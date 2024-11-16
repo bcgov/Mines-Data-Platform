@@ -1,0 +1,1 @@
+az lock create --name "lock-ef74b0-dev-networking" --resource-group "ef74b0-dev-networking" --lock-type CanNotDelete

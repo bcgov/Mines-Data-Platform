@@ -62,7 +62,13 @@ variable "locationAbbr" {
   }
 }
 
-variable "address_prefixes" {
+variable "address_space" {
   type        = list(string)
   description = "The address prefixes for the virtual network"
 } 
+
+variable "subnet_names" {
+  type        = list(string)
+  description = "A list of names for the subnets"
+}
+

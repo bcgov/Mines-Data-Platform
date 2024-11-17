@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "core" {
 }
 
 resource "azurerm_resource_group" "security" {
-  name     = "rg-${var.projectNameAbbr}-sec-${var.environment}-${var.locationAbbr}"
+  name     = "rg-${var.projectNameAbbr}-security-${var.environment}-${var.locationAbbr}"
   location = var.location
 }
 

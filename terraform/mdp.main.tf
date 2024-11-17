@@ -5,14 +5,19 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.0.2"
     }
+    azapi = {
+       source = "Azure/azapi"
+    }
   }
 
-  # backend "azurerm" {
-  #   resource_group_name  = "rg-mdp-unmanaged-dev-"
-  #   storage_account_name = "stgtfstate"
-  #   container_name       = "terraform"
-  #   key                  = "terraform.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name  = "rg-mdp-unmanaged-test-ca"
+    storage_account_name = "stgmdptfstateca"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+    use_azuread_auth     = true
+
+  }
 
   required_version = ">= 1.1.0"
 }
@@ -20,3 +25,5 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
+provider "azapi" {}

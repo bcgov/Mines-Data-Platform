@@ -6,6 +6,6 @@ resource "azurerm_data_factory" "adf" {
   identity {
     type = "SystemAssigned"
   }
-  location = var.location
+  location = azurerm_resource_group.data.location
   tags     = var.tags
 }

@@ -1,4 +1,4 @@
-resource "azurerm_network_security_group" "bastion_nsg" {
+resource "azurerm_network_security_group" "azurebastionsubnet_nsg" {
   name                = "nsg-${var.projectNameAbbr}-AzureBastionSubnet-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.core.name

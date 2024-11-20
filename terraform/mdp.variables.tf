@@ -65,10 +65,15 @@ variable "locationAbbr" {
 variable "address_space" {
   type        = list(string)
   description = "The address prefixes for the virtual network"
-} 
+}
 
 variable "subnet_names" {
   type        = list(string)
   description = "A list of names for the subnets"
 }
 
+variable "jumpbox_SKU" {
+  type        = string
+  description = "The SKU of the jumpbox VM"
+  default     = "Standard_F2s_v2"
+}

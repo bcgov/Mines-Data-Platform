@@ -6,7 +6,7 @@ terraform {
       version = "~> 3.0.2"
     }
     azapi = {
-       source = "Azure/azapi"
+      source = "Azure/azapi"
     }
     random = {
       source  = "hashicorp/random"
@@ -14,7 +14,14 @@ terraform {
     }
   }
 
-  backend "azurerm" {}
+  backend "azurerm" {
+    resource_group_name  = "rg-mdp-unmanaged-test-ca"
+    storage_account_name = "stgmdptfstateca"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+    use_azuread_auth     = true
+
+  }
 
   required_version = ">= 1.1.0"
 }

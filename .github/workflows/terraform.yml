@@ -31,6 +31,13 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         enable-AzPSSession: true
+
+    - name: Set Azure Service Principal Environment Variables
+      run: |
+        echo "ARM_CLIENT_ID=${{ secrets.SERVICE_PRINCIPAL_ID }}" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
         
     - name: Terraform Init
       run: terraform init -backend-config="environments/test/backend.conf"

@@ -34,8 +34,8 @@ jobs:
       run: terraform plan -input=false
       working-directory: ./terraform
 
-    # Uncomment and adjust conditions for apply if needed
-    - name: Terraform Apply
-      if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
-      working-directory: ./terraform
+    # # Uncomment and adjust conditions for apply if needed
+    # - name: Terraform Apply
+    #   if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    #   run: terraform apply -auto-approve -input=false
+    #   working-directory: ./terraform

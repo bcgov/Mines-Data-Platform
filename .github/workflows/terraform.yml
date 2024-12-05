@@ -22,6 +22,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    # - name: Azure Login
+    #   uses: Azure/login@v2.2.0
+    #   with:
+    #     # ClientId of the Azure Service principal created.
+    #     client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
+    #     tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
+    #     subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+    #     auth-type: SERVICE_PRINCIPAL
+
+    - name: Simple AZ Login
+      run: az login --service-principal --username ${{ secrets.SERVICE_PRINCIPAL_ID }} --password ${{ secrets.SPN_PASSWORD }} --tenant ${{ vars.TF_VAR_TENANT_ID }}
+          
+
     - name: Terraform Init
       run: terraform init -backend-config="environments/test/backend.conf"
       working-directory: ./terraform

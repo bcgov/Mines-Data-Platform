@@ -63,14 +63,14 @@ jobs:
         TF_VAR_LICENSEPLATE: ${{ vars.TF_VAR_LICENSEPLATE }}
         TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
         TF_VAR_LOCATIONABBR: ${{ vars.TF_VAR_LOCATIONABBR }}
-        TF_VAR_SUBNET_NAMES: ${{ vars.TF_VAR_SUBNET_NAMES }}
-        TF_VAR_TENANT_ID: ${{ vars.TF_VAR_TENANT_ID }}
+        TF_VAR_subnet_names: ${{ vars.TF_VAR_SUBNET_NAMES }}
+        TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
         TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
         TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
         TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
         service_principal_id: ${{ secrets.service_principal_id }}
-        SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-        TF_VAR_ADDRESS_SPACE: ${{ secrets.ADDRESS_SPACE }}
+        TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+        TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
 
       run: terraform plan -input=false -var="ADDRESS_SPACE=${{ secrets.ADDRESS_SPACE }}" -var="SERVICE_PRINCIPAL_ID=${{ secrets.SERVICE_PRINCIPAL_ID }}"
       working-directory: ./terraform

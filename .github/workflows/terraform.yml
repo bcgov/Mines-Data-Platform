@@ -41,7 +41,8 @@ jobs:
 
     - name: Shell Script - Create Backend
       run: |
-        chmod +x ./scripts/createbackend.sh
+        pwd
+        chmod +x scripts/createbackend.sh
         ./scripts/createbackend.sh
       working-directory: ./scripts
 

@@ -44,7 +44,7 @@ jobs:
         ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
         RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
         STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
-        CONTAINER_NAME: "tfstate"
+        CONTAINER_NAME: ${{ vars.UNMANAGED_TFSTATE_CONTAINER }}
       run: |
         pwd
         chmod +x createbackend.sh

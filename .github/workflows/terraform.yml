@@ -72,7 +72,7 @@ jobs:
         TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
         TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
 
-      run: terraform plan -input=false"
+      run: terraform plan -input=false
       working-directory: ./terraform
 
     # # Uncomment and adjust conditions for apply if needed

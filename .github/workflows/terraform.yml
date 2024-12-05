@@ -67,7 +67,7 @@ jobs:
         TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
         TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
         TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
-        TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
+        TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
         service_principal_id: ${{ secrets.service_principal_id }}
         TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
         TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}

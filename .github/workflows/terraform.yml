@@ -19,10 +19,6 @@ jobs:
         shell: bash
 
     steps:
-
-    # - name: debug vars
-    #   run: echo ${{ vars.TF_VAR_LOCATION }}
-
     - name: Checkout
       uses: actions/checkout@v4
 

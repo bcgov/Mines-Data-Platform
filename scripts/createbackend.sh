@@ -1,24 +1,25 @@
 #!/bin/bash
-if [ -z "${ENVIRONMENT:-}" ]; then
-  echo "ERROR: ENVIRONMENT must be set as an environment variable" 1>&2
-  exit 1
-fi
-if [ -z "${RESOURCE_GROUP_NAME:-}" ]; then
-  echo "ERROR: RESOURCE_GROUP_NAME must be set as an environment variable" 1>&2
-  exit 1
-fi
-if [ -z "${STORAGE_ACCOUNT_NAME:-}" ]; then
-  echo "ERROR: STORAGE_ACCOUNT_NAME must be set as an environment variable" 1>&2
-  exit 1
-fi
-if [ -z "${CONTAINER_NAME:-}" ]; then
-  echo "ERROR: CONTAINER_NAME must be set as an environment variable" 1>&2
-  exit 1
-fi
-if [ -z "${SUBSCRIPTION_ID:-}" ]; then
-  echo "ERROR: CONTAINER_NAME must be set as an environment variable" 1>&2
-  exit 1
-fi
+
+# if [ -z "${ENVIRONMENT:-}" ]; then
+#   echo "ERROR: ENVIRONMENT must be set as an environment variable" 1>&2
+#   exit 1
+# fi
+# if [ -z "${RESOURCE_GROUP_NAME:-}" ]; then
+#   echo "ERROR: RESOURCE_GROUP_NAME must be set as an environment variable" 1>&2
+#   exit 1
+# fi
+# if [ -z "${STORAGE_ACCOUNT_NAME:-}" ]; then
+#   echo "ERROR: STORAGE_ACCOUNT_NAME must be set as an environment variable" 1>&2
+#   exit 1
+# fi
+# if [ -z "${CONTAINER_NAME:-}" ]; then
+#   echo "ERROR: CONTAINER_NAME must be set as an environment variable" 1>&2
+#   exit 1
+# fi
+# if [ -z "${SUBSCRIPTION_ID:-}" ]; then
+#   echo "ERROR: CONTAINER_NAME must be set as an environment variable" 1>&2
+#   exit 1
+# fi
 
 ACCOUNT_TYPE=$(az account show --query user.type -o tsv)
 

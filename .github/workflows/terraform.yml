@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -backend-config="environments/test/backend.conf"
       working-directory: ./terraform
 
     - name: Terraform Format

@@ -6,7 +6,7 @@ resource "azurerm_windows_virtual_machine" "jumpbox" {
   admin_username      = "adminuser"
   admin_password      = "P@$$w0rd1234!"
   network_interface_ids = [
-    azurerm_network_interface.example.id,
+    azurerm_network_interface.jumpbox.id,
   ]
 
   os_disk {

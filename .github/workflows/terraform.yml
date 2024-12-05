@@ -45,6 +45,7 @@ jobs:
         RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
         STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
         CONTAINER_NAME: tfstate
+        SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
         
       run: |
         pwd

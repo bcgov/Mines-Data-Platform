@@ -15,20 +15,20 @@ resource "azurerm_key_vault" "kv" {
 
   sku_name = "standard"
 
-  access_policy {
-    tenant_id = var.tenant_id
-    object_id = var.
+  # access_policy {
+  #   tenant_id = var.tenant_id
+  #   object_id = var.
 
-    key_permissions = [
-      "Get",
-    ]
+  #   key_permissions = [
+  #     "Get",
+  #   ]
 
-    secret_permissions = [
-      "Get",
-    ]
+  #   secret_permissions = [
+  #     "Get",
+  #   ]
 
-    storage_permissions = [
-      "Get",
-    ]
-  }
+  #   storage_permissions = [
+  #     "Get",
+  #   ]
+  # }
 }

@@ -40,6 +40,11 @@ jobs:
         echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
 
     - name: Shell Script - Create Backend
+      env: 
+        ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
+        RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
+        STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
+        CONTAINER_NAME: "tfstate"
       run: |
         pwd
         chmod +x createbackend.sh

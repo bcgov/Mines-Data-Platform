@@ -19,10 +19,6 @@ jobs:
         shell: bash
 
     steps:
-
-    # - name: debug vars
-    #   run: echo ${{ vars.TF_VAR_LOCATION }}
-
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -45,6 +41,7 @@ jobs:
         RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
         STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
         CONTAINER_NAME: tfstate
+        SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
         
       run: |
         pwd

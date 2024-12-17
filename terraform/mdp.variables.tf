@@ -16,7 +16,7 @@ variable "licensePlate" {
 }
 
 // Core Subscription Vars
-variable "subscription_id" {
+variable "SUBSCRIPTION_ID" {
   type        = string
   description = "The ID of the Azure subscription"
 }

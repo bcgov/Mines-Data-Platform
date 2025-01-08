@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~>3.0"
     }
+    http = {
+      source = "hashicorp/http"
+      version = "3.4.5"
+    }
   }
 
   backend "azurerm" {
@@ -31,3 +35,7 @@ provider "azurerm" {
 }
 
 provider "azapi" {}
+
+provider "http" {
+  # Configuration options
+}

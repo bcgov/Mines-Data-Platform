@@ -14,6 +14,8 @@ SUBSCRIPTION_NAME=$LICENSE_PLATE-$ENVIRONMENT
 SUBSCRIPTION_ID=$(az account list --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)
 
 ACCOUNT_TYPE=$(az account show --query user.type -o tsv)
+echo $ACCOUNT_TYPE
+echo $()
 
 if [ -z "$ACCOUNT_TYPE" ]; then
   echo "No Azure login found, please log in with 'az login --scope https://graph.microsoft.com//.default'"
@@ -70,7 +72,8 @@ fi
 
 if [[ $ACCOUNT_TYPE = "servicePrincipal" ]]; then
   echo "Current login is of type SERVICE_PRINCIPAL"
-  ASSIGNEE_OBJECT_ID=$(az ad sp show --id $(az account show --query user.name -o tsv) --query id -o tsv)
+  ASSIGNEE_APP_ID=$(az account show --query user.name -o tsv)
+  ASSIGNEE_OBJECT_ID=$(az ad sp show --id $ASSIGNEE_APP_ID --query id -o tsv)
 fi
 
 echo "Current user: $ASSIGNEE_OBJECT_ID"

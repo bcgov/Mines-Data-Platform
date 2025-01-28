@@ -24,7 +24,7 @@ variable "licensePlate" {
 variable "tenant_id" {
   type        = string
   description = "The ID of the Azure tenant"
-  default = "6fdb5200-3d0d-4a8a-b036-d3685e359adc"
+  default     = "6fdb5200-3d0d-4a8a-b036-d3685e359adc"
 }
 
 // Core Infrastructure Vars

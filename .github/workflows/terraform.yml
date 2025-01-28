@@ -36,18 +36,8 @@ jobs:
         sudo install terrascan /usr/local/bin
 
     - name: Run Terrascan
-      run: terrascan scan -t azure -i terraform --output json > terrascan_report.json
+      run: terrascan scan -t azure -i terraform
       working-directory: terraform
-
-    - name: Fail if Violations Found
-      run: |
-        violations=$(jq '.violations | length' terrascan_report.json)
-        if [ "$violations" -gt 0 ]; then
-          echo "❌ Security violations found: $violations"
-          exit 1
-        else
-          echo "✅ No violations found."
-        fi
 
     - name: Azure Login
       uses: azure/login@v2

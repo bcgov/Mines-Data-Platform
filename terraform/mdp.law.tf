@@ -1,24 +1,7 @@
-# resource "azurerm_monitor_diagnostic_setting" "test" {
-#   name               = "example"
-#   target_resource_id = "${azurerm_key_vault.test.id}"
-#   storage_account_id = "${azurerm_storage_account.test.id}"
-#   log_analytics_workspace_id = "${data.azurerm_log_analytics_workspace.test.id}"
-
-
-#   log {
-#     category = "AuditEvent"
-#     enabled  = false
-
-#     retention_policy {
-#       enabled = false
-#     }
-#   }
-
-#   metric {
-#     category = "AllMetrics"
-
-#     retention_policy {
-#       enabled = false
-#     }
-#   }
-# }
+resource "azurerm_log_analytics_workspace" "law" {
+  name                = "law-${var.projectNameAbbr}-${var.environment}-${var.locationAbbr}"
+  resource_group_name = azurerm_resource_group.data.name
+  location            = azurerm_resource_group.data.location
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}

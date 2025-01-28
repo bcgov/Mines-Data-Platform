@@ -12,17 +12,17 @@ resource "azurerm_resource_group" "data" {
   location = var.location
 }
 resource "azurerm_management_lock" "core_lock" {
-  name = "rg-core-lock"
+  name       = "rg-core-lock"
   lock_level = "CanNotDelete"
-  scope = azurerm_resource_group.core.id
+  scope      = azurerm_resource_group.core.id
 }
 resource "azurerm_management_lock" "security_lock" {
-  name = "rg-sec-lock"
+  name       = "rg-sec-lock"
   lock_level = "CanNotDelete"
-  scope = azurerm_resource_group.security.id
+  scope      = azurerm_resource_group.security.id
 }
 resource "azurerm_management_lock" "data_lock" {
-  name = "rg-data-lock"
+  name       = "rg-data-lock"
   lock_level = "CanNotDelete"
-  scope = azurerm_resource_group.data.id
+  scope      = azurerm_resource_group.data.id
 }

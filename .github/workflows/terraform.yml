@@ -49,7 +49,7 @@ jobs:
       run: |
         pwd
         chmod +x createbackend.sh
-        ./createbackend.sh
+        ./createbackend.sh "${{ github.job.environment }}"
       working-directory: terraform/scripts
 
         

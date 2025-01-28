@@ -1,1 +1,0 @@
-az lock delete --name "lock-ef74b0-test-networking" --resource-group "ef74b0-test-networking"

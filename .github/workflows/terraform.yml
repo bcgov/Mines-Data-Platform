@@ -34,6 +34,9 @@ jobs:
         echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
         echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
         echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
+  
+    - name: HashiCorp - Setup Terraform
+      uses: hashicorp/setup-terraform@v3.1.2
 
     - name: Shell Script - Create Backend
       env: 

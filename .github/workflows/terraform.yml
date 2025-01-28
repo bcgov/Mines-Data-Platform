@@ -38,7 +38,7 @@ jobs:
     - name: Terrascan Scan
       run: |
         terrascan scan -t azure -i terraform
-      working-directory: terraform/
+      working-directory: terraform
 
     - name: Azure Login
       uses: azure/login@v2

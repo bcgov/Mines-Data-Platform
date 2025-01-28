@@ -16,13 +16,15 @@ variable "licensePlate" {
 }
 
 // Core Subscription Vars
-variable "SUBSCRIPTION_ID" {
-  type        = string
-  description = "The ID of the Azure subscription"
-}
+# variable "SUBSCRIPTION_ID" {
+#   type        = string
+#   description = "The ID of the Azure subscription"
+# }
+
 variable "tenant_id" {
   type        = string
   description = "The ID of the Azure tenant"
+  default = "6fdb5200-3d0d-4a8a-b036-d3685e359adc"
 }
 
 // Core Infrastructure Vars
@@ -35,7 +37,7 @@ variable "tags" {
 variable "environment" {
   description = "Environment for the resource."
   type        = string
-  default     = "dev"
+  default     = "test"
   validation {
     condition     = contains(["dev", "test", "prod"], var.environment)
     error_message = "The environment must be one of 'dev', 'test', or 'prod'."

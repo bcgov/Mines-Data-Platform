@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   terraform:
-    name: 'Terraform'
+    name: 'Deployment'
     runs-on: ubuntu-latest
     environment: test
 
@@ -50,7 +50,7 @@ jobs:
         pwd
         chmod +x createbackend.sh
         ./createbackend.sh
-      working-directory: ./scripts
+      working-directory: terraform/scripts
 
         
     - name: Terraform Init

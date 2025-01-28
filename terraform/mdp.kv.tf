@@ -12,7 +12,8 @@ resource "azurerm_key_vault" "kv" {
     default_action = "Deny"
     bypass         = "AzureServices"
     // For local development below, please remove ip_rules when appropriate
-    ip_rules = ["${chomp(data.http.myip.response_body)}/32"]
+    # ip_rules = ["${chomp(data.http.myip.response_body)}/32"]
+    ip_rules = []
   }
 
   sku_name = "standard"

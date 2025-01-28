@@ -37,6 +37,7 @@ jobs:
 
     - name: Run Terrascan
       run: terrascan scan -t azure -i terraform --output json > terrascan_report.json
+      working-directory: terraform
 
     - name: Fail if Violations Found
       run: |

@@ -7,6 +7,7 @@ resource "azurerm_key_vault" "kv" {
   soft_delete_retention_days  = 7
   enabled_for_deployment      = true
   purge_protection_enabled    = false
+  
 
   network_acls {
     default_action = "Deny"

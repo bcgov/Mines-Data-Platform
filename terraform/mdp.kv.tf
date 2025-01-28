@@ -41,11 +41,6 @@ resource "azurerm_monitor_diagnostic_setting" "kv-diag" {
   name                       = "diag-${var.projectNameAbbr}-${var.environment}-${var.locationAbbr}"
   target_resource_id         = azurerm_key_vault.kv.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
-
-  enabled_log {
-    category = "AuditEvent"
-  }
-
   metric {
     category = "AllMetrics"
   }

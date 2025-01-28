@@ -60,7 +60,7 @@ variable "locationAbbr" {
   description = "The abbreviated name of the Azure region (e.g. ca)"
   validation {
     condition     = contains(["ca", "ce"], var.locationAbbr)
-    error_message = "The location must be one of 'ca', 'ce'"
+    error_message = "The location must be one of 'ca', 'ce'."
   }
 }
 

@@ -58,7 +58,7 @@ jobs:
     - name: Shell Script 
         
       run: |
-        echo $GITHUB_ENV
+        cat $GITHUB_ENV
 
     - name: 'Run az commands'
       run: |

@@ -14,6 +14,7 @@ fi
 
 # Set variables
 ENVIRONMENT=$1
+ADDRESS_SPACE=""
 vmName="github-runner"
 vmSize="Standard_DS2_v2"
 adminUsername="adminuser"
@@ -39,8 +40,21 @@ if [[ $ACCOUNT_TYPE = "servicePrincipal" ]]; then
   ASSIGNEE_OBJECT_ID=$(az ad sp show --id $(az account show --query user.name -o tsv) --query id -o tsv)
 fi
 
+echo "Creating resource group $resourcegroup in $location"
 az group create -n $resourcegroup -l $location
+echo "Done"
 
+#TODO: HERE
+echo "Creating runner subnet"
+az network vnet subnet create \
+  --name subnet-mdp-runner-${ENVIRONMENT}-ca \
+  --address-prefixes 10.0.1.0/24 \
+  --resource-group $resourcegroup \
+  --vnet-name ef74b0-${ENVIRONMENT}-vwan-spoke \
+  --delegations Microsoft.ContainerService/managedClusters \
+  --nsg default
+
+echo "Creating key vault $keyvault_name in $location"
 az keyvault create \
   -n $keyvault_name \
   -g $resourcegroup \
@@ -54,22 +68,26 @@ az keyvault create \
   --enable-purge-protection True
 
 wait 3 # Wait for the key vault to be created
+echo "Done"
 
 # Generate a random admin password
+echo "Generating a random password for the VM and storing it in Key Vault"
 admin_password=$(openssl rand -base64 16)
 
 # Store the password as a secret in Key Vault
 az keyvault secret set \
   --vault-name $keyvault_name \
   --name $admin_password_secret_name \
-  --value "$admin_password" \
+  --value $admin_password \
   -o none
 
 
 # # Retrieve the password from Key Vault during VM creation
-# admin_password=$(az keyvault secret show \
-#   --vault-name $keyvault_name \
-#   --name $admin_password_secret_name \
-#   --query value -o tsv)
+admin_password=$(az keyvault secret show \
+  --vault-name $keyvault_name \
+  --name $admin_password_secret_name \
+  --query value -o tsv)
 
-# az vm create -n $vmName -g $resourcegroup --image UbuntuLTS --size $vmSize --admin-username $adminUsername --adminPassword
+echo "Creating VM $vmName in $resourcegroup"
+az vm create -n $vmName -g $resourcegroup --image UbuntuLTS --size $vmSize --admin-username $adminUsername --adminPassword
+echo "Done"

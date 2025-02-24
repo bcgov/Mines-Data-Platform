@@ -6,6 +6,7 @@ on:
   pull_request:
 
 permissions:
+  id-token: write
   contents: write  # Required if Terraform needs to update state files or perform actions
 
 jobs:

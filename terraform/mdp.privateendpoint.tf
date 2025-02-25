@@ -13,7 +13,7 @@ resource "azurerm_private_endpoint" "adf" {
 }
 
 resource "azurerm_private_endpoint" "kv" {
-  name                = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}" 
+  name                = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.security.name
   subnet_id           = azapi_resource.privatesubnet.id

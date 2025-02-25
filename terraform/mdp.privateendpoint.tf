@@ -11,3 +11,17 @@ resource "azurerm_private_endpoint" "adf" {
     is_manual_connection           = false
   }
 }
+
+resource "azurerm_private_endpoint" "kv" {
+  name                = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}" 
+  location            = var.location
+  resource_group_name = azurerm_resource_group.security.name
+  subnet_id           = azapi_resource.privatesubnet.id
+
+  private_service_connection {
+    name                           = "psc-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
+    private_connection_resource_id = azurerm_key_vault.kv.id
+    subresource_names              = ["vault"]
+    is_manual_connection           = false
+  }
+}

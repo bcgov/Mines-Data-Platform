@@ -8,9 +8,11 @@ resource "azurerm_key_vault" "kv" {
   enabled_for_deployment      = true
   purge_protection_enabled    = false
 
+
   network_acls {
     default_action = "Deny"
     bypass         = "AzureServices"
+    ip_rules       = []
   }
 
   sku_name = "standard"
@@ -31,4 +33,13 @@ resource "azurerm_key_vault" "kv" {
   #     "Get",
   #   ]
   # }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "kv-diag" {
+  name                       = "diag-${var.projectNameAbbr}-${var.environment}-${var.locationAbbr}"
+  target_resource_id         = azurerm_key_vault.kv.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
+  metric {
+    category = "AllMetrics"
+  }
 }

@@ -16,13 +16,15 @@ variable "licensePlate" {
 }
 
 // Core Subscription Vars
-variable "subscription_id" {
-  type        = string
-  description = "The ID of the Azure subscription"
-}
+# variable "SUBSCRIPTION_ID" {
+#   type        = string
+#   description = "The ID of the Azure subscription"
+# }
+
 variable "tenant_id" {
   type        = string
   description = "The ID of the Azure tenant"
+  default     = "6fdb5200-3d0d-4a8a-b036-d3685e359adc"
 }
 
 // Core Infrastructure Vars
@@ -35,7 +37,7 @@ variable "tags" {
 variable "environment" {
   description = "Environment for the resource."
   type        = string
-  default     = "dev"
+  default     = "test"
   validation {
     condition     = contains(["dev", "test", "prod"], var.environment)
     error_message = "The environment must be one of 'dev', 'test', or 'prod'."
@@ -48,7 +50,7 @@ variable "location" {
   description = "The Azure region (e.g. Canada Central)"
   validation {
     condition     = contains(["Canada Central", "Canada East"], var.location)
-    error_message = "The location must be one of 'Canada Central', 'Canada East'"
+    error_message = "The location must be one of 'Canada Central', 'Canada East'."
   }
 }
 
@@ -58,7 +60,7 @@ variable "locationAbbr" {
   description = "The abbreviated name of the Azure region (e.g. ca)"
   validation {
     condition     = contains(["ca", "ce"], var.locationAbbr)
-    error_message = "The location must be one of 'ca', 'ce'"
+    error_message = "The location must be one of 'ca', 'ce'."
   }
 }
 

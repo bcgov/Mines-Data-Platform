@@ -101,20 +101,15 @@ resource "azurerm_network_security_group" "azurebastionsubnet_nsg" {
   }
 }
 
-resource "azurerm_network_security_group" "core_nsg" {
-  name                = "nsg-${var.projectNameAbbr}-core-${var.environment}-${var.locationAbbr}"
+resource "azurerm_network_security_group" "public_nsg" {
+  name                = "nsg-${var.projectNameAbbr}-public-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.core.name
 }
 
-resource "azurerm_network_security_group" "data_nsg" {
-  name                = "nsg-${var.projectNameAbbr}-data-${var.environment}-${var.locationAbbr}"
+resource "azurerm_network_security_group" "private_nsg" {
+  name                = "nsg-${var.projectNameAbbr}-private-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
 }
 
-resource "azurerm_network_security_group" "security_nsg" {
-  name                = "nsg-${var.projectNameAbbr}-security-${var.environment}-${var.locationAbbr}"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.security.name
-}

@@ -36,6 +36,9 @@ jobs:
         tar -xvf terrascan.tar.gz
         sudo install terrascan /usr/local/bin
 
+    - name: HashiCorp - Setup Terraform
+      uses: hashicorp/setup-terraform@v3.0.0
+
     - name: Run Terrascan
       run: terrascan scan -t azure -i terraform
       working-directory: terraform
@@ -47,10 +50,10 @@ jobs:
         tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
         subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
-    # - name: HashiCorp - Setup Terraform
-    # # You may pin to the exact commit or the version.
-    # # uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
-    #   uses: hashicorp/setup-terraform@v2.0.3
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
             
 
     - name: Set Azure Service Principal Environment Variables
@@ -59,9 +62,7 @@ jobs:
         echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
         echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
         echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
-  
-    - name: HashiCorp - Setup Terraform
-      uses: hashicorp/setup-terraform@v3.0.0
+
 
     - name: Shell Script - Create Backend
       env: 

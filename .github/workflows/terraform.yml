@@ -6,12 +6,13 @@ on:
   pull_request:
 
 permissions:
-  contents: write  # Required if Terraform needs to update state files or perform actions
+  id-token: write
+  contents: read
 
 jobs:
   terraform:
     name: 'Deployment'
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted"]
     environment: test
 
     defaults:
@@ -40,10 +41,11 @@ jobs:
       working-directory: terraform
 
     - name: Azure Login
-      uses: azure/login@v2
+      uses: azure/login@v2.2.0
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        enable-AzPSSession: false
+        client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
+        tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
+        subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
     - name: Set Azure Service Principal Environment Variables
       run: |

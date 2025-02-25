@@ -7,12 +7,12 @@ on:
 
 permissions:
   id-token: write
-  contents: write  # Required if Terraform needs to update state files or perform actions
+  contents: read  # Required if Terraform needs to update state files or perform actions
 
 jobs:
   terraform:
     name: 'Deployment'
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted"]
     environment: test
 
     defaults:

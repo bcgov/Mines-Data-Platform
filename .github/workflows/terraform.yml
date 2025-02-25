@@ -67,6 +67,7 @@ jobs:
         
       run: |
         pwd
+        node --version
         chmod +x createbackend.sh
         ./createbackend.sh test
       working-directory: terraform/scripts

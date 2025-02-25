@@ -12,7 +12,7 @@ permissions:
 jobs:
   terraform:
     name: 'Deployment'
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted"]
     environment: test
 
     defaults:

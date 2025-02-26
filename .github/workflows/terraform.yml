@@ -40,7 +40,7 @@ jobs:
       uses: hashicorp/setup-terraform@v3.0.0
 
     - name: Run Terrascan
-      run: terrascan scan -t azure -i terraform --severity medium
+      run: terrascan scan -t azure -i terraform --severity "medium"
       working-directory: terraform
 
     - name: Azure Login

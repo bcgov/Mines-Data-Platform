@@ -77,12 +77,11 @@ jobs:
         node --version
         chmod +x createbackend.sh
         ./createbackend.sh test
-      working-directory: terraform/scripts
+      working-directory: scripts
 
         
     - name: Terraform Init
       run: terraform init -backend-config="environments/test/backend.conf"
-      working-directory: ./terraform
 
     - name: Terraform Format
       run: terraform fmt -check

@@ -6,7 +6,7 @@ resource "azurerm_key_vault" "kv" {
   tenant_id                   = var.tenant_id
   soft_delete_retention_days  = 7
   enabled_for_deployment      = true
-  purge_protection_enabled    = false
+  purge_protection_enabled    = true
 
 
   network_acls {

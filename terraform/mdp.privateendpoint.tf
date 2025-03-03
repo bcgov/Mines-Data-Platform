@@ -2,7 +2,7 @@ resource "azurerm_private_endpoint" "adf" {
   name                = "pe-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
-  subnet_id           = azapi_resource.privatesubnet.id
+  subnet_id           = data.azurerm_subnet.privatesubnet.id
 
   private_service_connection {
     name                           = "psc-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
@@ -16,7 +16,7 @@ resource "azurerm_private_endpoint" "kv" {
   name                = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.security.name
-  subnet_id           = azapi_resource.privatesubnet.id
+  subnet_id           = data.azurerm_subnet.privatesubnet.id
 
   private_service_connection {
     name                           = "psc-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"

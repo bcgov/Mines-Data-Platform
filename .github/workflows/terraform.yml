@@ -81,7 +81,7 @@ jobs:
 
         
     - name: Terraform Init
-      run: terraform init -backend-config="../environments/test/backend.conf"
+      run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
       working-directory: ./terraform
 
     - name: Terraform Format

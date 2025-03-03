@@ -1,21 +1,22 @@
 resource "azurerm_key_vault" "kv" {
-  name                        = "kv-${var.projectNameAbbr}-${var.environment}-${var.locationAbbr}"
-  location                    = azurerm_resource_group.security.location
-  resource_group_name         = azurerm_resource_group.security.name
-  enabled_for_disk_encryption = true
-  tenant_id                   = var.tenant_id
-  soft_delete_retention_days  = 7
-  enabled_for_deployment      = true
-  purge_protection_enabled    = true
+  name                          = "kv-${var.projectNameAbbr}-${var.environment}-${var.locationAbbr}"
+  location                      = azurerm_resource_group.security.location
+  resource_group_name           = azurerm_resource_group.security.name
+  enabled_for_disk_encryption   = true
+  tenant_id                     = var.tenant_id
+  soft_delete_retention_days    = 7
+  enabled_for_deployment        = true
+  purge_protection_enabled      = true
+  public_network_access_enabled = false
 
 
   network_acls {
     default_action = "Deny"
     bypass         = "None"
-    # virtual_network_subnet_ids = [
-    #   data.azurerm_subnet.privatesubnet.id,
-    #   azapi_resource.publicsubnet.id
-    # ]
+    virtual_network_subnet_ids = [
+      data.azurerm_subnet.privatesubnet.id,
+      azapi_resource.publicsubnet.id
+    ]
   }
 
   sku_name = "standard"

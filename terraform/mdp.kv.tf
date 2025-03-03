@@ -8,6 +8,7 @@ resource "azurerm_key_vault" "kv" {
   enabled_for_deployment        = true
   purge_protection_enabled      = true
   public_network_access_enabled = false
+  enable_rbac_authorization     = true
 
 
   network_acls {

@@ -12,10 +12,10 @@ resource "azurerm_key_vault" "kv" {
   network_acls {
     default_action = "Deny"
     bypass         = "None"
-    virtual_network_subnet_ids = [
-      data.azurerm_subnet.privatesubnet.id,
-      azapi_resource.publicsubnet.id
-    ]
+    # virtual_network_subnet_ids = [
+    #   data.azurerm_subnet.privatesubnet.id,
+    #   azapi_resource.publicsubnet.id
+    # ]
   }
 
   sku_name = "standard"

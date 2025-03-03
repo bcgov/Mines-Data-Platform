@@ -9,6 +9,14 @@ resource "azapi_resource" "publicsubnet" {
       networkSecurityGroup = {
         id = azurerm_network_security_group.public_nsg.id
       }
+      serviceEndpoints = [
+        {
+          service = "Microsoft.KeyVault"
+        },
+        {
+          service = "Microsoft.Storage"
+        }
+      ]
     }
   }
 

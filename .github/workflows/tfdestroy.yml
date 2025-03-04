@@ -102,7 +102,18 @@ jobs:
     #   run: terraform plan -input=false 
     #   working-directory: ./terraform
 
-    # Uncomment and adjust conditions for apply if needed
     - name: Terraform Destroy
+      env:
+        TF_VAR_LICENSEPLATE: ${{ vars.TF_VAR_LICENSEPLATE }}
+        TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+        TF_VAR_LOCATIONABBR: ${{ vars.TF_VAR_LOCATIONABBR }}
+        TF_VAR_subnet_names: ${{ vars.TF_VAR_SUBNET_NAMES }}
+        TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
+        TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
+        TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
+        TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
+        service_principal_id: ${{ secrets.service_principal_id }}
+        TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+        TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
       run: terraform destroy -auto-approve -input=false
       working-directory: ./terraform

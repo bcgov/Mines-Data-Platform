@@ -1,8 +1,6 @@
-name: 'Create/Update Infrastructure'
+name: 'Create/Update Infrastructure (Manual)'
 
-on:
-  push:
-    branches: [ "main", "staging" ]
+on: workflow_dispatch
 
 permissions:
   id-token: write

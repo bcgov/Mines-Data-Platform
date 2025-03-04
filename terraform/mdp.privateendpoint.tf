@@ -25,3 +25,31 @@ resource "azurerm_private_endpoint" "kv" {
     is_manual_connection           = false
   }
 }
+
+resource "azurerm_private_endpoint" "corestorage" {
+  name                = "pe-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.data.name
+  subnet_id           = data.azurerm_subnet.privatesubnet.id
+
+  private_service_connection {
+    name                           = "psc-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
+    private_connection_resource_id = azurerm_storage_account.data.id
+    subresource_names              = ["blob"]
+    is_manual_connection           = false
+  }
+}
+
+resource "azurerm_private_endpoint" "datastorage" {
+  name                = "pe-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.data.name
+  subnet_id           = data.azurerm_subnet.privatesubnet.id
+
+  private_service_connection {
+    name                           = "psc-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
+    private_connection_resource_id = azurerm_storage_account.data.id
+    subresource_names              = ["blob"]
+    is_manual_connection           = false
+  }
+}

@@ -11,3 +11,6 @@ provider "azapi" {}
 provider "http" {
   # Configuration options
 }
+
+provider "azuread" {
+}

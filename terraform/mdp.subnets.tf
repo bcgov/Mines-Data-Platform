@@ -23,8 +23,29 @@ resource "azapi_resource" "publicsubnet" {
   depends_on = [azurerm_network_security_group.public_nsg]
 }
 
+# Created as a part of a script, will be reintroduced here later as a terraform resource
 data "azurerm_subnet" "privatesubnet" {
   name                 = "sn-${var.projectNameAbbr}-private-${var.environment}-${var.locationAbbr}"
   virtual_network_name = data.azurerm_virtual_network.vnet.name
   resource_group_name  = "${var.licensePlate}-${var.environment}-networking"
+}
+
+resource "azapi_resource" "bastion_subnet" {
+  type = "Microsoft.Network/virtualNetworks/subnets@2024-05-01"
+
+  name      = "AzureBastionSubnet"
+  parent_id = data.azurerm_virtual_network.vnet.id
+  locks = [
+    data.azurerm_virtual_network.vnet.id
+  ]
+
+  body = {
+    properties = {
+      addressPrefix = var.bastionSubnetAddressPrefix
+      networkSecurityGroup = {
+        id = azurerm_network_security_group.bastion_nsg.id
+      }
+    }
+  }
+  response_export_values = ["*"]
 }

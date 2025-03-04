@@ -1,8 +1,3 @@
-resource "azurerm_resource_group" "bastion_rg" {
-  name     = var.resource_group_name
-  location = var.location
-}
-
 resource "random_string" "random" {
   length      = 6
   lower       = true
@@ -12,6 +7,7 @@ resource "random_string" "random" {
   min_numeric = 2
 }
 
+#TODO: Currently relies on external module. Need to create a registry.
 module "azure_bastion" {
   source           = "Azure/avm-res-network-bastionhost/azurerm"
   enable_telemetry = true
@@ -22,7 +18,7 @@ module "azure_bastion" {
 
   copy_paste_enabled        = var.copy_paste_enabled
   file_copy_enabled         = var.file_copy_enabled
-  sku                       = var.sku
+  sku                       = var.bastion_sku
   ip_connect_enabled        = var.ip_connect_enabled
   kerberos_enabled          = var.kerberos_enabled
   scale_units               = var.scale_units

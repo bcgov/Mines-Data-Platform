@@ -4,3 +4,4 @@ data "azurerm_virtual_network" "vnet" {
 }
 
 data "azuread_client_config" "current" {}
+data "azurerm_subscription" "current" {}

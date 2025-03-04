@@ -1,103 +1,119 @@
-resource "azurerm_network_security_group" "azurebastionsubnet_nsg" {
-  name                = "nsg-${var.projectNameAbbr}-AzureBastionSubnet-${var.environment}-${var.locationAbbr}"
+resource "azurerm_network_security_group" "bastion_nsg" {
+  name                = "${var.bastion_host_name}-${random_string.random.result}"
   location            = var.location
-  resource_group_name = azurerm_resource_group.core.name
+  resource_group_name = azurerm_resource_group.bastion_rg.name
 
   security_rule {
-    name                       = "Allow-443-From-Internet"
-    priority                   = 100
+    name                       = "AllowHttpsInbound"
+    description                = "Allow HTTPS inbound traffic"
+    priority                   = 120
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
     source_address_prefix      = "Internet"
     destination_address_prefix = "*"
-    destination_port_range     = "443"
-    source_port_range          = "*"
   }
 
   security_rule {
-    name                       = "Allow-443-From-GatewayManager"
-    priority                   = 200
+    name                       = "AllowGatewayManagerInbound"
+    description                = "Allow Gateway Manager inbound traffic"
+    priority                   = 130
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
     source_address_prefix      = "GatewayManager"
     destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowAzureLoadBalancerInbound"
+    description                = "Allow Azure Load Balancer inbound traffic"
+    priority                   = 140
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
     destination_port_range     = "443"
-    source_port_range          = "*"
-  }
-
-  security_rule {
-    name                       = "Allow-8080-5701-From-VirtualNetwork"
-    priority                   = 300
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_address_prefix      = "VirtualNetwork"
-    destination_address_prefix = "VirtualNetwork"
-    destination_port_ranges    = ["8080", "5701"]
-    source_port_range          = "*"
-  }
-
-  security_rule {
-    name                       = "Allow-443-From-AzureLoadBalancer"
-    priority                   = 400
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
     source_address_prefix      = "AzureLoadBalancer"
     destination_address_prefix = "*"
-    destination_port_range     = "443"
-    source_port_range          = "*"
-  }
-
-  # Egress Rules
-  security_rule {
-    name                       = "Allow-3389-22-To-VirtualNetwork"
-    priority                   = 500
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_address_prefix      = "*"
-    destination_address_prefix = "VirtualNetwork"
-    destination_port_ranges    = ["3389", "22"]
-    source_port_range          = "*"
   }
 
   security_rule {
-    name                       = "Allow-8080-5701-To-VirtualNetwork"
-    priority                   = 600
-    direction                  = "Outbound"
+    name                       = "AllowBastionHostCommunication"
+    description                = "Allow Bastion Host communication"
+    priority                   = 150
+    direction                  = "Inbound"
     access                     = "Allow"
-    protocol                   = "Tcp"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_ranges    = ["8080", "5701"]
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "VirtualNetwork"
-    destination_port_ranges    = ["8080", "5701"]
+  }
+
+  # OUTBOUND RULES
+  security_rule {
+    name                       = "AllowSshRdpOutbound"
+    description                = "Allow SSH and RDP outbound traffic"
+    priority                   = 120
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "*"
     source_port_range          = "*"
+    destination_port_ranges    = ["22", "3389"]
+    source_address_prefix      = "*"
+    destination_address_prefix = "VirtualNetwork"
   }
 
   security_rule {
-    name                       = "Allow-443-To-AzureCloud"
-    priority                   = 700
+    name                       = "AllowAzureCloudOutbound"
+    description                = "Allow Azure Cloud outbound traffic"
+    priority                   = 130
     direction                  = "Outbound"
     access                     = "Allow"
     protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
     source_address_prefix      = "*"
     destination_address_prefix = "AzureCloud"
-    destination_port_range     = "443"
-    source_port_range          = "*"
   }
 
   security_rule {
-    name                       = "Allow-80-To-Internet"
-    priority                   = 800
+    name                       = "AllowBastionCommunication"
+    description                = "Allow Bastion Host communication"
+    priority                   = 140
     direction                  = "Outbound"
     access                     = "Allow"
-    protocol                   = "Tcp"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_ranges    = ["8080", "5701"]
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "VirtualNetwork"
+  }
+
+  security_rule {
+    name                       = "AllowHttpOutbound"
+    description                = "Allow HTTP outbound traffic"
+    priority                   = 150
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "80"
     source_address_prefix      = "*"
     destination_address_prefix = "Internet"
-    destination_port_range     = "80"
-    source_port_range          = "*"
+  }
+
+  tags = var.tags
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }
 

@@ -104,6 +104,5 @@ jobs:
 
     # Uncomment and adjust conditions for apply if needed
     - name: Terraform Destroy
-      if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform destroy -auto-approve -input=false
       working-directory: ./terraform

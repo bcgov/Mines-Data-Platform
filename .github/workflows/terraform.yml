@@ -1,16 +1,15 @@
-name: 'Terraform'
+name: 'Create/Update Infrastructure'
 
 on:
   push:
     branches: [ "main", "staging" ]
-  # pull_request:
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  terraform:
+  Terraform:
     name: 'Deployment'
     runs-on: ["self-hosted"]
     environment: test
@@ -64,7 +63,7 @@ jobs:
         echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
 
 
-    - name: Shell Script - Create Backend
+    - name: Shell Script - Create/Update Backend
       env: 
         ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
         RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
@@ -78,7 +77,6 @@ jobs:
         chmod +x createbackend.sh
         ./createbackend.sh test
       working-directory: scripts
-
         
     - name: Terraform Init
       run: terraform init -upgrade -backend-config="../environments/test/backend.conf"

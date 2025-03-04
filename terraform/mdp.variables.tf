@@ -85,7 +85,7 @@ variable "jumpbox_SKU" {
 variable "bastion_host_name" {
   description = "(Required) The name of the Bastion Host"
   type        = string
-  default = "bstn-mdp"
+  default     = "bstn-mdp"
 }
 
 variable "bastion_sku" {
@@ -95,7 +95,7 @@ variable "bastion_sku" {
 
   validation {
     condition     = var.bastion_sku != "Developer"
-    error_message = "Developer SKU is not currently available in Canada"
+    error_message = "Developer SKU is not currently available in Canada."
   }
 }
 
@@ -115,7 +115,7 @@ variable "file_copy_enabled" {
       (var.file_copy_enabled == null || var.file_copy_enabled == false) ||
       (var.file_copy_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
     )
-    error_message = "file_copy_enabled is only supported when sku is Standard or Premium"
+    error_message = "File_copy_enabled is only supported when sku is Standard or Premium."
   }
 }
 
@@ -129,7 +129,7 @@ variable "ip_connect_enabled" {
       (var.ip_connect_enabled == null || var.ip_connect_enabled == false) ||
       (var.ip_connect_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
     )
-    error_message = "ip_connect_enabled is only supported when sku is Standard or Premium"
+    error_message = "Ip_connect_enabled is only supported when sku is Standard or Premium."
   }
 }
 
@@ -143,7 +143,7 @@ variable "kerberos_enabled" {
       (var.kerberos_enabled == null || var.kerberos_enabled == false) ||
       (var.kerberos_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
     )
-    error_message = "kerberos_enabled is only supported when sku is Standard or Premium"
+    error_message = "Kerberos_enabled is only supported when sku is Standard or Premium."
   }
 }
 
@@ -163,7 +163,7 @@ variable "scale_units" {
         var.bastion_sku == "Basic"
       )
     )
-    error_message = "scale_units is only supported when sku is Standard or Premium"
+    error_message = "Scale_units is only supported when sku is Standard or Premium."
   }
 
   validation {
@@ -171,7 +171,7 @@ variable "scale_units" {
       var.scale_units >= 2 &&
       var.scale_units <= 50
     )
-    error_message = "scale_units must be between 2 and 50"
+    error_message = "Scale_units must be between 2 and 50."
   }
 }
 
@@ -185,7 +185,7 @@ variable "shareable_link_enabled" {
       (var.shareable_link_enabled == null || var.shareable_link_enabled == false) ||
       (var.shareable_link_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
     )
-    error_message = "shareable_link_enabled is only supported when sku is Standard or Premium"
+    error_message = "Shareable_link_enabled is only supported when sku is Standard or Premium."
   }
 }
 
@@ -199,7 +199,7 @@ variable "tunneling_enabled" {
       (var.tunneling_enabled == null || var.tunneling_enabled == false) ||
       (var.tunneling_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
     )
-    error_message = "tunneling_enabled is only supported when sku is Standard or Premium"
+    error_message = "Tunneling_enabled is only supported when sku is Standard or Premium."
   }
 }
 
@@ -213,7 +213,7 @@ variable "session_recording_enabled" {
       (var.session_recording_enabled == null || var.session_recording_enabled == false) ||
       (var.session_recording_enabled == true && var.bastion_sku == "Premium")
     )
-    error_message = "session_recording_enabled is only supported when sku is Premium."
+    error_message = "Session_recording_enabled is only supported when sku is Premium."
   }
 }
 
@@ -233,6 +233,6 @@ variable "bastionSubnetAddressPrefix" {
 
   validation {
     condition     = can(regex("^(\\d{1,3}\\.){3}\\d{1,3}/(\\d{1,2})$", var.bastionSubnetAddressPrefix)) && tonumber(split("/", var.bastionSubnetAddressPrefix)[1]) <= 26
-    error_message = "bastionSubnetAddressPrefix must be in the form w.x.y.z/26 or larger (e.g., /25, /24, etc.)"
+    error_message = "BastionSubnetAddressPrefix must be in the form w.x.y.z/26 or larger (e.g., /25, /24, etc)."
   }
 }

@@ -5,7 +5,7 @@ resource "azurerm_network_interface" "jumpbox" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azapi_resource.publicsubnet.id
+    subnet_id                     = data.azurerm_subnet.privatesubnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }

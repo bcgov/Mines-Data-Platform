@@ -109,62 +109,24 @@ variable "file_copy_enabled" {
   description = "(Optional) Is File Copy feature enabled for the Bastion Host. Defaults to false."
   type        = bool
   default     = null
-
-  validation {
-    condition = (
-      (var.file_copy_enabled == null || var.file_copy_enabled == false) ||
-      (var.file_copy_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
-    )
-    error_message = "File_copy_enabled is only supported when sku is Standard or Premium."
-  }
 }
 
 variable "ip_connect_enabled" {
   description = "(Optional) Is IP Connect feature enabled for the Bastion Host. Defaults to false."
   type        = bool
   default     = null
-
-  validation {
-    condition = (
-      (var.ip_connect_enabled == null || var.ip_connect_enabled == false) ||
-      (var.ip_connect_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
-    )
-    error_message = "Ip_connect_enabled is only supported when sku is Standard or Premium."
-  }
 }
 
 variable "kerberos_enabled" {
   description = "(Optional) Is Kerberos feature enabled for the Bastion Host. Defaults to false."
   type        = bool
   default     = null
-
-  validation {
-    condition = (
-      (var.kerberos_enabled == null || var.kerberos_enabled == false) ||
-      (var.kerberos_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
-    )
-    error_message = "Kerberos_enabled is only supported when sku is Standard or Premium."
-  }
 }
 
 variable "scale_units" {
   description = "(Optional) The number of scale units for the Bastion Host. Defaults to 2."
   type        = number
   default     = 2
-
-  validation {
-    condition = (
-      (
-        var.scale_units >= 2 &&
-        var.bastion_sku == "Standard" || var.bastion_sku == "Premium"
-      ) ||
-      (
-        var.scale_units <= 2 &&
-        var.bastion_sku == "Basic"
-      )
-    )
-    error_message = "Scale_units is only supported when sku is Standard or Premium."
-  }
 
   validation {
     condition = (
@@ -179,42 +141,18 @@ variable "shareable_link_enabled" {
   description = "(Optional) Is Shareable Link feature enabled for the Bastion Host. Defaults to false."
   type        = bool
   default     = null
-
-  validation {
-    condition = (
-      (var.shareable_link_enabled == null || var.shareable_link_enabled == false) ||
-      (var.shareable_link_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
-    )
-    error_message = "Shareable_link_enabled is only supported when sku is Standard or Premium."
-  }
 }
 
 variable "tunneling_enabled" {
   description = "(Optional) Enable tunneling through the Bastion Host"
   type        = bool
   default     = null
-
-  validation {
-    condition = (
-      (var.tunneling_enabled == null || var.tunneling_enabled == false) ||
-      (var.tunneling_enabled == true && var.bastion_sku == "Standard" || var.bastion_sku == "Premium")
-    )
-    error_message = "Tunneling_enabled is only supported when sku is Standard or Premium."
-  }
 }
 
 variable "session_recording_enabled" {
   description = "(Optional) Enable session recording for the Bastion Host"
   type        = bool
   default     = null
-
-  validation {
-    condition = (
-      (var.session_recording_enabled == null || var.session_recording_enabled == false) ||
-      (var.session_recording_enabled == true && var.bastion_sku == "Premium")
-    )
-    error_message = "Session_recording_enabled is only supported when sku is Premium."
-  }
 }
 
 variable "virtual_network_name" {

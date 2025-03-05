@@ -14,7 +14,9 @@ resource "azurerm_key_vault" "kv" {
     default_action = "Deny"
     bypass         = "AzureServices"
     virtual_network_subnet_ids = [
-      data.azurerm_subnet.privatesubnet.id
+      data.azurerm_subnet.privatesubnet.id,
+      data.azurerm_subnet.containerinstancesubnet.id,
+      data.azurerm_subnet.containerappsubnet.id
     ]
   }
 
@@ -36,6 +38,12 @@ resource "azurerm_key_vault" "kv" {
   #     "Get",
   #   ]
   # }
+  depends_on = [
+      data.azurerm_subnet.privatesubnet.id,
+      data.azurerm_subnet.containerinstancesubnet.id,
+      data.azurerm_subnet.containerappsubnet.id,
+      azurerm_resource_group.security
+    ]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "kv-diag" {

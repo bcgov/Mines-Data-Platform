@@ -1,58 +1,46 @@
-resource "azurerm_private_endpoint" "adf" {
-  name                = "pe-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
+module "private_endpoint_adf" {
+  source              = "./modules/private_endpoint_with_delay"
+  endpoint_name       = "pe-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
   subnet_id           = data.azurerm_subnet.privatesubnet.id
-
-  private_service_connection {
-    name                           = "psc-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
-    private_connection_resource_id = azurerm_data_factory.adf.id
-    subresource_names              = ["dataFactory"]
-    is_manual_connection           = false
-  }
+  connection_name     = "psc-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
+  resource_id         = azurerm_data_factory.adf.id
+  subresource_names   = ["dataFactory"]
 }
 
-resource "azurerm_private_endpoint" "kv" {
-  name                = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
-  location            = var.location
+module "private_endpoint_kv" {
+  source              = "./modules/private_endpoint_with_delay"
+  endpoint_name       = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
+  location            = azurerm_resource_group.security.location
   resource_group_name = azurerm_resource_group.security.name
   subnet_id           = data.azurerm_subnet.privatesubnet.id
-
-  private_service_connection {
-    name                           = "psc-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
-    private_connection_resource_id = azurerm_key_vault.kv.id
-    subresource_names              = ["vault"]
-    is_manual_connection           = false
-  }
-  depends_on = [azurerm_key_vault.kv]
+  connection_name     = "psc-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
+  resource_id         = azurerm_key_vault.kv.id
+  subresource_names   = ["vault"]
+  depends_on          = [azurerm_key_vault.kv]
 }
 
-resource "azurerm_private_endpoint" "corestorage" {
-  name                = "pe-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
+module "private_endpoint_corestorage" {
+  source              = "./modules/private_endpoint_with_delay"
+  endpoint_name       = "pe-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
   subnet_id           = data.azurerm_subnet.privatesubnet.id
-
-  private_service_connection {
-    name                           = "psc-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
-    private_connection_resource_id = azurerm_storage_account.core.id
-    subresource_names              = ["blob"]
-    is_manual_connection           = false
-  }
-  depends_on = [azurerm_storage_account.core]
+  connection_name     = "psc-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
+  resource_id         = azurerm_storage_account.core.id
+  subresource_names   = ["blob"]
+  depends_on          = [azurerm_storage_account.core]
 }
 
-resource "azurerm_private_endpoint" "datastorage" {
-  name                = "pe-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
+module "private_endpoint_datastorage" {
+  source              = "./modules/private_endpoint_with_delay"
+  endpoint_name       = "pe-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
   subnet_id           = data.azurerm_subnet.privatesubnet.id
-
-  private_service_connection {
-    name                           = "psc-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
-    private_connection_resource_id = azurerm_storage_account.data.id
-    subresource_names              = ["blob"]
-    is_manual_connection           = false
-  }
-  depends_on = [azurerm_storage_account.data]
+  connection_name     = "psc-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
+  resource_id         = azurerm_storage_account.data.id
+  subresource_names   = ["blob"]
+  depends_on          = [azurerm_storage_account.data]
 }

@@ -8,7 +8,7 @@ resource "azurerm_storage_account" "core" {
   access_tier                     = "Hot"
   public_network_access_enabled   = false
   allow_nested_items_to_be_public = false
-  shared_access_key_enabled       = false
+  # shared_access_key_enabled       = false
 
   https_traffic_only_enabled = true
   min_tls_version            = "TLS1_2"
@@ -42,7 +42,7 @@ resource "azurerm_storage_account" "data" {
   https_traffic_only_enabled      = true
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
-  shared_access_key_enabled       = false
+  # shared_access_key_enabled       = false
 
   network_rules {
     default_action = "Deny"

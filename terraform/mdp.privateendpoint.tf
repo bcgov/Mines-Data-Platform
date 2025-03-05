@@ -27,29 +27,31 @@ resource "azurerm_private_endpoint" "kv" {
 }
 
 resource "azurerm_private_endpoint" "corestorage" {
-  name                = "pe-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
+  name                = "pe-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
   subnet_id           = data.azurerm_subnet.privatesubnet.id
 
   private_service_connection {
-    name                           = "psc-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
-    private_connection_resource_id = azurerm_storage_account.data.id
+    name                           = "psc-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
+    private_connection_resource_id = azurerm_storage_account.core.id
     subresource_names              = ["blob"]
     is_manual_connection           = false
   }
+  depends_on = [ azurerm_storage_account.core ]
 }
 
 resource "azurerm_private_endpoint" "datastorage" {
-  name                = "pe-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
+  name                = "pe-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
   subnet_id           = data.azurerm_subnet.privatesubnet.id
 
   private_service_connection {
-    name                           = "psc-${var.projectNameAbbr}-storage-${var.environment}-${var.locationAbbr}"
+    name                           = "psc-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
     private_connection_resource_id = azurerm_storage_account.data.id
     subresource_names              = ["blob"]
     is_manual_connection           = false
   }
+  depends_on = [ azurerm_storage_account.data ]
 }

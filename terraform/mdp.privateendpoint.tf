@@ -1,5 +1,5 @@
 module "private_endpoint_adf" {
-  source              = "./modules/private_endpoint_with_delay"
+  source              = "./modules/privateendpoint_with_delay"
   endpoint_name       = "pe-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
@@ -10,7 +10,7 @@ module "private_endpoint_adf" {
 }
 
 module "private_endpoint_kv" {
-  source              = "./modules/private_endpoint_with_delay"
+  source              = "./modules/privateendpoint_with_delay"
   endpoint_name       = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
   location            = azurerm_resource_group.security.location
   resource_group_name = azurerm_resource_group.security.name
@@ -22,7 +22,7 @@ module "private_endpoint_kv" {
 }
 
 module "private_endpoint_corestorage" {
-  source              = "./modules/private_endpoint_with_delay"
+  source              = "./modules/privateendpoint_with_delay"
   endpoint_name       = "pe-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
@@ -34,7 +34,7 @@ module "private_endpoint_corestorage" {
 }
 
 module "private_endpoint_datastorage" {
-  source              = "./modules/private_endpoint_with_delay"
+  source              = "./modules/privateendpoint_with_delay"
   endpoint_name       = "pe-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name

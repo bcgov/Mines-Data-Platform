@@ -8,7 +8,7 @@ resource "azurerm_storage_account" "core" {
   network_rules {
     default_action             = "Deny"
     bypass                     = ["AzureServices"]
-    virtual_network_subnet_ids = [azurerm_subnet.core.id]
+    virtual_network_subnet_ids = [data.azurerm_subnet.privatesubnet.id]
   }
 
   tags = var.tags
@@ -24,7 +24,7 @@ resource "azurerm_storage_account" "data" {
   network_rules {
     default_action             = "Deny"
     bypass                     = ["AzureServices"]
-    virtual_network_subnet_ids = [azurerm_subnet.data.id]
+    virtual_network_subnet_ids = [data.azurerm_subnet.privatesubnet.id]
   }
 
   tags = var.tags

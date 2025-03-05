@@ -5,6 +5,13 @@ resource "azurerm_storage_account" "core" {
   account_tier                  = "Standard"
   account_replication_type      = "LRS"
   public_network_access_enabled = false
+  network_rules {
+    default_action             = "Deny"
+    bypass                     = ["AzureServices"]
+    virtual_network_subnet_ids = [azurerm_subnet.core.id]
+  }
+
+  tags = var.tags
 }
 
 resource "azurerm_storage_account" "data" {
@@ -14,4 +21,11 @@ resource "azurerm_storage_account" "data" {
   account_tier                  = "Standard"
   account_replication_type      = "LRS"
   public_network_access_enabled = false
+  network_rules {
+    default_action             = "Deny"
+    bypass                     = ["AzureServices"]
+    virtual_network_subnet_ids = [azurerm_subnet.data.id]
+  }
+
+  tags = var.tags
 }

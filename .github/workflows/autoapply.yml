@@ -92,9 +92,9 @@ jobs:
         service_principal_id: ${{ secrets.service_principal_id }}
         TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
         TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
-        virtual_network_name: ${{vars.virtual_network_name}}
-        virtual_network_resource_group: ${{vars.virtual_network_resource_group}}
-        bastionSubnetAddressPrefix: ${{vars.bastionSubnetAddressPrefix}}
+        TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
+        TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
+        TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
       run: terraform plan -input=false 
       working-directory: ./terraform
 
@@ -112,9 +112,9 @@ jobs:
         service_principal_id: ${{ secrets.service_principal_id }}
         TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
         TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
-        virtual_network_name: ${{vars.virtual_network_name}}
-        virtual_network_resource_group: ${{vars.virtual_network_resource_group}}
-        bastionSubnetAddressPrefix: ${{vars.bastionSubnetAddressPrefix}}
+        TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
+        TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
+        TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
       if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false
       working-directory: ./terraform

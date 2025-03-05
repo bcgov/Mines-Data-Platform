@@ -38,7 +38,7 @@ resource "azurerm_private_endpoint" "corestorage" {
     subresource_names              = ["blob"]
     is_manual_connection           = false
   }
-  depends_on = [ azurerm_storage_account.core ]
+  depends_on = [azurerm_storage_account.core]
 }
 
 resource "azurerm_private_endpoint" "datastorage" {
@@ -53,5 +53,5 @@ resource "azurerm_private_endpoint" "datastorage" {
     subresource_names              = ["blob"]
     is_manual_connection           = false
   }
-  depends_on = [ azurerm_storage_account.data ]
+  depends_on = [azurerm_storage_account.data]
 }

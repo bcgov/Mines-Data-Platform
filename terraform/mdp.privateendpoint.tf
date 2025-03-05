@@ -24,6 +24,7 @@ resource "azurerm_private_endpoint" "kv" {
     subresource_names              = ["vault"]
     is_manual_connection           = false
   }
+  depends_on = [azurerm_key_vault.kv]
 }
 
 resource "azurerm_private_endpoint" "corestorage" {

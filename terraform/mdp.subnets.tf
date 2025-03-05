@@ -45,6 +45,14 @@ resource "azapi_resource" "bastion_subnet" {
       networkSecurityGroup = {
         id = azurerm_network_security_group.bastion_nsg.id
       }
+      serviceEndpoints = [
+        {
+          service = "Microsoft.KeyVault"
+        },
+        {
+          service = "Microsoft.Storage"
+        }
+      ]
     }
   }
   response_export_values = ["*"]

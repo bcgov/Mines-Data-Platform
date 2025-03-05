@@ -39,11 +39,11 @@ resource "azurerm_key_vault" "kv" {
   #   ]
   # }
   depends_on = [
-      data.azurerm_subnet.privatesubnet.id,
-      data.azurerm_subnet.containerinstancesubnet.id,
-      data.azurerm_subnet.containerappsubnet.id,
-      azurerm_resource_group.security
-    ]
+    data.azurerm_subnet.privatesubnet.id,
+    data.azurerm_subnet.containerinstancesubnet.id,
+    data.azurerm_subnet.containerappsubnet.id,
+    azurerm_resource_group.security
+  ]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "kv-diag" {

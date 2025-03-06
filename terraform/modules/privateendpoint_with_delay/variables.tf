@@ -32,3 +32,9 @@ variable "subresource_names" {
   type        = list(string)
   description = "A list of subresources to which to connect."
 }
+
+variable "dns_delay" {
+  type        = number
+  description = "The number of seconds to wait for DNS resolution."
+  default     = 90
+}

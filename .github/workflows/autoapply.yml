@@ -19,6 +19,9 @@ jobs:
         shell: bash
 
     steps:
+    - name: Runner Information
+      run: echo "Runner Information ${{ runner }}, initiated by  - ${{ github.actor }}"
+
     - name: Checkout
       uses: actions/checkout@v4
     

@@ -14,5 +14,5 @@ resource "azurerm_private_endpoint" "this" {
 
 resource "time_sleep" "wait_for_dns" {
   depends_on      = [azurerm_private_endpoint.this]
-  create_duration = "90s"
+  create_duration = "60s"
 }

@@ -12,13 +12,13 @@ resource "azurerm_private_endpoint" "this" {
   }
 }
 
-resource "time_sleep" "wait_for_dns" {
-  depends_on      = [azurerm_private_endpoint.this]
-  create_duration = "30s"
-}
+# resource "time_sleep" "wait_for_dns" {
+#   depends_on      = [azurerm_private_endpoint.this]
+#   create_duration = "30s"
+# }
 
 resource "null_resource" "poll_private_endpoint" {
-  depends_on = [time_sleep.wait_for_dns]
+  depends_on = [azurerm_private_endpoint.this]
 
   provisioner "local-exec" {
     command = <<-EOT
@@ -31,8 +31,8 @@ resource "null_resource" "poll_private_endpoint" {
 
       echo "Polling Private Endpoint at $URL..."
 
-      MAX_RETRIES=12
-      SLEEP_INTERVAL=10
+      MAX_RETRIES=20
+      SLEEP_INTERVAL=60
       retry=0
 
       while [ $retry -lt $MAX_RETRIES ]; do

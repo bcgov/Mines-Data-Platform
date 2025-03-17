@@ -13,6 +13,8 @@ CONTAINER_NAME="tfstate"
 SUBSCRIPTION_NAME=$LICENSE_PLATE-$ENVIRONMENT
 SUBSCRIPTION_ID=$(az account list --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)
 
+echo "Subscription ID: $$SUBSCRIPTION_ID}"
+
 ACCOUNT_TYPE=$(az account show --query user.type -o tsv)
 echo $ACCOUNT_TYPE
 echo $()

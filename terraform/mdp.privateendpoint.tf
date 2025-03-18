@@ -11,11 +11,11 @@ module "private_endpoint_adf" {
 
 module "private_endpoint_kv" {
   source              = "./modules/privateendpoint_with_delay"
-  endpoint_name       = "pe-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
+  endpoint_name       = "pe-${var.projectNameAbbr}-vault-${var.environment}-${var.locationAbbr}"
   location            = azurerm_resource_group.security.location
   resource_group_name = azurerm_resource_group.security.name
   subnet_id           = data.azurerm_subnet.privatesubnet.id
-  connection_name     = "psc-${var.projectNameAbbr}-kv-${var.environment}-${var.locationAbbr}"
+  connection_name     = "psc-${var.projectNameAbbr}-vault-${var.environment}-${var.locationAbbr}"
   resource_id         = azurerm_key_vault.kv.id
   subresource_names   = ["vault"]
   depends_on          = [azurerm_key_vault.kv]

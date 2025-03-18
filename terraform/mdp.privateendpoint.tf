@@ -7,6 +7,7 @@ module "private_endpoint_adf" {
   connection_name     = "psc-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
   resource_id         = azurerm_data_factory.adf.id
   subresource_names   = ["dataFactory"]
+  depends_on          = [azurerm_data_factory.adf]
 }
 
 module "private_endpoint_kv" {

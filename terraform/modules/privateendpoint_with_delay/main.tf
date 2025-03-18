@@ -10,11 +10,17 @@ resource "azurerm_private_endpoint" "this" {
     is_manual_connection           = false
     subresource_names              = var.subresource_names
   }
+  lifecycle {
+    ignore_changes = [
+      private_dns_zone_group,
+      tags
+    ]
+  }
 }
 
 resource "time_sleep" "wait_for_dns" {
   depends_on      = [azurerm_private_endpoint.this]
-  create_duration = "120s"
+  create_duration = "700s"
 }
 
 # resource "null_resource" "poll_private_endpoint" {

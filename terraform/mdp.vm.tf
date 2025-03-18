@@ -6,7 +6,7 @@ resource "azurerm_windows_virtual_machine" "jumpbox" {
   size                = var.jumpbox_SKU
   admin_username      = azurerm_key_vault_secret.jumpboxadminuser.value
   # admin_password      = azurerm_key_vault_secret.jumpboxadminpassword.value
-  admin_password      = "Password1234!"
+  admin_password = "Password1234!"
   network_interface_ids = [
     azurerm_network_interface.jumpbox.id,
   ]

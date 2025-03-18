@@ -57,6 +57,10 @@ jobs:
         echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
         echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
 
+    # - name: Assign Role
+    #   run: |
+    #     az role assignment create --assignee ${{ secrets.SERVICE_PRINCIPAL_ID }} --role "Storage Blob Data Contributor" --scope /subscriptions/${{ vars.TF_VAR_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.UNMANAGED_RG }}/providers/Microsoft.Storage/storageAccounts/${{ vars.UNMANAGED_STORAGE_TFSTATE }}
+    #   if: always() # Ensure this runs even if previous steps fail
 
     - name: Shell Script - Create/Update Backend
       env: 

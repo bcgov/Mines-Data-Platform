@@ -33,7 +33,7 @@ resource "azurerm_windows_virtual_machine" "shir" {
   admin_username      = azurerm_key_vault_secret.jumpboxadminuser.value
   admin_password      = azurerm_key_vault_secret.jumpboxadminpassword.value
   network_interface_ids = [
-    azurerm_network_interface.jumpbox.id,
+    azurerm_network_interface.shir.id,
   ]
 
   os_disk {

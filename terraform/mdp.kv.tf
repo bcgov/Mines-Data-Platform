@@ -58,9 +58,4 @@ resource "azurerm_monitor_diagnostic_setting" "kv-diag" {
   metric {
     category = "AllMetrics"
   }
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
 }

@@ -129,5 +129,5 @@ jobs:
       with:
         max_attempts: 3
         timeout_minutes: 10
-        command: terraform apply -chdir="./terraform" -auto-approve -input=false
+        command: terraform -chdir="terraform" apply  -auto-approve -input=false
       # working-directory: ./terraform

@@ -25,7 +25,8 @@ resource "azurerm_storage_account" "core" {
 
   lifecycle {
     ignore_changes = [
-      tags
+      tags,
+      network_rules
     ]
   }
 }
@@ -56,7 +57,8 @@ resource "azurerm_storage_account" "data" {
 
   lifecycle {
     ignore_changes = [
-      tags
+      tags,
+      network_rules
     ]
   }
 }

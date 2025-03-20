@@ -9,6 +9,7 @@ resource "azurerm_windows_virtual_machine" "shir" {
   network_interface_ids = [
     azurerm_network_interface.shir.id,
   ]
+  patch_assessment_mode = "AutomaticByPlatform"
 
   os_disk {
     caching              = "ReadWrite"
@@ -23,7 +24,8 @@ resource "azurerm_windows_virtual_machine" "shir" {
   }
   lifecycle {
     ignore_changes = [
-      tags
+      tags,
+      identity
     ]
   }
 }

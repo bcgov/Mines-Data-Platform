@@ -16,7 +16,6 @@ resource "azurerm_private_endpoint" "this" {
       tags
     ]
   }
-  # depends_on = [ data.azurerm_subnet.privatesubnet ]
 }
 
 resource "time_sleep" "wait_for_dns" {

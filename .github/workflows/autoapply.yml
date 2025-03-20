@@ -3,6 +3,7 @@ name: 'Create/Update Infrastructure (Automatic)'
 on:
   push:
     branches: [ "main", "staging" ]
+  workflow_dispatch: # Allow manual triggering of workflow
 
 permissions:
   id-token: write
@@ -124,5 +125,9 @@ jobs:
         TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
         TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
       if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
-      working-directory: ./terraform
+      uses: nick-fields/retry@v2
+      with:
+        max_attempts: 3
+        timeout_minutes: 10
+        command: terraform apply -chdir=terraform -auto-approve -input=false
+      # working-directory: ./terraform

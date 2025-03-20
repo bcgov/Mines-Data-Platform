@@ -21,4 +21,9 @@ resource "azurerm_windows_virtual_machine" "shir" {
     sku       = "2016-Datacenter"
     version   = "latest"
   }
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }

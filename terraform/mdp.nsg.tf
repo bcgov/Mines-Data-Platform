@@ -121,11 +121,21 @@ resource "azurerm_network_security_group" "public_nsg" {
   name                = "nsg-${var.projectNameAbbr}-public-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.core.name
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_network_security_group" "private_nsg" {
   name                = "nsg-${var.projectNameAbbr}-private-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 

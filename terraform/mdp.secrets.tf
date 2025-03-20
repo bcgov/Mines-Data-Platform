@@ -4,6 +4,11 @@ resource "azurerm_key_vault_secret" "jumpboxadminuser" {
   key_vault_id    = azurerm_key_vault.kv.id
   depends_on      = [azurerm_key_vault.kv, module.private_endpoint_kv]
   expiration_date = timeadd(timestamp(), "2160h")
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "random_password" "jumpboxadminpassword" {
@@ -17,4 +22,9 @@ resource "azurerm_key_vault_secret" "jumpboxadminpassword" {
   key_vault_id    = azurerm_key_vault.kv.id
   depends_on      = [azurerm_key_vault.kv, module.private_endpoint_kv]
   expiration_date = timeadd(timestamp(), "2160h")
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }

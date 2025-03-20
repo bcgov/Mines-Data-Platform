@@ -8,4 +8,10 @@ resource "azurerm_network_interface" "shir" {
     subnet_id                     = data.azurerm_subnet.privatesubnet.id
     private_ip_address_allocation = "Dynamic"
   }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }

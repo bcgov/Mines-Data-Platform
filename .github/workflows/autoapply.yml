@@ -3,7 +3,7 @@ name: 'Create/Update Infrastructure (Automatic)'
 on:
   push:
     branches: [ "main", "staging" ]
-  workflow_dispatch: # Allow manual triggering of workflow
+  workflow_dispatch: 
 
 permissions:
   id-token: write
@@ -129,5 +129,5 @@ jobs:
       with:
         max_attempts: 3
         timeout_minutes: 10
-        command: terraform -chdir="terraform" apply  -auto-approve -input=false
+        command: terraform apply -chdir=terraform -auto-approve -input=false -lock=false
       # working-directory: ./terraform

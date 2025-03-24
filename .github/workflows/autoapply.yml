@@ -3,6 +3,13 @@ name: 'Create/Update Infrastructure (Automatic)'
 on:
   push:
     branches: [ "main", "staging" ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'test'
+        type: string
 
 permissions:
   id-token: write
@@ -57,6 +64,11 @@ jobs:
         echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
         echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
         echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
+      
+    # - name: Assign Role
+    #   run: |
+    #     az role assignment create --assignee ${{ secrets.SERVICE_PRINCIPAL_ID }} --role "Storage Blob Data Contributor" --scope /subscriptions/${{ vars.TF_VAR_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.UNMANAGED_RG }}/providers/Microsoft.Storage/storageAccounts/${{ vars.UNMANAGED_STORAGE_TFSTATE }}
+    #   if: always() # Ensure this runs even if previous steps fail
 
 
     - name: Shell Script - Create/Update Backend
@@ -118,6 +130,6 @@ jobs:
         TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
         TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
         TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
-      if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+      if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false
       working-directory: ./terraform

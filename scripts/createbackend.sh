@@ -11,7 +11,10 @@ RESOURCE_GROUP_NAME="rg-mdp-unmanaged-$ENVIRONMENT-ca"
 STORAGE_ACCOUNT_NAME="stgmdptfstate${ENVIRONMENT}ca"
 CONTAINER_NAME="tfstate"
 SUBSCRIPTION_NAME=$LICENSE_PLATE-$ENVIRONMENT
+echo "SUB QUERY=$(az account list --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)"
 SUBSCRIPTION_ID=$(az account list --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)
+
+echo "SUBSCRIPTION ID: $$SUBSCRIPTION_ID}"
 
 ACCOUNT_TYPE=$(az account show --query user.type -o tsv)
 echo $ACCOUNT_TYPE

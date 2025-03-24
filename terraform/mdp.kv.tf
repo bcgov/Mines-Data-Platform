@@ -44,6 +44,11 @@ resource "azurerm_key_vault" "kv" {
     data.azurerm_subnet.containerappsubnet,
     azurerm_resource_group.security
   ]
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "kv-diag" {

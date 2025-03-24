@@ -10,9 +10,37 @@ resource "azurerm_private_endpoint" "this" {
     is_manual_connection           = false
     subresource_names              = var.subresource_names
   }
+  lifecycle {
+    ignore_changes = [
+      private_dns_zone_group,
+      tags
+    ]
+  }
 }
 
 resource "time_sleep" "wait_for_dns" {
   depends_on      = [azurerm_private_endpoint.this]
-  create_duration = "60s"
+  create_duration = "900s"
 }
+
+# resource "null_resource" "poll_private_endpoint" {
+#   provisioner "local-exec" {
+#     command = <<-EOF
+#       #!/bin/sh
+#       echo "Polling Private Endpoint at http://${azurerm_private_endpoint.this.private_service_connection[0].private_ip_address}..."
+
+#       for i in $(seq 1 12); do
+#         HTTP_CODE=$(curl -s -o /dev/null -w "%%{http_code}" "http://${azurerm_private_endpoint.this.private_service_connection[0].private_ip_address}")
+#         if [ "$$HTTP_CODE" = "200" ]; then
+#           echo "Endpoint is available (HTTP $$HTTP_CODE). Proceeding..."
+#           exit 0
+#         fi
+#         echo "Attempt $$i/12: Received HTTP $$HTTP_CODE. Retrying in 10 seconds..."
+#         sleep 10
+#       done
+
+#       echo "Endpoint did not become available after 12 attempts."
+#       exit 1
+#     EOF
+#   }
+# }

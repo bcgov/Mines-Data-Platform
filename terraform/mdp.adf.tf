@@ -8,4 +8,9 @@ resource "azurerm_data_factory" "adf" {
   }
   location = azurerm_resource_group.data.location
   tags     = var.tags
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }

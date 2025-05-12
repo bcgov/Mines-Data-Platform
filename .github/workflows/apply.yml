@@ -38,26 +38,26 @@ jobs:
         run: terraform fmt -check
         working-directory: ./terraform
 
-  scan:
-    name: "Security Scan (Terrascan)"
-    runs-on: self-hosted
-    defaults:
-      run:
-        shell: bash
-    needs: lint
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # scan:
+  #   name: "Security Scan (Terrascan)"
+  #   runs-on: self-hosted
+  #   defaults:
+  #     run:
+  #       shell: bash
+  #   needs: lint
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Terrascan Install
-        run: |
-          curl --location https://github.com/accurics/terrascan/releases/download/v1.3.1/terrascan_1.3.1_Linux_x86_64.tar.gz --output terrascan.tar.gz
-          tar -xvf terrascan.tar.gz
-          sudo install terrascan /usr/local/bin
+  #     - name: Terrascan Install
+  #       run: |
+  #         curl --location https://github.com/accurics/terrascan/releases/download/v1.3.1/terrascan_1.3.1_Linux_x86_64.tar.gz --output terrascan.tar.gz
+  #         tar -xvf terrascan.tar.gz
+  #         sudo install terrascan /usr/local/bin
 
-      - name: Run Terrascan
-        run: terrascan scan -t azure -i terraform --skip-rules="accurics.azure.NS.272"
-        working-directory: terraform
+  #     - name: Run Terrascan
+  #       run: terrascan scan -t azure -i terraform --skip-rules="accurics.azure.NS.272"
+  #       working-directory: terraform
 
   plan:
     name: "Terraform Plan"

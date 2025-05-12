@@ -63,6 +63,7 @@ jobs:
     name: "Terraform Plan"
     runs-on: self-hosted
     needs: [lint]
+    environment: test
     # needs: [lint, scan]
     defaults:
       run:

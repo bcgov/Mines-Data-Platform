@@ -17,8 +17,9 @@ permissions:
 
 jobs:
   setup-backend:
-    name: '🔧 Create/Update Backend'
+    name: 'Create/Update Backend'
     runs-on: ["self-hosted"]
+    environment: test
     defaults:
       run:
         shell: bash
@@ -81,9 +82,10 @@ jobs:
           ./createbackend.sh ${{ github.event.inputs.environment }}
 
   validate:
-    name: '✅ Validate Terraform'
+    name: 'Validate Terraform'
     runs-on: ["self-hosted"]
     needs: setup-backend
+    environment: test
     defaults:
       run:
         shell: bash
@@ -109,10 +111,11 @@ jobs:
       #   working-directory: terraform
 
   plan:
-    name: '📋 Terraform Plan'
+    name: 'Terraform Plan'
     runs-on: ["self-hosted"]
     needs: validate
-    environment: ${{ github.event.inputs.environment }}
+    environment: test
+    #environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
         shell: bash
@@ -166,11 +169,12 @@ jobs:
         run: terraform plan -input=false
 
   apply:
-    name: '🚀 Terraform Apply'
+    name: 'Terraform Apply'
     runs-on: ["self-hosted"]
     needs: plan
     if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') && github.event_name == 'push'
-    environment: ${{ github.event.inputs.environment }}
+    environment: test
+    #environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
         shell: bash

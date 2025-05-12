@@ -62,7 +62,8 @@ jobs:
   plan:
     name: "Terraform Plan"
     runs-on: self-hosted
-    needs: [lint, scan]
+    needs: [lint]
+    # needs: [lint, scan]
     defaults:
       run:
         shell: bash

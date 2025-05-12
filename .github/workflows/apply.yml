@@ -16,120 +16,205 @@ permissions:
   contents: read
 
 jobs:
-  Terraform:
-    name: 'Deployment'
+  setup-backend:
+    name: '🔧 Create/Update Backend'
     runs-on: ["self-hosted"]
-    environment: test
-
     defaults:
       run:
         shell: bash
-
     steps:
-    - name: Runner Information
-      run: echo "Runner Information ${{ toJson(runner) }}, initiated by  - ${{ github.actor }}"
+      - name: Runner Information
+        run: echo "Runner Information ${{ toJson(runner) }}, initiated by - ${{ github.actor }}"
 
-    - name: Checkout
-      uses: actions/checkout@v4
-    
-    # - name: Terrascan Install
-    #   run: |
-    #     curl --location https://github.com/accurics/terrascan/releases/download/v1.3.1/terrascan_1.3.1_Linux_x86_64.tar.gz --output terrascan.tar.gz
-    #     tar -xvf terrascan.tar.gz
-    #     sudo install terrascan /usr/local/bin
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: HashiCorp - Setup Terraform
-      uses: hashicorp/setup-terraform@v3.0.0
+      # - name: Terrascan Install
+      #   run: |
+      #     curl --location https://github.com/accurics/terrascan/releases/download/v1.3.1/terrascan_1.3.1_Linux_x86_64.tar.gz --output terrascan.tar.gz
+      #     tar -xvf terrascan.tar.gz
+      #     sudo install terrascan /usr/local/bin
 
-    # - name: Run Terrascan
-    #   run: terrascan scan -t azure -i terraform --skip-rules="accurics.azure.NS.272" #TODO: Removes check for resource group locks
-    #   working-directory: terraform
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v3.0.0
 
-    - name: Azure Login
-      uses: azure/login@v2.2.0
-      with:
-        client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
-        tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
-        subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+      # - name: Run Terrascan
+      #   run: terrascan scan -t azure -i terraform --skip-rules="accurics.azure.NS.272" #TODO: Removes check for resource group locks
+      #   working-directory: terraform
 
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-            
+      - name: Azure Login
+        uses: azure/login@v2.2.0
+        with:
+          client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
+          tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
+          subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
-    - name: Set Azure Service Principal Environment Variables
-      run: |
-        echo "ARM_CLIENT_ID=${{ secrets.SERVICE_PRINCIPAL_ID }}" >> $GITHUB_ENV
-        echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
-        echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
-        echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
-      
-    # - name: Assign Role
-    #   run: |
-    #     az role assignment create --assignee ${{ secrets.SERVICE_PRINCIPAL_ID }} --role "Storage Blob Data Contributor" --scope /subscriptions/${{ vars.TF_VAR_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.UNMANAGED_RG }}/providers/Microsoft.Storage/storageAccounts/${{ vars.UNMANAGED_STORAGE_TFSTATE }}
-    #   if: always() # Ensure this runs even if previous steps fail
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
+      - name: Set Azure Service Principal Environment Variables
+        run: |
+          echo "ARM_CLIENT_ID=${{ secrets.SERVICE_PRINCIPAL_ID }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
 
-    - name: Shell Script - Create/Update Backend
-      env: 
-        ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
-        RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
-        STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
-        CONTAINER_NAME: tfstate
-        SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-        
-      run: |
-        pwd
-        node --version
-        chmod +x createbackend.sh
-        ./createbackend.sh test
-      working-directory: scripts
-        
-    - name: Terraform Init
-      run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
-      working-directory: ./terraform
+      # - name: Assign Role
+      #   run: |
+      #     az role assignment create --assignee ${{ secrets.SERVICE_PRINCIPAL_ID }} --role "Storage Blob Data Contributor" --scope /subscriptions/${{ vars.TF_VAR_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.UNMANAGED_RG }}/providers/Microsoft.Storage/storageAccounts/${{ vars.UNMANAGED_STORAGE_TFSTATE }}
+      #   if: always() # Ensure this runs even if previous steps fail
 
-    - name: Terraform Format
-      run: terraform fmt -check
-      working-directory: ./terraform
+      - name: Shell Script - Create/Update Backend
+        working-directory: scripts
+        env:
+          ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
+          RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
+          STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
+          CONTAINER_NAME: tfstate
+          SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+        run: |
+          pwd
+          node --version
+          chmod +x createbackend.sh
+          ./createbackend.sh ${{ github.event.inputs.environment }}
 
-    - name: Terraform Plan
-      env:
-        TF_VAR_LICENSEPLATE: ${{ vars.TF_VAR_LICENSEPLATE }}
-        TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
-        TF_VAR_LOCATIONABBR: ${{ vars.TF_VAR_LOCATIONABBR }}
-        TF_VAR_subnet_names: ${{ vars.TF_VAR_SUBNET_NAMES }}
-        TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
-        TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
-        TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
-        TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
-        service_principal_id: ${{ secrets.service_principal_id }}
-        TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-        TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
-        TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
-        TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
-        TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
-      run: terraform plan -input=false 
-      working-directory: ./terraform
+  validate:
+    name: '✅ Validate Terraform'
+    runs-on: ["self-hosted"]
+    needs: setup-backend
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # Uncomment and adjust conditions for apply if needed
-    - name: Terraform Apply
-      env:
-        TF_VAR_LICENSEPLATE: ${{ vars.TF_VAR_LICENSEPLATE }}
-        TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
-        TF_VAR_LOCATIONABBR: ${{ vars.TF_VAR_LOCATIONABBR }}
-        TF_VAR_subnet_names: ${{ vars.TF_VAR_SUBNET_NAMES }}
-        TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
-        TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
-        TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
-        TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
-        service_principal_id: ${{ secrets.service_principal_id }}
-        TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-        TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
-        TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
-        TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
-        TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
-      if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
-      working-directory: ./terraform
+      # - name: Terrascan Install
+      #   run: |
+      #     curl --location https://github.com/accurics/terrascan/releases/download/v1.3.1/terrascan_1.3.1_Linux_x86_64.tar.gz --output terrascan.tar.gz
+      #     tar -xvf terrascan.tar.gz
+      #     sudo install terrascan /usr/local/bin
+
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v3.0.0
+
+      - name: Terraform Format
+        working-directory: ./terraform
+        run: terraform fmt -check
+
+      # - name: Run Terrascan
+      #   run: terrascan scan -t azure -i terraform --skip-rules="accurics.azure.NS.272"
+      #   working-directory: terraform
+
+  plan:
+    name: '📋 Terraform Plan'
+    runs-on: ["self-hosted"]
+    needs: validate
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v3.0.0
+
+      - name: Azure Login
+        uses: azure/login@v2.2.0
+        with:
+          client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
+          tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
+          subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set Azure Service Principal Environment Variables
+        run: |
+          echo "ARM_CLIENT_ID=${{ secrets.SERVICE_PRINCIPAL_ID }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init -upgrade -backend-config="../environments/${{ github.event.inputs.environment }}/backend.conf"
+
+      - name: Terraform Plan
+        working-directory: ./terraform
+        env:
+          TF_VAR_LICENSEPLATE: ${{ vars.TF_VAR_LICENSEPLATE }}
+          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+          TF_VAR_LOCATIONABBR: ${{ vars.TF_VAR_LOCATIONABBR }}
+          TF_VAR_subnet_names: ${{ vars.TF_VAR_SUBNET_NAMES }}
+          TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
+          TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
+          TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
+          TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
+          service_principal_id: ${{ secrets.service_principal_id }}
+          TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+          TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
+          TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
+          TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
+          TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
+        run: terraform plan -input=false
+
+  apply:
+    name: '🚀 Terraform Apply'
+    runs-on: ["self-hosted"]
+    needs: plan
+    if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') && github.event_name == 'push'
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v3.0.0
+
+      - name: Azure Login
+        uses: azure/login@v2.2.0
+        with:
+          client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
+          tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
+          subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set Azure Service Principal Environment Variables
+        run: |
+          echo "ARM_CLIENT_ID=${{ secrets.SERVICE_PRINCIPAL_ID }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        env:
+          TF_VAR_LICENSEPLATE: ${{ vars.TF_VAR_LICENSEPLATE }}
+          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+          TF_VAR_LOCATIONABBR: ${{ vars.TF_VAR_LOCATIONABBR }}
+          TF_VAR_subnet_names: ${{ vars.TF_VAR_SUBNET_NAMES }}
+          TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
+          TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
+          TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
+          TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
+          service_principal_id: ${{ secrets.service_principal_id }}
+          TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+          TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
+          TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
+          TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
+          TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
+        run: terraform apply -auto-approve -input=false

@@ -1,4 +1,4 @@
-name: 'Create/Update Infrastructure (Automatic)'
+name: 'Create/Update Infrastructure'
 
 on:
   push:
@@ -206,8 +206,9 @@ jobs:
 
       - name: Verify Directory Structure
         run: |
+          pwd
           echo "Current directory structure:"
-          tree ./terraform
+          ls -la ./terraform
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false tf.plan

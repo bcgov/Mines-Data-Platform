@@ -142,6 +142,7 @@ jobs:
           path: |
             ./terraform/tf.plan
             ./terraform/.terraform.lock.hcl
+            ./terraform/.terraform/**/*
           retention-days: 1
 
   apply:

@@ -200,7 +200,14 @@ jobs:
       - name: Download Plan Artifacts
         uses: actions/download-artifact@v4
         with:
+          name: tfplan
+          merge-multiple: true
           path: ./terraform
+
+      - name: Verify Directory Structure
+        run: |
+          echo "Current directory structure:"
+          tree ./terraform
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false tf.plan

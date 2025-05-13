@@ -144,6 +144,7 @@ jobs:
     name: "Terraform Apply"
     runs-on: self-hosted
     needs: plan
+    environment: test
     if: >
       needs.plan.result == 'success' &&
       (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') &&
@@ -182,8 +183,6 @@ jobs:
           client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
           subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-
-      
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false

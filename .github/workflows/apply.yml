@@ -136,7 +136,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Terraform Plan
+          name: tfplan
           path: ./terraform/tf.plan
           retention-days: 1
 
@@ -184,6 +184,12 @@ jobs:
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
           subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
+      - name: Download Plan Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: ./terraform
+
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply tf.plan -auto-approve -input=false
         working-directory: ./terraform

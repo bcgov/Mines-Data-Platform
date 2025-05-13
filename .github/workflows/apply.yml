@@ -204,6 +204,11 @@ jobs:
           merge-multiple: true
           path: ./terraform
 
+      - name: Fix Permissions for Providers
+        run: |
+          find .terraform/providers/ -type f -exec chmod +x {} \;
+
+
       - name: Verify Directory Structure
         run: |
           pwd

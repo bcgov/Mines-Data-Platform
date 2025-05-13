@@ -127,7 +127,6 @@ jobs:
       - name: Terraform Init
         #run: terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment }}/backend.conf"
         run: terraform init -upgrade -backend-config="environments/test/backend.conf"
-        working-directory: ./terraform
 
       - name: Terraform Plan
         run: terraform plan -input=false

@@ -197,6 +197,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Terraform Init
+        #run: terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment }}/backend.conf"
+        run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
+        working-directory: ./terraform
+
       # - name: Download Plan Artifacts
       #   uses: actions/download-artifact@v4
       #   with:

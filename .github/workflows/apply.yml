@@ -126,11 +126,18 @@ jobs:
 
       - name: Terraform Init
         #run: terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment }}/backend.conf"
-        run: terraform init -upgrade -backend-config="environments/test/backend.conf"
+        run: terraform init -upgrade -reconfigure -backend-config="environments/test/backend.conf"
 
       - name: Terraform Plan
-        run: terraform plan -input=false
+        run: terraform plan -input=false -out=tf.plan
         working-directory: ./terraform
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Terraform Plan
+          path: ./terraform/tf.plan
+          retention-days: 1
 
   apply:
     name: "Terraform Apply"
@@ -174,6 +181,8 @@ jobs:
           client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
           subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
+
+      
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false

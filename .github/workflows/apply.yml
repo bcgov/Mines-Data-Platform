@@ -197,24 +197,25 @@ jobs:
         with:
           node-version: 20
 
-      - name: Download Plan Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-          merge-multiple: true
-          path: ./terraform
+      # - name: Download Plan Artifacts
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: tfplan
+      #     merge-multiple: true
+      #     path: ./terraform
 
-      - name: Fix Permissions for Providers
-        run: |
-          find .terraform/providers/ -type f -exec chmod +x {} \;
+      # - name: Fix Permissions for Providers
+      #   run: |
+      #     find .terraform/providers/ -type f -exec chmod +x {} \;
 
 
-      - name: Verify Directory Structure
-        run: |
-          pwd
-          echo "Current directory structure:"
-          ls -la ./terraform
+      # - name: Verify Directory Structure
+      #   run: |
+      #     pwd
+      #     sudo apt install tree
+      #     echo "Current directory structure:"
+      #     ls -la ./terraform
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false tf.plan
+        run: terraform apply -auto-approve -input=false #tf.plan
         working-directory: ./terraform

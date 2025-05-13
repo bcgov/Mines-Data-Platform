@@ -184,6 +184,14 @@ jobs:
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
           subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v3.0.0
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Download Plan Artifacts
         uses: actions/download-artifact@v4
         with:

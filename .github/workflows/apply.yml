@@ -137,6 +137,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
+          include-hidden-files: true
+          if-no-files-found: error
           path: |
             ./terraform/tf.plan
             ./terraform/.terraform.lock.hcl

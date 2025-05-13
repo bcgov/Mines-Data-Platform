@@ -199,5 +199,5 @@ jobs:
           path: ./terraform
 
       - name: Terraform Apply
-        run: terraform apply tf.plan -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false tf.plan
         working-directory: ./terraform

@@ -10,6 +10,7 @@ resource "azurerm_storage_account" "core" {
   allow_nested_items_to_be_public = false
   local_user_enabled              = false
 
+
   https_traffic_only_enabled = true
   min_tls_version            = "TLS1_2"
 

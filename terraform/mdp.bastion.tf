@@ -10,6 +10,7 @@ resource "random_string" "random" {
 #TODO: Currently relies on external module. Need to create a registry.
 module "azure_bastion" {
   source           = "Azure/avm-res-network-bastionhost/azurerm"
+  version          = "0.7.2"
   enable_telemetry = true
 
   name                = "${var.bastion_host_name}-${random_string.random.result}"

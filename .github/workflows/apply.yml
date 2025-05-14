@@ -130,9 +130,9 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Inputs: ${{ github.event.inputs }}"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
+            terraform init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
           else
-            terraform init -upgrade -backend-config="environments/test/backend.conf"
+            terraform init -upgrade -backend-config="../environments/test/backend.conf"
           fi
         # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
         working-directory: ./terraform
@@ -212,9 +212,9 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Inputs: ${{ github.event.inputs }}"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
+            terraform init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
           else
-            terraform init -upgrade -backend-config="environments/test/backend.conf"
+            terraform init -upgrade -backend-config="../environments/test/backend.conf"
           fi
         # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
         working-directory: ./terraform

@@ -125,8 +125,16 @@ jobs:
         working-directory: scripts
 
       - name: Terraform Init
-        #run: terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment }}/backend.conf"
-        run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Inputs: ${{ github.event.inputs }}"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
+          else
+            terraform init -upgrade -backend-config="environments/test/backend.conf"
+          fi
+        # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
         working-directory: ./terraform
 
       - name: Terraform Plan
@@ -199,10 +207,19 @@ jobs:
           node-version: 20
 
       - name: Terraform Init
-        #run: terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment }}/backend.conf"
-        run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Inputs: ${{ github.event.inputs }}"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            terraform init -upgrade -backend-config="environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
+          else
+            terraform init -upgrade -backend-config="environments/test/backend.conf"
+          fi
+        # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
         working-directory: ./terraform
 
+      #TODO: download plan artifacts from Github to run terraform apply
       # - name: Download Plan Artifacts
       #   uses: actions/download-artifact@v4
       #   with:

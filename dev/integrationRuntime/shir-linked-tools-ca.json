@@ -1,0 +1,12 @@
+{
+	"name": "shir-linked-tools-ca",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/69d8e7b9-8637-443f-bbee-98aba237ad24/resourcegroups/ef74b0-tools-unmanaged/providers/Microsoft.DataFactory/factories/adf-mdp-tools-ca/integrationruntimes/shir-adf-tools-ca",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

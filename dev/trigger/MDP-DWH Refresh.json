@@ -1,0 +1,44 @@
+{
+	"name": "MDP-DWH Refresh",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "MDP-DWH_Refresh_1",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"reciever": "vlad.rutstein@gov.bc.ca; mahyar.gorji@gov.bc.ca; nhung.nguyen@gov.bc.ca; rajneesh.1.gulati@gov.bc.ca"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-12-09T21:33:00",
+				"timeZone": "Pacific Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						5
+					],
+					"weekDays": [
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday",
+						"Monday",
+						"Sunday",
+						"Saturday"
+					]
+				}
+			}
+		}
+	}
+}

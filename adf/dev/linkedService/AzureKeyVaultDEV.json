@@ -1,0 +1,12 @@
+{
+	"name": "AzureKeyVaultDEV",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Key vault connector dev",
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://kv-mdp-dev-ca.vault.azure.net/"
+		}
+	}
+}

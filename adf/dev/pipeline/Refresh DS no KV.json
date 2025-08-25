@@ -1,0 +1,147 @@
+{
+	"name": "Refresh DS no KV",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetAccessToken",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"url": {
+						"value": "https://login.microsoftonline.com/@{pipeline().parameters.tenantId}/oauth2/v2.0/token",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "client_id=@{pipeline().parameters.clientId}\n&grant_type=client_credentials\n&scope=@{pipeline().parameters.scope}\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "RefreshDataset",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "GetAccessToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "@concat(string(activity('GetAccessToken').output.token_type),' ',string(activity('GetAccessToken').output.access_token))",
+							"type": "Expression"
+						}
+					},
+					"url": {
+						"value": "@concat('https://api.powerbi.com/v1.0/myorg/groups/',pipeline().parameters.PBIAppWorkspaceId,'/datasets/',pipeline().parameters.datasetId,'/refreshes')",
+						"type": "Expression"
+					},
+					"body": {
+						"hello": "world"
+					}
+				}
+			},
+			{
+				"name": "Until1",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "RefreshDataset",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(equals(activity('Check Refresh Status').output.value[0].status, 'Completed'),\n     equals(activity('Check Refresh Status').output.value[0].status, 'Failed'))\n",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Check Refresh Status",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "@concat(string(activity('GetAccessToken').output.token_type),' ',string(activity('GetAccessToken').output.access_token))",
+										"type": "Expression"
+									}
+								},
+								"url": {
+									"value": "@concat('https://api.powerbi.com/v1.0/myorg/groups/', pipeline().parameters.PBIAppWorkspaceId, '/datasets/', pipeline().parameters.datasetId, '/refreshes')\n",
+									"type": "Expression"
+								},
+								"body": {
+									"hello": "world"
+								}
+							}
+						}
+					],
+					"timeout": "0.12:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"tenantId": {
+				"type": "string",
+				"defaultValue": "6fdb5200-3d0d-4a8a-b036-d3685e359adc"
+			},
+			"clientId": {
+				"type": "string",
+				"defaultValue": "4407728a-53d8-4ed3-8126-a90092086c69"
+			},
+			"scope": {
+				"type": "string",
+				"defaultValue": "https://analysis.windows.net/powerbi/api/.default"
+			},
+			"PBIAppWorkspaceId": {
+				"type": "string",
+				"defaultValue": "dc216c1a-9a6a-4df9-b5ab-2bd690c68432"
+			},
+			"datasetId": {
+				"type": "string",
+				"defaultValue": "8eeafead-480e-4580-943c-546ea48bbadc"
+			},
+			"powerBIAPIRoot": {
+				"type": "string",
+				"defaultValue": "https://api.powerbi.com/v1.0/myorg"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-08-25T21:57:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

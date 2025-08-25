@@ -1,0 +1,42 @@
+{
+	"name": "send email",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web - email",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-Tipe": "Application/Json"
+					},
+					"url": "https://prod-43.eastus.logic.azure.com:443/workflows/b296be26e35d4e509d73575677bc2b5b/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-9qJYk_gsNUss042UgwkgqRvSmN9ZfVF0p15uK8mBYM",
+					"body": {
+						"message": "Test!",
+						"dataFactoryName": "@{pipeline().DataFactory}",
+						"pipelineName": "@{pipeline().Pipeline}",
+						"receiver": "@pipeline().parameters.receiver"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"receiver": {
+				"type": "string",
+				"defaultValue": "vlad.rutstein@gov.bc.ca"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-02-11T19:34:54Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

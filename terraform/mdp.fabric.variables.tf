@@ -1,13 +1,13 @@
 variable "non_prod_workspace_display_name" {
   description = "A name for the getting started workspace."
   type        = string
-  default = "MCM_MDP_NonProd"
+  default     = "MCM_MDP_NonProd"
 }
 
 variable "prod_workspace_display_name" {
   description = "A name for the getting started workspace."
   type        = string
-  default = "MCM_MDP_Prod"
+  default     = "MCM_MDP_Prod"
 }
 
 # variable "notebook_display_name" {
@@ -28,6 +28,6 @@ variable "prod_workspace_display_name" {
 
 variable "capacity_name" {
   description = "The name of the capacity to use."
-  type = string
-  default = "mdpfabrictoolsca"
+  type        = string
+  default     = "mdpfabrictoolsca"
 }

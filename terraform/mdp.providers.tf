@@ -23,3 +23,19 @@ provider "azuread" {
 provider "fabric" {
   # Configuration options
 }
+
+terraform {
+  required_version = ">= 1.14.0"
+  required_providers {
+    fabric = {
+      source  = "microsoft/fabric"
+      version = ">= 1.6.0"
+    }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 4.44.0"
+    }
+  }
+
+  backend "azurerm" {}
+}

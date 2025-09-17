@@ -4,7 +4,6 @@ resource "azurerm_windows_virtual_machine" "shir" {
   computer_name                     = "vm-${var.projectNameAbbr}-jump"
   location                          = azurerm_resource_group.core.location
   size                              = var.jumpbox_SKU
-  vm_agent_platform_updates_enabled = true
   # admin_username      = azurerm_key_vault_secret.jumpboxadminuser.value
   admin_username = "mdpadmin"
   admin_password = azurerm_key_vault_secret.jumpboxadminpassword.value

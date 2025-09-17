@@ -173,6 +173,8 @@ jobs:
       run:
         shell: bash
     env:
+      TF_LOG: INFO
+      TF_LOG_PATH: ./terraform/tf.log
       ARM_CLIENT_ID: ${{ secrets.SERVICE_PRINCIPAL_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
@@ -239,5 +241,5 @@ jobs:
       #     find .terraform/providers/ -type f -exec chmod +x {} \;
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false 2>&1 | tee terraform.log
         working-directory: ./terraform

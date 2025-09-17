@@ -18,3 +18,8 @@ provider "http" {
 
 provider "azuread" {
 }
+
+# Configure the Microsoft Fabric Terraform Provider
+provider "fabric" {
+  # Configuration options
+}

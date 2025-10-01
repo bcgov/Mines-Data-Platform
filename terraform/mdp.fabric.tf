@@ -1,6 +1,6 @@
 # It's recommended to use `lifecycle` with `postcondition` block to handle the state of the capacity.
 data "fabric_capacity" "example" {
-  display_name = var.capacity_name
+  id = var.capacity_id
 
   lifecycle {
     postcondition {

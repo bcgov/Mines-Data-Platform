@@ -35,5 +35,5 @@ variable "capacity_name" {
 variable "capacity_id" {
   description = "The id of the capacity to use."
   type        = string
-  default     = "198C68F4-8402-45B9-8010-BDE58A729DDF"
+  default     = "198c68f4-8402-45b9-8010-bde58a729ddf"
 }

@@ -143,6 +143,9 @@ jobs:
         # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
         working-directory: ./terraform
 
+      - name: Show token audience
+        run: az account get-access-token --resource https://api.fabric.microsoft.com
+
       - name: Terraform Plan
         run: terraform plan -input=false -out=tf.plan
         working-directory: ./terraform

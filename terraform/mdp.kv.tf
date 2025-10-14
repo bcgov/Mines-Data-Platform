@@ -15,8 +15,6 @@ resource "azurerm_key_vault" "kv" {
     bypass         = "AzureServices"
     virtual_network_subnet_ids = [
       data.azurerm_subnet.privatesubnet.id,
-      data.azurerm_subnet.containerinstancesubnet.id,
-      data.azurerm_subnet.containerappsubnet.id
     ]
   }
 
@@ -40,8 +38,6 @@ resource "azurerm_key_vault" "kv" {
   # }
   depends_on = [
     data.azurerm_subnet.privatesubnet,
-    data.azurerm_subnet.containerinstancesubnet,
-    data.azurerm_subnet.containerappsubnet,
     azurerm_resource_group.security
   ]
   lifecycle {

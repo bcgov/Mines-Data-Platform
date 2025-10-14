@@ -2,7 +2,7 @@ name: 'Create/Update Infrastructure'
 
 on:
   push:
-    branches: [ "main", "staging" ]
+    branches: [ "main", "staging", "tofu_terragrunt_migration" ]
   workflow_dispatch:
     inputs:
       environment:
@@ -31,8 +31,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: HashiCorp - Setup Terraform
-        uses: hashicorp/setup-terraform@v3.0.0
+      - name: OpenTofu Setup - Setup Terraform
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.9.0
 
       - name: Terraform Format Check
         run: terraform fmt -check
@@ -64,7 +66,6 @@ jobs:
     runs-on: self-hosted
     needs: [lint]
     environment: ${{ github.event.inputs.environment || 'test' }}
-    # needs: [lint, scan]
     defaults:
       run:
         shell: bash
@@ -93,8 +94,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: HashiCorp - Setup Terraform
-        uses: hashicorp/setup-terraform@v3.0.0
+      - name: OpenTofu Setup - Setup Terraform
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.9.0
 
       - name: Azure Login
         uses: azure/login@v2.2.0
@@ -136,9 +139,9 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Inputs: ${{ github.event.inputs }}"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            terraform init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
+            tofu init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
           else
-            terraform init -upgrade -backend-config="../environments/test/backend.conf"
+            tofu init -upgrade -backend-config="../environments/test/backend.conf"
           fi
         # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
         working-directory: ./terraform
@@ -147,21 +150,8 @@ jobs:
         run: az account get-access-token --resource https://api.fabric.microsoft.com
 
       - name: Terraform Plan
-        run: terraform plan -input=false -out=tf.plan
+        run: tofu plan -input=false -out=tf.plan
         working-directory: ./terraform
-
-      #TODO: Upload plan artifacts to Github, download in apply job
-      # - name: Upload Artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: tfplan
-      #     include-hidden-files: true
-      #     if-no-files-found: error
-      #     path: |
-      #       ./terraform/tf.plan
-      #       ./terraform/.terraform.lock.hcl
-      #       ./terraform/.terraform/**/*
-      #     retention-days: 1
 
   apply:
     name: "Terraform Apply"
@@ -170,7 +160,7 @@ jobs:
     environment: ${{ github.event.inputs.environment || 'test' }}
     if: >
       needs.plan.result == 'success' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/tofu_terragrunt_migration') &&
       github.event_name == 'push'
     defaults:
       run:
@@ -209,8 +199,10 @@ jobs:
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
           subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
-      - name: HashiCorp - Setup Terraform
-        uses: hashicorp/setup-terraform@v3.0.0
+      - name: OpenTofu Setup - Setup Terraform
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.9.0
       
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -223,9 +215,9 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Inputs: ${{ github.event.inputs }}"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            terraform init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
+            tofu init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
           else
-            terraform init -upgrade -backend-config="../environments/test/backend.conf"
+            tofu init -upgrade -backend-config="../environments/test/backend.conf"
           fi
         # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
         working-directory: ./terraform
@@ -244,5 +236,5 @@ jobs:
       #     find .terraform/providers/ -type f -exec chmod +x {} \;
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false 2>&1 | tee terraform.log
+        run: tofu apply -auto-approve -input=false 2>&1 | tee terraform.log
         working-directory: ./terraform

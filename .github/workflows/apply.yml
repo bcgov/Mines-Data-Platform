@@ -37,7 +37,7 @@ jobs:
           tofu_version: 1.9.0
 
       - name: Terraform Format Check
-        run: terraform fmt -check
+        run: tofu fmt -check
         working-directory: ./terraform
 
   # scan:

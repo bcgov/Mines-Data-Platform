@@ -12,7 +12,7 @@ on:
         type: choice
         options:
           - 'test'
-          - 'prod'
+          - 'production'
       dry_run:
         description: 'Dry Run'
         required: true

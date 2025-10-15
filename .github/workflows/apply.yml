@@ -236,7 +236,7 @@ jobs:
       #     find .terraform/providers/ -type f -exec chmod +x {} \;
 
       - name: Terraform Apply
-        run: tofu apply -auto-approve -input=false
+        run: script -q -e -c "tofu apply -auto-approve -input=false"
         working-directory: ./terraform
 
       - name: Upload Logs

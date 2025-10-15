@@ -118,7 +118,7 @@ jobs:
 
       - name: Add IP to Storage Account Firewall
         run: |
-          echo "Adding IP to ToolsStorage Account Firewall"
+          echo "Adding IP to Tools Storage Account Firewall"
           az account set --subscription ${{ vars.TF_VAR_TOOLS_SUBSCRIPTION_ID }}
           az storage account network-rule add --resource-group ef74b0-tools-unmanaged --account-name stgmdptfstateca --ip-address $(curl -s https://api.ipify.org)
           echo "IP Added to Storage Account Firewall"
@@ -147,7 +147,7 @@ jobs:
         working-directory: ./terraform
 
       - name: Terraform Plan
-        run: tofu plan -auto-approve -input=false -out=tfplan
+        run: tofu plan -input=false -out=tfplan
         working-directory: ./terraform
 
       - name: Terraform Apply

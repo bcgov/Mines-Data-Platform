@@ -18,7 +18,7 @@ resource "azurerm_storage_account" "core" {
     default_action = "Deny"
     bypass         = ["None"]
     virtual_network_subnet_ids = [
-      azapi_resource.privatesubnet.id.id,
+      azapi_resource.privatesubnet.id,
     ]
   }
 
@@ -50,7 +50,7 @@ resource "azurerm_storage_account" "data" {
     default_action = "Deny"
     bypass         = ["None"]
     virtual_network_subnet_ids = [
-      azapi_resource.privatesubnet.id.id,
+      azapi_resource.privatesubnet.id,
     ]
   }
 

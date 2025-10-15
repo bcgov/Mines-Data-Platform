@@ -79,10 +79,6 @@ jobs:
     runs-on: self-hosted
     needs: lint
     environment: ${{ github.event.inputs.environment || 'test' }}
-    if: >
-      needs.lint.result == 'success' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/tofu_terragrunt_migration') &&
-      github.event_name == 'push'
     defaults:
       run:
         shell: bash
@@ -120,6 +116,10 @@ jobs:
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
           subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
+      - name: Add IP to Storage Account Firewall
+        run: |
+          az storage account network-rule add --resource-group ef74b0-tools-unmanaged --account-name stgmdptfstateca --ip-address $(curl -s https://api.ipify.org)
+      
       - name: Show Fabric Token Audience
         run: az account get-access-token --resource https://api.fabric.microsoft.com
 
@@ -145,9 +145,11 @@ jobs:
       - name: Terraform Plan
         run: tofu plan -auto-approve -input=false -out=tfplan
         working-directory: ./terraform
+
       - name: Terraform Apply
         run: |
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+          if [ "$DRY_RUN" = "true" ]; then
             echo "Dry run enabled, skipping apply step."
             exit 0
           fi

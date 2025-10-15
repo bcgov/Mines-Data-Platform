@@ -113,9 +113,9 @@ jobs:
         uses: azure/login@v2.2.0
         with:
           auth-type: SERVICE_PRINCIPAL
-          client-id: "$ARM_CLIENT_SECRET"
-          tenant-id: "$ARM_TENANT_ID"
-          subscription-id: "$ARM_SUBSCRIPTION_ID"
+          client-id: ${{ secrets.ARM_CLIENT_SECRET }}
+          tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
+          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
 
       - name: Add IP to Storage Account Firewall
         run: |

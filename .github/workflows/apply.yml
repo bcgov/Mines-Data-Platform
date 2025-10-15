@@ -9,7 +9,20 @@ on:
         description: 'Environment to deploy to'
         required: true
         default: 'test'
-        type: string
+        type: choice
+        options:
+          - 'test'
+          - 'prod'
+      dry_run:
+        description: 'Dry Run'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+
 
 permissions:
   id-token: write
@@ -61,105 +74,13 @@ jobs:
   #       run: terrascan scan -t azure -i terraform --skip-rules="accurics.azure.NS.272"
   #       working-directory: terraform
 
-  plan:
-    name: "Terraform Plan"
-    runs-on: self-hosted
-    needs: [lint]
-    environment: ${{ github.event.inputs.environment || 'test' }}
-    defaults:
-      run:
-        shell: bash
-    env:
-      ARM_CLIENT_ID: ${{ secrets.SERVICE_PRINCIPAL_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ vars.TF_VAR_TENANT_ID }}
-
-      TF_VAR_LICENSEPLATE: ${{ vars.TF_VAR_LICENSEPLATE }}
-      TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
-      TF_VAR_LOCATIONABBR: ${{ vars.TF_VAR_LOCATIONABBR }}
-      TF_VAR_subnet_names: ${{ vars.TF_VAR_SUBNET_NAMES }}
-      TF_VAR_tenant_id: ${{ vars.TF_VAR_TENANT_ID }}
-      TF_VAR_TAGS: ${{ vars.TF_VAR_TAGS }}
-      TF_VAR_JUMPBOX_SKU: ${{ vars.TF_VAR_JUMPBOX_SKU }}
-      TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
-      TF_VAR_subscription_id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-      TF_VAR_address_space: ${{ secrets.ADDRESS_SPACE }}
-      TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
-      TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
-      TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
-
-      service_principal_id: ${{ secrets.service_principal_id }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: OpenTofu Setup - Setup Terraform
-        uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: 1.9.0
-
-      - name: Azure Login
-        uses: azure/login@v2.2.0
-        with:
-          client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
-          tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
-          subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Shell Script - Create/Update Backend
-        env:
-          ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
-          RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
-          STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
-          CONTAINER_NAME: tfstate
-          SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-        run: |
-          pwd
-          node --version
-          #echo ${{ github.event.inputs.environment }}
-          chmod +x createbackend.sh
-          echo "Event: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Inputs: ${{ github.event.inputs }}"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            ./createbackend.sh ${{ github.event.inputs.environment }}
-          else
-            ./createbackend.sh test
-          fi
-        working-directory: scripts
-
-      - name: Terraform Init
-        run: |
-          echo "Event: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Inputs: ${{ github.event.inputs }}"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            tofu init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
-          else
-            tofu init -upgrade -backend-config="../environments/test/backend.conf"
-          fi
-        # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
-        working-directory: ./terraform
-
-      - name: Show token audience
-        run: az account get-access-token --resource https://api.fabric.microsoft.com
-
-      - name: Terraform Plan
-        run: tofu plan -input=false
-        working-directory: ./terraform
-
   apply:
-    name: "Terraform Apply"
+    name: "Execute Terraform"
     runs-on: self-hosted
-    needs: plan
+    needs: lint
     environment: ${{ github.event.inputs.environment || 'test' }}
     if: >
-      needs.plan.result == 'success' &&
+      needs.lint.result == 'success' &&
       (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/tofu_terragrunt_migration') &&
       github.event_name == 'push'
     defaults:
@@ -199,6 +120,9 @@ jobs:
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
           subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
+      - name: Show Fabric Token Audience
+        run: az account get-access-token --resource https://api.fabric.microsoft.com
+
       - name: OpenTofu Setup - Setup Terraform
         uses: opentofu/setup-opentofu@v1
         with:
@@ -214,29 +138,20 @@ jobs:
           echo "Event: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
           echo "Inputs: ${{ github.event.inputs }}"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            tofu init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
-          else
-            tofu init -upgrade -backend-config="../environments/test/backend.conf"
-          fi
-        # run: terraform init -upgrade -backend-config="../environments/test/backend.conf"
+
+          tofu init -upgrade -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
         working-directory: ./terraform
 
-      #TODO: download plan artifacts from Github to run terraform apply
-      # - name: Download Plan Artifacts
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: tfplan
-      #     merge-multiple: true
-      #     path: ./terraform
-
-      # Necessary to fix permissions for providers after downloading artifacts
-      # - name: Fix Permissions for Providers
-      #   run: |
-      #     find .terraform/providers/ -type f -exec chmod +x {} \;
-
+      - name: Terraform Plan
+        run: tofu plan -auto-approve -input=false -out=tfplan
+        working-directory: ./terraform
       - name: Terraform Apply
-        run: script -q -e -c "tofu apply -auto-approve -input=false"
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "Dry run enabled, skipping apply step."
+            exit 0
+          fi
+          tofu apply -auto-approve -input=false tfplan
         working-directory: ./terraform
 
       - name: Upload Logs

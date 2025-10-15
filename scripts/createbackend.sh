@@ -7,12 +7,16 @@ if [ -z "$ENVIRONMENT" ]; then
   exit 1
 fi
 
-RESOURCE_GROUP_NAME="rg-mdp-unmanaged-$ENVIRONMENT-ca"
-STORAGE_ACCOUNT_NAME="stgmdptfstate${ENVIRONMENT}ca"
+RESOURCE_GROUP_NAME="${lICENSE_PLATE}-tools-unmanaged"
+STORAGE_ACCOUNT_NAME="stgmdptfstateca"
 CONTAINER_NAME="tfstate"
 SUBSCRIPTION_NAME=$LICENSE_PLATE-$ENVIRONMENT
-echo "SUB QUERY=$(az account list --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)"
-SUBSCRIPTION_ID=$(az account list --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)
+
+echo "subscription name: $SUBSCRIPTION_NAME"
+
+# TODO: Make sure this is robust
+echo "SUB QUERY=$(az account show --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)"
+SUBSCRIPTION_ID=$(az account show --query "[?name=='$SUBSCRIPTION_NAME'].id" -o tsv)
 
 echo "SUBSCRIPTION ID: $$SUBSCRIPTION_ID}"
 
@@ -25,16 +29,6 @@ if [ -z "$ACCOUNT_TYPE" ]; then
   exit 1
 fi
 
-echo "Creating backend resources..."
-
-# Check if resource group exists
-if [ $(az group show --name $RESOURCE_GROUP_NAME &> /dev/null; echo $?) -eq 0 ]; then
-  echo "Resource group $RESOURCE_GROUP_NAME already exists. Skipping creation"
-else
-  # Create resource group
-  az group create --name $RESOURCE_GROUP_NAME --location canadacentral
-fi
-
 sleep 2
 
 # Check if storage account exists
@@ -44,7 +38,7 @@ if [ $(az storage account show --name $STORAGE_ACCOUNT_NAME --resource-group $RE
   # Check if network rule exists
   CURRENT_IP=$(curl -s https://api.ipify.org)
   sleep 2
-  az storage account network-rule add --resource-group $RESOURCE_GROUP_NAME --account-name $STORAGE_ACCOUNT_NAME --ip-address $CURRENT_IP
+  az storage account network-rule add --resource-group $RESOURCE_GROUP_NAME --account-name $STORAGE_ACCOUNT_NAME --ip-address $(curl -s https://api.ipify.org)
 
 else
   # Create storage account with soft delete off

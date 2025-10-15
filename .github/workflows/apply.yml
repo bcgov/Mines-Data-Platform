@@ -150,7 +150,7 @@ jobs:
         run: az account get-access-token --resource https://api.fabric.microsoft.com
 
       - name: Terraform Plan
-        run: tofu plan -input=false -out=tf.plan
+        run: tofu plan -input=false
         working-directory: ./terraform
 
   apply:
@@ -236,5 +236,11 @@ jobs:
       #     find .terraform/providers/ -type f -exec chmod +x {} \;
 
       - name: Terraform Apply
-        run: tofu apply -auto-approve -input=false 2>&1 | tee terraform.log
+        run: tofu apply -auto-approve -input=false
         working-directory: ./terraform
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf_logs
+          path: ./terraform/tf.log

@@ -1,6 +1,24 @@
 name: 'Destroy Infrastructure'
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - 'test'
+          - 'prod'
+      dry_run:
+        description: 'Dry Run'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 permissions:
   id-token: write
@@ -10,7 +28,7 @@ jobs:
   InfrastructureDestroy:
     name: 'Deployment'
     runs-on: ["self-hosted"]
-    environment: test
+    environment: ${{ github.event.inputs.environment || 'test' }}
 
     defaults:
       run:
@@ -24,8 +42,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: HashiCorp - Setup Terraform
-      uses: hashicorp/setup-terraform@v3.0.0
+    - name: OpenTofu Setup - Setup Terraform
+      uses: opentofu/setup-opentofu@v1
+      with:
+          tofu_version: 1.9.0
 
     - name: Azure Login
       uses: azure/login@v2.2.0
@@ -46,23 +66,16 @@ jobs:
         echo "ARM_SUBSCRIPTION_ID=${{ vars.TF_VAR_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
         echo "ARM_TENANT_ID=${{ vars.TF_VAR_TENANT_ID }}" >> $GITHUB_ENV
 
-    - name: Shell Script - Create/Update Backend
-      env: 
-        ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
-        RESOURCE_GROUP_NAME: ${{ vars.UNMANAGED_RG }}
-        STORAGE_ACCOUNT_NAME: ${{ vars.UNMANAGED_STORAGE_TFSTATE }}
-        CONTAINER_NAME: tfstate
-        SUBSCRIPTION_ID: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
-        
+    - name: Add IP to Storage Account Firewall
       run: |
-        pwd
-        node --version
-        chmod +x createbackend.sh
-        ./createbackend.sh test
-      working-directory: scripts
+        echo "Adding IP to Tools Storage Account Firewall"
+        az account set --subscription ${{ vars.TF_VAR_TOOLS_SUBSCRIPTION_ID }}
+        az storage account network-rule add --resource-group ef74b0-tools-unmanaged --account-name stgmdptfstateca --ip-address $(curl -s https://api.ipify.org)
+        echo "IP Added to Storage Account Firewall"
+        az account set --subscription ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
         
     - name: Terraform Init
-      run: terraform init -backend-config="../environments/test/backend.conf"
+      run: tofu init -backend-config="../environments/${{ github.event.inputs.environment || 'test' }}/backend.conf"
       working-directory: ./terraform
 
     - name: Terraform Destroy
@@ -81,5 +94,11 @@ jobs:
         TF_VAR_virtual_network_name: ${{ vars.virtual_network_name }}
         TF_VAR_virtual_network_resource_group: ${{ vars.virtual_network_resource_group }}
         TF_VAR_bastionSubnetAddressPrefix: ${{ vars.bastionSubnetAddressPrefix }}
-      run: terraform destroy -auto-approve -input=false
+      run: |
+        DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Dry run enabled, skipping destroy step."
+            exit 0
+          fi
+          tofu destroy -auto-approve -input=false
       working-directory: ./terraform

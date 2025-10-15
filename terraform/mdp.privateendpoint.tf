@@ -3,7 +3,7 @@ module "private_endpoint_adf" {
   endpoint_name       = "pe-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
-  subnet_id           = data.azurerm_subnet.privatesubnet.id
+  subnet_id           = azapi_resource.privatesubnet.id
   connection_name     = "psc-${var.projectNameAbbr}-adf-${var.environment}-${var.locationAbbr}"
   resource_id         = azurerm_data_factory.adf.id
   subresource_names   = ["dataFactory"]
@@ -15,7 +15,7 @@ module "private_endpoint_kv" {
   endpoint_name       = "pe-${var.projectNameAbbr}-vault-${var.environment}-${var.locationAbbr}"
   location            = azurerm_resource_group.security.location
   resource_group_name = azurerm_resource_group.security.name
-  subnet_id           = data.azurerm_subnet.privatesubnet.id
+  subnet_id           = azapi_resource.privatesubnet.id
   connection_name     = "psc-${var.projectNameAbbr}-vault-${var.environment}-${var.locationAbbr}"
   resource_id         = azurerm_key_vault.kv.id
   subresource_names   = ["vault"]
@@ -27,7 +27,7 @@ module "private_endpoint_corestorage" {
   endpoint_name       = "pe-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
-  subnet_id           = data.azurerm_subnet.privatesubnet.id
+  subnet_id           = azapi_resource.privatesubnet.id
   connection_name     = "psc-${var.projectNameAbbr}-stgcore-${var.environment}-${var.locationAbbr}"
   resource_id         = azurerm_storage_account.core.id
   subresource_names   = ["blob"]
@@ -39,7 +39,7 @@ module "private_endpoint_datastorage" {
   endpoint_name       = "pe-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
   location            = var.location
   resource_group_name = azurerm_resource_group.data.name
-  subnet_id           = data.azurerm_subnet.privatesubnet.id
+  subnet_id           = azapi_resource.privatesubnet.id
   connection_name     = "psc-${var.projectNameAbbr}-stgdata-${var.environment}-${var.locationAbbr}"
   resource_id         = azurerm_storage_account.data.id
   subresource_names   = ["blob"]

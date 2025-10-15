@@ -14,7 +14,7 @@ resource "azurerm_key_vault" "kv" {
     default_action = "Deny"
     bypass         = "AzureServices"
     virtual_network_subnet_ids = [
-      data.azurerm_subnet.privatesubnet.id,
+      azapi_resource.privatesubnet,
     ]
   }
 
@@ -37,7 +37,7 @@ resource "azurerm_key_vault" "kv" {
   #   ]
   # }
   depends_on = [
-    data.azurerm_subnet.privatesubnet,
+    azapi_resource.privatesubnet,
     azurerm_resource_group.security
   ]
   lifecycle {

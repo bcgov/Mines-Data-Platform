@@ -12,7 +12,7 @@ on:
         type: choice
         options:
           - 'test'
-          - 'production'
+          - 'prod'
       dry_run:
         description: 'Dry Run'
         required: true
@@ -113,9 +113,9 @@ jobs:
         uses: azure/login@v2.2.0
         with:
           auth-type: SERVICE_PRINCIPAL
-          client-id: ${{ secrets.ARM_CLIENT_SECRET }}
+          client-id: ${{ secrets.SERVICE_PRINCIPAL_ID }}
           tenant-id: ${{ vars.TF_VAR_TENANT_ID }}
-          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
+          subscription-id: ${{ vars.TF_VAR_SUBSCRIPTION_ID }}
 
       - name: Add IP to Storage Account Firewall
         run: |

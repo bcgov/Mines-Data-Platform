@@ -1,0 +1,135 @@
+{
+	"name": "AzureSqlTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase2",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			},
+			"Schema": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "inspection_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "external_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "inspection_date",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "completed_date",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "inspection_status_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "business_area",
+				"type": "nvarchar"
+			},
+			{
+				"name": "mine_no",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspector_idir",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_introduction",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_preamble",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_closing",
+				"type": "nvarchar"
+			},
+			{
+				"name": "officer_notes",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_report_sent_date",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "inspection_type_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "inspection_from_date",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "inspection_to_date",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "inspection_auth_source_application",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_auth_source_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_auth_status",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_auth_type",
+				"type": "nvarchar"
+			},
+			{
+				"name": "inspection_reason_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "inspection_substatus_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "assessment_sub_type",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().Schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

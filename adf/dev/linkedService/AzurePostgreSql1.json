@@ -1,0 +1,18 @@
+{
+	"name": "AzurePostgreSql1",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzurePostgreSql",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVaultDEV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "legacy-pg-connection-string"
+			}
+		}
+	}
+}

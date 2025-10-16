@@ -1,0 +1,43 @@
+{
+	"name": "Start-Stop vm-mdp-shir-tools-ca",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"url": {
+						"value": "@concat(\n  'https://management.azure.com/subscriptions/69d8e7b9-8637-443f-bbee-98aba237ad24/resourceGroups/ef74b0-tools-unmanaged/providers/Microsoft.Compute/virtualMachines/vm-mdp-shir-tools-ca/',\n    pipeline().parameters.Action,\n  '?api-version=2022-03-01'\n)\n",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com/"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Action": {
+				"type": "string",
+				"defaultValue": "Start"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-06-25T05:28:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

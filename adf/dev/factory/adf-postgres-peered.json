@@ -1,0 +1,9 @@
+{
+	"name": "adf-postgres-peered",
+	"location": "canadacentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "901083b7-a0f5-4f30-bb26-0f475652e21f",
+		"tenantId": "6fdb5200-3d0d-4a8a-b036-d3685e359adc"
+	}
+}

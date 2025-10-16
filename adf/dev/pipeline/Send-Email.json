@@ -1,0 +1,49 @@
+{
+	"name": "Send-Email",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-Tipe": "Application/Json"
+					},
+					"url": "https://prod-27.canadacentral.logic.azure.com:443/workflows/a1ce68e9ee064c308d51a9298d50d47d/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=dV52fosESm8RT-yn2tPDnwuEewUzG5a3xuKKEf9x18o",
+					"body": {
+						"message": "@pipeline().parameters.message",
+						"dataFactoryName": "@{pipeline().DataFactory}",
+						"pipelineName": "@{pipeline().Pipeline}",
+						"receiver": "@pipeline().parameters.receiver",
+						"subject": "@concat(pipeline().Pipeline, ' - Failure Alert')"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"receiver": {
+				"type": "string",
+				"defaultValue": "vlad.rutstein@gov.bc.ca"
+			},
+			"message": {
+				"type": "string"
+			},
+			"subject": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-03-03T07:42:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

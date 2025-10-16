@@ -20,6 +20,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "3.1.0"
     }
+    fabric = {
+      source  = "microsoft/fabric"
+      version = ">= 1.6.0"
+    }
   }
 
   backend "azurerm" {

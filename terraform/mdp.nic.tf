@@ -5,7 +5,7 @@ resource "azurerm_network_interface" "shir" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = data.azurerm_subnet.privatesubnet.id
+    subnet_id                     = azapi_resource.privatesubnet.id
     private_ip_address_allocation = "Dynamic"
   }
 

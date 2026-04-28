@@ -1,0 +1,72 @@
+name: Initialize Warehouse
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to initialize'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+permissions:
+  contents: read
+
+jobs:
+  initialize-warehouse:
+    name: Initialize Warehouse (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev jq curl
+          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+
+      - name: Make script executable
+        run: chmod +x ./initialize/warehouse_init.sh
+
+      - name: Set environment variables
+        id: set-env
+        run: |
+          case "${{ inputs.environment }}" in
+            prod)
+              echo "workspace_id=${{ vars.PROD_WORKSPACE_ID }}" >> $GITHUB_OUTPUT
+              echo "warehouse_id=${{ vars.PROD_WAREHOUSE_ID }}" >> $GITHUB_OUTPUT
+              ;;
+            test)
+              echo "workspace_id=${{ vars.TEST_WORKSPACE_ID }}" >> $GITHUB_OUTPUT
+              echo "warehouse_id=${{ vars.TEST_WAREHOUSE_ID }}" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "workspace_id=${{ vars.DEV_WORKSPACE_ID }}" >> $GITHUB_OUTPUT
+              echo "warehouse_id=${{ vars.DEV_WAREHOUSE_ID }}" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Run warehouse initialization
+        env:
+          AZURE_CLIENT_ID:     ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID:     ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID:        ${{ steps.set-env.outputs.workspace_id }}
+          WAREHOUSE_ID:        ${{ steps.set-env.outputs.warehouse_id }}
+        run: ./initialize/warehouse_init.sh
+
+      - name: Summary
+        run: |
+          echo "### Warehouse Initialization Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workspace ID**: ${{ steps.set-env.outputs.workspace_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Warehouse ID**: ${{ steps.set-env.outputs.warehouse_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Schemas**: bronze | silver | gold | app" >> $GITHUB_STEP_SUMMARY
+          echo "- **App objects**: pipeline_control | pipeline_log | config | error_log | schema_registry" >> $GITHUB_STEP_SUMMARY

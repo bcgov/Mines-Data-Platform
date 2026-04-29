@@ -152,8 +152,11 @@ run_sql_init() {
     echo -e "${BOLD}Running warehouse_init.sql...${NC}"
     echo "─────────────────────────────────────────────────────────────────"
 
+    # sqlcmd requires tcp: prefix and port 1433 for Fabric Warehouse
+    local server="tcp:${conn_string},1433"
+
     sqlcmd \
-        -S "$conn_string" \
+        -S "$server" \
         -G \
         -C \
         -b \

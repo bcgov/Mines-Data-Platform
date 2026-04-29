@@ -83,13 +83,13 @@ get_fabric_token() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# Resolve warehouse connection string via Fabric REST API
+# Resolve warehouse name and connection string via Fabric REST API
 # ══════════════════════════════════════════════════════════════
 
-get_connection_string() {
+get_warehouse_details() {
     local token="$1"
 
-    echo -e "${BLUE}[INFO]${NC} Resolving warehouse connection string..." >&2
+    echo -e "${BLUE}[INFO]${NC} Resolving warehouse details..." >&2
 
     local url="https://api.fabric.microsoft.com/v1/workspaces/${WORKSPACE_ID}/warehouses/${WAREHOUSE_ID}"
     echo -e "${BLUE}[INFO]${NC} GET ${url}" >&2
@@ -111,10 +111,7 @@ get_connection_string() {
         exit 1
     fi
 
-    echo -e "${BLUE}[INFO]${NC} Raw response:" >&2
-    echo "$body" | jq . 2>/dev/null || echo "$body" >&2
-
-    # Try camelCase first (Fabric API), then snake_case (Terraform state)
+    # Extract connection string — try both camelCase and snake_case
     local conn_string
     conn_string=$(echo "$body" | jq -r '
         .properties.connectionString //
@@ -124,15 +121,48 @@ get_connection_string() {
         empty
     ')
 
+    # Extract warehouse display name for the -d flag
+    local warehouse_name
+    warehouse_name=$(echo "$body" | jq -r '.displayName // empty')
+
     if [[ -z "$conn_string" || "$conn_string" == "null" ]]; then
         echo -e "${RED}[✗]${NC} Could not find connection string in response." >&2
-        echo -e "${BLUE}[INFO]${NC} Available properties:" >&2
         echo "$body" | jq '.properties // .' 2>/dev/null >&2
         exit 1
     fi
 
-    echo -e "${GREEN}[✓]${NC} Connection string: ${conn_string}" >&2
-    echo "$conn_string"
+    if [[ -z "$warehouse_name" || "$warehouse_name" == "null" ]]; then
+        echo -e "${RED}[✗]${NC} Could not find warehouse display name in response." >&2
+        exit 1
+    fi
+
+    echo -e "${GREEN}[✓]${NC} Server   : ${conn_string}" >&2
+    echo -e "${GREEN}[✓]${NC} Database : ${warehouse_name}" >&2
+
+    # Return both as tab-separated values
+    echo "${conn_string}"$'\t'"${warehouse_name}"
+}
+
+# ══════════════════════════════════════════════════════════════
+# Get SQL access token
+# sqlcmd -G does not support service principals — pass token directly
+# via SQLCMDPASSWORD with ActiveDirectoryToken authentication
+# ══════════════════════════════════════════════════════════════
+
+get_sql_token() {
+    echo -e "${BLUE}[INFO]${NC} Fetching SQL access token for Fabric Warehouse..." >&2
+    local token
+    # Fabric Warehouse uses the database.windows.net scope for SQL connections
+    token=$(az account get-access-token         --resource https://database.windows.net/         --query accessToken         -o tsv)
+
+    if [[ -z "$token" ]]; then
+        echo -e "${RED}[✗]${NC} Failed to obtain SQL access token" >&2
+        exit 1
+    fi
+
+    echo "::add-mask::${token}" >&2
+    echo -e "${GREEN}[✓]${NC} SQL token obtained" >&2
+    echo "$token"
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -140,7 +170,9 @@ get_connection_string() {
 # ══════════════════════════════════════════════════════════════
 
 run_sql_init() {
-    local conn_string="$1"
+    local server="$1"
+    local database="$2"
+    local sql_token="$3"
 
     if [[ ! -f "$SQL_FILE" ]]; then
         echo -e "${RED}[✗]${NC} SQL file not found: ${SQL_FILE}"
@@ -151,11 +183,11 @@ run_sql_init() {
     echo -e "${BOLD}Running warehouse_init.sql...${NC}"
     echo "─────────────────────────────────────────────────────────────────"
 
-    # sqlcmd requires tcp: prefix and port 1433 for Fabric Warehouse
-    local server="tcp:${conn_string},1433"
-
-    sqlcmd \
-        -S "$server" \
+    # Use ActiveDirectoryToken auth — works with service principals
+    # Server format: <hostname>,1433 (comma, not semicolon)
+    SQLCMDPASSWORD="$sql_token" sqlcmd \
+        -S "${server},1433" \
+        -d "$database" \
         -G \
         -C \
         -b \
@@ -176,10 +208,15 @@ main() {
     local fabric_token
     fabric_token=$(get_fabric_token)
 
-    local conn_string
-    conn_string=$(get_connection_string "$fabric_token")
+    local details server database
+    details=$(get_warehouse_details "$fabric_token")
+    server=$(echo "$details" | cut -f1)
+    database=$(echo "$details" | cut -f2)
 
-    run_sql_init "$conn_string"
+    local sql_token
+    sql_token=$(get_sql_token)
+
+    run_sql_init "$server" "$database" "$sql_token"
 
     echo ""
     echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════${NC}"

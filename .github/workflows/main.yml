@@ -23,24 +23,28 @@ env:
   VAR_PREFIX: ENV_VARS
   APPROVER: Data-Alchemy
 
-  DEV_CAPACITY_ID: ${{ vars.DEV_CAPACITY_ID }}
+  DEV_CAPACITY_ID:  ${{ vars.DEV_CAPACITY_ID }}
   TEST_CAPACITY_ID: ${{ vars.TEST_CAPACITY_ID }}
   PROD_CAPACITY_ID: ${{ vars.PROD_CAPACITY_ID }}
 
-  DEV_WORKSPACE_ID: ${{ vars.DEV_WORKSPACE_ID }}
+  DEV_WORKSPACE_ID:  ${{ vars.DEV_WORKSPACE_ID }}
   TEST_WORKSPACE_ID: ${{ vars.TEST_WORKSPACE_ID }}
   PROD_WORKSPACE_ID: ${{ vars.PROD_WORKSPACE_ID }}
 
-  GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+  DEV_WAREHOUSE_ID:  ${{ vars.DEV_WAREHOUSE_ID }}
+  TEST_WAREHOUSE_ID: ${{ vars.TEST_WAREHOUSE_ID }}
+  PROD_WAREHOUSE_ID: ${{ vars.PROD_WAREHOUSE_ID }}
+
+  GITHUB_REPOSITORY_NAME:  ${{ github.event.repository.name }}
   GITHUB_REPOSITORY_OWNER: ${{ github.event.repository.owner.login }}
 
   FABRIC_VAR_FILE_PATH: variable_template.VariableLibrary/variables.json
   FABRIC_CONNECTION_ID: ${{ vars.FABRIC_CONNECTION_ID }}
-  WORKSPACE_ADMIN_ID: ${{ vars.WORKSPACE_ADMIN_ID }}
+  WORKSPACE_ADMIN_ID:   ${{ vars.WORKSPACE_ADMIN_ID }}
 
 jobs:
   # ══════════════════════════════════════════════════════════════
-  # 0. Validate Service Principal Permissions + Capture user commit msg
+  # 0. Validate Service Principal Permissions + Capture commit msg
   # ══════════════════════════════════════════════════════════════
   check-spn-permissions:
     name: "0. Validate SPN Permissions"
@@ -67,7 +71,6 @@ jobs:
             subject="manual run ${GITHUB_SHA}"
           fi
 
-          # Optional guard: strip "chore:" if user accidentally used it
           if [[ "$subject" =~ ^chore:\ * ]]; then
             subject="${subject#chore: }"
           fi
@@ -79,11 +82,10 @@ jobs:
 
       - name: Run SPN Evaluator
         env:
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID:    ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID:    ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        run: |
-          ./.github/workflows/scripts/spn_evaluator.sh --output table
+        run: ./.github/workflows/scripts/spn_evaluator.sh --output table
 
   # ══════════════════════════════════════════════════════════════
   # 1. Create Feature Workspace (feature/**)
@@ -111,14 +113,13 @@ jobs:
   update-dev-variables:
     if: startsWith(github.ref, 'refs/heads/feature/')
     name: "2. Update Dev Variables"
-    # needs: [create-feature-workspace, check-spn-permissions]
-    needs: [ check-spn-permissions]
+    needs: [check-spn-permissions]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set commit message (from user commit subject)
+      - name: Set commit message
         id: commitmsg
         shell: bash
         run: |
@@ -137,22 +138,18 @@ jobs:
             -f ${{ env.FABRIC_VAR_FILE_PATH }} \
             -r ${{ github.repository }}
 
-      - name: Commit and push changes (merge all changes from this stage)
+      - name: Commit and push changes
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git add -A
-
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           fi
-
           git commit -m "${{ steps.commitmsg.outputs.message }}"
-
           git pull --no-rebase origin "${GITHUB_REF_NAME}" || true
           git push
 
@@ -174,7 +171,24 @@ jobs:
       client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
   # ══════════════════════════════════════════════════════════════
-  # 4. Wait for Test Approval (Issue creation)
+  # 3b. Initialize Dev Warehouse (auto, after deploy-to-dev)
+  # ══════════════════════════════════════════════════════════════
+  initialize-dev-warehouse:
+    if: startsWith(github.ref, 'refs/heads/feature/')
+    name: "3b. Initialize Dev Warehouse"
+    needs: [deploy-to-dev]
+    uses: ./.github/workflows/initialize-warehouse.yml
+    with:
+      environment:  dev
+      workspace-id: ${{ vars.DEV_WORKSPACE_ID }}
+      warehouse-id: ${{ vars.DEV_WAREHOUSE_ID }}
+    secrets:
+      tenant-id:     ${{ secrets.AZURE_TENANT_ID }}
+      client-id:     ${{ secrets.AZURE_CLIENT_ID }}
+      client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+  # ══════════════════════════════════════════════════════════════
+  # 4. Wait for Test Approval (runs in parallel with 3b)
   # ══════════════════════════════════════════════════════════════
   wait-for-test-approval:
     if: startsWith(github.ref, 'refs/heads/feature/')
@@ -202,7 +216,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set commit message (from user commit subject)
+      - name: Set commit message
         id: commitmsg
         shell: bash
         run: |
@@ -221,27 +235,23 @@ jobs:
             -f ${{ env.FABRIC_VAR_FILE_PATH }} \
             -r ${{ github.repository }}
 
-      - name: Commit and push changes (merge all changes from this stage)
+      - name: Commit and push changes
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git add -A
-
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           fi
-
           git commit -m "${{ steps.commitmsg.outputs.message }}"
-
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push
 
   # ══════════════════════════════════════════════════════════════
-  # 6. Create PR feature -> test (MANUAL MERGE - Pipeline stops here)
+  # 6. Create PR feature -> test (MANUAL MERGE)
   # ══════════════════════════════════════════════════════════════
   create-test-pr:
     if: startsWith(github.ref, 'refs/heads/feature/')
@@ -252,16 +262,15 @@ jobs:
       source-branch: ${{ github.ref_name }}
       target-branch: test
       pr-title: ${{ needs.check-spn-permissions.outputs.user_commit_subject }}
-      auto-approve: false  # Pauses flow - user must approve PR
-      auto-merge: false    # Pauses flow - user must merge PR
+      auto-approve: false
+      auto-merge: false
       delete-source-branch: false
       squash: false
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
-
   # ══════════════════════════════════════════════════════════════
-  # 7. Deploy to Test (ONLY after PR merged feature -> test)
+  # 7. Deploy to Test (after PR merged feature -> test)
   # ══════════════════════════════════════════════════════════════
   deploy-to-test:
     if: >
@@ -279,6 +288,27 @@ jobs:
     secrets:
       tenant-id: ${{ secrets.AZURE_TENANT_ID }}
       client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+  # ══════════════════════════════════════════════════════════════
+  # 7b. Initialize Test Warehouse (after deploy-to-test)
+  # ══════════════════════════════════════════════════════════════
+  initialize-test-warehouse:
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'test' &&
+      startsWith(github.event.pull_request.head.ref, 'feature/')
+    name: "7b. Initialize Test Warehouse"
+    needs: [deploy-to-test]
+    uses: ./.github/workflows/initialize-warehouse.yml
+    with:
+      environment:  test
+      workspace-id: ${{ vars.TEST_WORKSPACE_ID }}
+      warehouse-id: ${{ vars.TEST_WAREHOUSE_ID }}
+    secrets:
+      tenant-id:     ${{ secrets.AZURE_TENANT_ID }}
+      client-id:     ${{ secrets.AZURE_CLIENT_ID }}
       client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
   # ══════════════════════════════════════════════════════════════
@@ -305,7 +335,7 @@ jobs:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # ══════════════════════════════════════════════════════════════
-  # PROD FLOW (ONLY after PR merged test -> main)
+  # 9. Update Prod Variables (after PR merged test -> main)
   # ══════════════════════════════════════════════════════════════
   update-prod-variables:
     if: >
@@ -322,7 +352,7 @@ jobs:
         with:
           ref: main
 
-      - name: Set commit message (from user commit subject)
+      - name: Set commit message
         id: commitmsg
         shell: bash
         run: |
@@ -341,24 +371,24 @@ jobs:
             -f ${{ env.FABRIC_VAR_FILE_PATH }} \
             -r ${{ github.repository }}
 
-      - name: Commit and push changes (merge all changes from this stage)
+      - name: Commit and push changes
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git add -A
-
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           fi
-
           git commit -m "${{ steps.commitmsg.outputs.message }}"
           git pull --rebase origin main
           git push origin main
 
+  # ══════════════════════════════════════════════════════════════
+  # 10. Deploy to Production
+  # ══════════════════════════════════════════════════════════════
   deploy-to-prod:
     if: >
       github.event_name == 'pull_request' &&
@@ -375,4 +405,25 @@ jobs:
     secrets:
       tenant-id: ${{ secrets.AZURE_TENANT_ID }}
       client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+  # ══════════════════════════════════════════════════════════════
+  # 10b. Initialize Prod Warehouse (after deploy-to-prod)
+  # ══════════════════════════════════════════════════════════════
+  initialize-prod-warehouse:
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.ref == 'test'
+    name: "10b. Initialize Prod Warehouse"
+    needs: [deploy-to-prod]
+    uses: ./.github/workflows/initialize-warehouse.yml
+    with:
+      environment:  prod
+      workspace-id: ${{ vars.PROD_WORKSPACE_ID }}
+      warehouse-id: ${{ vars.PROD_WAREHOUSE_ID }}
+    secrets:
+      tenant-id:     ${{ secrets.AZURE_TENANT_ID }}
+      client-id:     ${{ secrets.AZURE_CLIENT_ID }}
       client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}

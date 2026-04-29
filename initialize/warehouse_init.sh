@@ -42,7 +42,7 @@ check_dependencies() {
     command -v az      &>/dev/null || missing+=("azure-cli")
     command -v curl    &>/dev/null || missing+=("curl")
     command -v jq      &>/dev/null || missing+=("jq")
-    command -v sqlcmd  &>/dev/null || missing+=("sqlcmd (mssql-tools18)")
+    command -v sqlcmd  &>/dev/null || missing+=("sqlcmd (go-sqlcmd — sudo apt-get install -y sqlcmd)")
 
     if [[ ${#missing[@]} -gt 0 ]]; then
         echo -e "${RED}[✗]${NC} Missing required tools: ${missing[*]}"
@@ -161,15 +161,18 @@ run_sql_init() {
     echo "─────────────────────────────────────────────────────────────────"
 
     # go-sqlcmd ActiveDirectoryServicePrincipal auth:
-    # -U must be in the form <client_id>@<tenant_id>
-    # SQLCMDPASSWORD must be set to the client secret
-    # --authentication-method ActiveDirectoryServicePrincipal
-    SQLCMDPASSWORD="$CLIENT_SECRET" sqlcmd \
+    # -U is the client (application) ID
+    # SQLCMDPASSWORD env var must hold the client secret
+    # AZURE_TENANT_ID env var must be set for tenant resolution
+    # No -C flag — go-sqlcmd uses --trust-server-certificate instead
+    SQLCMDPASSWORD="$CLIENT_SECRET" \
+    AZURE_TENANT_ID="$TENANT_ID" \
+    sqlcmd \
         -S "${server},1433" \
         -d "$database" \
-        -U "${CLIENT_ID}@${TENANT_ID}" \
+        -U "$CLIENT_ID" \
         --authentication-method ActiveDirectoryServicePrincipal \
-        -C \
+        --trust-server-certificate \
         -i "$SQL_FILE"
 
     echo "─────────────────────────────────────────────────────────────────"

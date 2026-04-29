@@ -1,6 +1,6 @@
 -- =============================================================================
 -- warehouse_init.sql
--- Fabric Warehouse compatible — no DEFAULT, CHECK, or UNIQUE constraints
+-- Fabric Warehouse compatible - no DEFAULT, CHECK, or UNIQUE constraints
 -- Idempotent: safe to run multiple times
 -- =============================================================================
 
@@ -51,8 +51,8 @@ BEGIN
         [target_schema]         VARCHAR(50)    NOT NULL,
         [target_table]          VARCHAR(200)   NOT NULL,
         [source_query_template] VARCHAR(MAX)   NULL,
-        [from_date]             DATETIME2       NULL,
-        [to_date]               DATETIME2       NULL,
+        [from_date]             DATETIME2(6)       NULL,
+        [to_date]               DATETIME2(6)       NULL,
         [watermark_column]      VARCHAR(200)   NULL,
         [last_watermark]        VARCHAR(500)   NULL,
         [load_type]             VARCHAR(20)    NOT NULL,
@@ -61,10 +61,10 @@ BEGIN
         [priority]              INT             NOT NULL,
         [dependency_on]         VARCHAR(200)   NULL,
         [last_run_status]       VARCHAR(20)    NULL,
-        [last_run_date]         DATETIME2       NULL,
-        [created_date]          DATETIME2       NOT NULL,
+        [last_run_date]         DATETIME2(6)       NULL,
+        [created_date]          DATETIME2(6)       NOT NULL,
         [created_by]            VARCHAR(200)   NOT NULL,
-        [modified_date]         DATETIME2       NOT NULL,
+        [modified_date]         DATETIME2(6)       NOT NULL,
         [modified_by]           VARCHAR(200)   NOT NULL
     );
 END;
@@ -92,17 +92,17 @@ BEGIN
         [rows_read]           BIGINT          NULL,
         [rows_written]        BIGINT          NULL,
         [rows_skipped]        BIGINT          NULL,
-        [from_date]           DATETIME2       NULL,
-        [to_date]             DATETIME2       NULL,
+        [from_date]           DATETIME2(6)       NULL,
+        [to_date]             DATETIME2(6)       NULL,
         [watermark_start]     VARCHAR(500)   NULL,
         [watermark_end]       VARCHAR(500)   NULL,
         [error_message]       VARCHAR(MAX)   NULL,
         [error_code]          VARCHAR(100)   NULL,
-        [start_time]          DATETIME2       NOT NULL,
-        [end_time]            DATETIME2       NULL,
+        [start_time]          DATETIME2(6)       NOT NULL,
+        [end_time]            DATETIME2(6)       NULL,
         [environment]         VARCHAR(20)    NOT NULL,
         [triggered_by]        VARCHAR(200)   NULL,
-        [created_date]        DATETIME2       NOT NULL
+        [created_date]        DATETIME2(6)       NOT NULL
     );
 END;
 GO
@@ -126,9 +126,9 @@ BEGIN
         [description]     VARCHAR(500)   NULL,
         [is_secret]       BIT             NOT NULL,
         [is_active]       BIT             NOT NULL,
-        [created_date]    DATETIME2       NOT NULL,
+        [created_date]    DATETIME2(6)       NOT NULL,
         [created_by]      VARCHAR(200)   NOT NULL,
-        [modified_date]   DATETIME2       NOT NULL,
+        [modified_date]   DATETIME2(6)       NOT NULL,
         [modified_by]     VARCHAR(200)   NOT NULL
     );
 END;
@@ -157,7 +157,7 @@ BEGIN
         [error_message]   VARCHAR(MAX)   NOT NULL,
         [error_context]   VARCHAR(MAX)   NULL,
         [stack_trace]     VARCHAR(MAX)   NULL,
-        [created_date]    DATETIME2       NOT NULL
+        [created_date]    DATETIME2(6)       NOT NULL
     );
 END;
 GO
@@ -178,7 +178,7 @@ BEGIN
         [layer]         VARCHAR(50)    NOT NULL,
         [description]   VARCHAR(500)   NULL,
         [owner]         VARCHAR(200)   NULL,
-        [created_date]  DATETIME2       NOT NULL
+        [created_date]  DATETIME2(6)       NOT NULL
     );
 END;
 GO
@@ -186,10 +186,10 @@ GO
 IF NOT EXISTS (SELECT 1 FROM [app].[schema_registry] WHERE [schema_name] = 'bronze')
     INSERT INTO [app].[schema_registry] ([schema_name], [layer], [description], [created_date])
     VALUES
-        ('bronze', 'RAW',      'Raw ingested data — no transformations applied',               SYSUTCDATETIME()),
-        ('silver', 'CLEANSED', 'Cleansed and conformed data — business rules applied',         SYSUTCDATETIME()),
-        ('gold',   'CURATED',  'Curated aggregates and star schema models for reporting',      SYSUTCDATETIME()),
-        ('app',    'APP',      'Application control objects — logging, config, orchestration', SYSUTCDATETIME());
+        ('bronze', 'RAW',      'Raw ingested data - no transformations applied',               CAST(SYSUTCDATETIME() AS DATETIME2(6))),
+        ('silver', 'CLEANSED', 'Cleansed and conformed data - business rules applied',         CAST(SYSUTCDATETIME() AS DATETIME2(6))),
+        ('gold',   'CURATED',  'Curated aggregates and star schema models for reporting',      CAST(SYSUTCDATETIME() AS DATETIME2(6))),
+        ('app',    'APP',      'Application control objects - logging, config, orchestration', CAST(SYSUTCDATETIME() AS DATETIME2(6)));
 GO
 
 -- =============================================================================
@@ -198,27 +198,27 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM [app].[config] WHERE [config_key] = 'retention_days_bronze' AND [environment] = 'ALL')
     INSERT INTO [app].[config] ([config_key], [config_value], [config_group], [environment], [description], [is_secret], [is_active], [created_date], [created_by], [modified_date], [modified_by])
-    VALUES ('retention_days_bronze', '90', 'RETENTION', 'ALL', 'Days to retain data in bronze layer', 0, 1, SYSUTCDATETIME(), SUSER_SNAME(), SYSUTCDATETIME(), SUSER_SNAME());
+    VALUES ('retention_days_bronze', '90', 'RETENTION', 'ALL', 'Days to retain data in bronze layer', 0, 1, CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(), CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME());
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [app].[config] WHERE [config_key] = 'retention_days_silver' AND [environment] = 'ALL')
     INSERT INTO [app].[config] ([config_key], [config_value], [config_group], [environment], [description], [is_secret], [is_active], [created_date], [created_by], [modified_date], [modified_by])
-    VALUES ('retention_days_silver', '365', 'RETENTION', 'ALL', 'Days to retain data in silver layer', 0, 1, SYSUTCDATETIME(), SUSER_SNAME(), SYSUTCDATETIME(), SUSER_SNAME());
+    VALUES ('retention_days_silver', '365', 'RETENTION', 'ALL', 'Days to retain data in silver layer', 0, 1, CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(), CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME());
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [app].[config] WHERE [config_key] = 'retention_days_gold' AND [environment] = 'ALL')
     INSERT INTO [app].[config] ([config_key], [config_value], [config_group], [environment], [description], [is_secret], [is_active], [created_date], [created_by], [modified_date], [modified_by])
-    VALUES ('retention_days_gold', '730', 'RETENTION', 'ALL', 'Days to retain data in gold layer', 0, 1, SYSUTCDATETIME(), SUSER_SNAME(), SYSUTCDATETIME(), SUSER_SNAME());
+    VALUES ('retention_days_gold', '730', 'RETENTION', 'ALL', 'Days to retain data in gold layer', 0, 1, CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(), CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME());
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [app].[config] WHERE [config_key] = 'max_retry_attempts' AND [environment] = 'ALL')
     INSERT INTO [app].[config] ([config_key], [config_value], [config_group], [environment], [description], [is_secret], [is_active], [created_date], [created_by], [modified_date], [modified_by])
-    VALUES ('max_retry_attempts', '3', 'ORCHESTRATION', 'ALL', 'Maximum pipeline retry attempts on failure', 0, 1, SYSUTCDATETIME(), SUSER_SNAME(), SYSUTCDATETIME(), SUSER_SNAME());
+    VALUES ('max_retry_attempts', '3', 'ORCHESTRATION', 'ALL', 'Maximum pipeline retry attempts on failure', 0, 1, CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(), CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME());
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [app].[config] WHERE [config_key] = 'alert_on_failure' AND [environment] = 'ALL')
     INSERT INTO [app].[config] ([config_key], [config_value], [config_group], [environment], [description], [is_secret], [is_active], [created_date], [created_by], [modified_date], [modified_by])
-    VALUES ('alert_on_failure', 'true', 'ALERTING', 'ALL', 'Send alert notification on pipeline failure', 0, 1, SYSUTCDATETIME(), SUSER_SNAME(), SYSUTCDATETIME(), SUSER_SNAME());
+    VALUES ('alert_on_failure', 'true', 'ALERTING', 'ALL', 'Send alert notification on pipeline failure', 0, 1, CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(), CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME());
 GO
 
 -- =============================================================================
@@ -237,9 +237,9 @@ IF NOT EXISTS (SELECT 1 FROM [app].[pipeline_control] WHERE [pipeline_name] = 'p
     VALUES (
         'pl_ingest_orders', 'SourceDB', 'dbo.Orders',
         'bronze', 'orders', 'INCREMENTAL',
-        'updated_at', '2024-01-01 00:00:00', SYSUTCDATETIME(),
+        'updated_at', '2024-01-01 00:00:00', CAST(SYSUTCDATETIME() AS DATETIME2(6)),
         1, 100,
-        SYSUTCDATETIME(), SUSER_SNAME(), SYSUTCDATETIME(), SUSER_SNAME(),
+        CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(), CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(),
         'SELECT order_id, customer_id, order_date, total_amount, updated_at
 FROM dbo.Orders
 WHERE updated_at >= ''@from_date''

@@ -33,18 +33,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install go-sqlcmd and jq
+      - name: Install ODBC Driver 18 and dependencies
         run: |
-          # go-sqlcmd supports ActiveDirectoryServicePrincipal natively
-          # unlike mssql-tools18 which requires ODBC workarounds
           curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
             | gpg --batch --yes --dearmor \
             | sudo tee /usr/share/keyrings/microsoft-prod.gpg > /dev/null
           curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list \
             | sudo tee /etc/apt/sources.list.d/msprod.list > /dev/null
           sudo apt-get update -q
-          sudo apt-get install -y sqlcmd jq
-          sqlcmd --version
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev jq python3-pip
+          odbcinst -q -d -n "ODBC Driver 18 for SQL Server" && echo "ODBC driver verified"
 
       - name: Make script executable
         run: chmod +x ./initialize/warehouse_init.sh

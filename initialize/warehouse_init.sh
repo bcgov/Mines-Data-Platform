@@ -2,6 +2,8 @@
 # =============================================================================
 # initialize/warehouse_init.sh
 # Initializes a Fabric Warehouse with medallion schemas and app control objects
+# Uses pyodbc with ActiveDirectoryServicePrincipal — the proven working pattern
+# for service principal SQL connections to Fabric Warehouse
 # =============================================================================
 
 set -euo pipefail
@@ -42,12 +44,19 @@ check_dependencies() {
     command -v az      &>/dev/null || missing+=("azure-cli")
     command -v curl    &>/dev/null || missing+=("curl")
     command -v jq      &>/dev/null || missing+=("jq")
-    command -v sqlcmd  &>/dev/null || missing+=("sqlcmd (go-sqlcmd — sudo apt-get install -y sqlcmd)")
+    command -v python3 &>/dev/null || missing+=("python3")
 
     if [[ ${#missing[@]} -gt 0 ]]; then
         echo -e "${RED}[✗]${NC} Missing required tools: ${missing[*]}"
         exit 1
     fi
+
+    # Check ODBC driver
+    if ! odbcinst -q -d -n "ODBC Driver 18 for SQL Server" &>/dev/null; then
+        echo -e "${RED}[✗]${NC} Missing: ODBC Driver 18 for SQL Server"
+        exit 1
+    fi
+
     echo -e "${GREEN}[✓]${NC} All dependencies present"
 }
 
@@ -69,32 +78,35 @@ authenticate_azure() {
 get_fabric_token() {
     echo -e "${BLUE}[INFO]${NC} Fetching Fabric access token..." >&2
     local token
-    token=$(az account get-access-token         --resource https://api.fabric.microsoft.com         --query accessToken         -o tsv)
+    token=$(az account get-access-token \
+        --resource https://api.fabric.microsoft.com \
+        --query accessToken \
+        -o tsv)
 
     if [[ -z "$token" ]]; then
         echo -e "${RED}[✗]${NC} Failed to obtain Fabric access token" >&2
         exit 1
     fi
 
-    # Mask token from logs
     echo "::add-mask::${token}" >&2
     echo -e "${GREEN}[✓]${NC} Fabric token obtained" >&2
     echo "$token"
 }
 
 # ══════════════════════════════════════════════════════════════
-# Resolve warehouse name and connection string via Fabric REST API
+# Bootstrap Fabric security token for SP
+# Required before any SQL connection — without this first API call
+# the SP has no Fabric security token and SQL connections will fail
 # ══════════════════════════════════════════════════════════════
 
-get_warehouse_details() {
+bootstrap_fabric_token() {
     local token="$1"
 
-    echo -e "${BLUE}[INFO]${NC} Resolving warehouse details..." >&2
+    echo -e "${BLUE}[INFO]${NC} Bootstrapping Fabric security token for SP..." >&2
 
     local url="https://api.fabric.microsoft.com/v1/workspaces/${WORKSPACE_ID}/warehouses/${WAREHOUSE_ID}"
-    echo -e "${BLUE}[INFO]${NC} GET ${url}" >&2
-
     local http_code response body
+
     response=$(curl -s -w "\n%{http_code}" \
         -H "Authorization: Bearer ${token}" \
         -H "Content-Type: application/json" \
@@ -103,16 +115,13 @@ get_warehouse_details() {
     http_code=$(echo "$response" | tail -n1)
     body=$(echo "$response" | sed '$d')
 
-    echo -e "${BLUE}[INFO]${NC} HTTP status: ${http_code}" >&2
-
     if [[ "$http_code" != "200" ]]; then
-        echo -e "${RED}[✗]${NC} API call failed (HTTP ${http_code})" >&2
+        echo -e "${RED}[✗]${NC} Bootstrap API call failed (HTTP ${http_code})" >&2
         echo "$body" | jq . 2>/dev/null || echo "$body" >&2
         exit 1
     fi
 
-    # Extract connection string — try both camelCase and snake_case
-    local conn_string
+    local conn_string warehouse_name
     conn_string=$(echo "$body" | jq -r '
         .properties.connectionString //
         .properties.connection_string //
@@ -120,31 +129,25 @@ get_warehouse_details() {
         .connection_string //
         empty
     ')
-
-    # Extract warehouse display name for the -d flag
-    local warehouse_name
     warehouse_name=$(echo "$body" | jq -r '.displayName // empty')
 
-    if [[ -z "$conn_string" || "$conn_string" == "null" ]]; then
-        echo -e "${RED}[✗]${NC} Could not find connection string in response." >&2
+    if [[ -z "$conn_string" || -z "$warehouse_name" ]]; then
+        echo -e "${RED}[✗]${NC} Could not resolve warehouse details" >&2
         echo "$body" | jq '.properties // .' 2>/dev/null >&2
         exit 1
     fi
 
-    if [[ -z "$warehouse_name" || "$warehouse_name" == "null" ]]; then
-        echo -e "${RED}[✗]${NC} Could not find warehouse display name in response." >&2
-        exit 1
-    fi
-
+    echo -e "${GREEN}[✓]${NC} Fabric token bootstrapped" >&2
     echo -e "${GREEN}[✓]${NC} Server   : ${conn_string}" >&2
     echo -e "${GREEN}[✓]${NC} Database : ${warehouse_name}" >&2
 
-    # Return both as tab-separated values
     echo "${conn_string}"$'\t'"${warehouse_name}"
 }
 
 # ══════════════════════════════════════════════════════════════
-# Execute SQL initialization script
+# Execute SQL via pyodbc with ActiveDirectoryServicePrincipal
+# This is the proven working pattern for SP SQL connections
+# to Fabric Warehouse — sqlcmd does not work reliably with SPs
 # ══════════════════════════════════════════════════════════════
 
 run_sql_init() {
@@ -157,23 +160,73 @@ run_sql_init() {
     fi
 
     echo ""
-    echo -e "${BOLD}Running warehouse_init.sql...${NC}"
+    echo -e "${BOLD}Installing pyodbc and running warehouse_init.sql...${NC}"
     echo "─────────────────────────────────────────────────────────────────"
 
-    # go-sqlcmd ActiveDirectoryServicePrincipal auth:
-    # -U is the client (application) ID
-    # SQLCMDPASSWORD env var must hold the client secret
-    # AZURE_TENANT_ID env var must be set for tenant resolution
-    # No -C flag — go-sqlcmd uses --trust-server-certificate instead
-    SQLCMDPASSWORD="$CLIENT_SECRET" \
-    AZURE_TENANT_ID="$TENANT_ID" \
-    sqlcmd \
-        -S "${server},1433" \
-        -d "$database" \
-        -U "$CLIENT_ID" \
-        --authentication-method ActiveDirectoryServicePrincipal \
-        --trust-server-certificate \
-        -i "$SQL_FILE"
+    pip install pyodbc --quiet --break-system-packages
+
+    python3 << PYEOF
+import pyodbc
+import sys
+import os
+
+server   = "${server}"
+database = "${database}"
+client_id     = os.environ["AZURE_CLIENT_ID"]
+client_secret = os.environ["AZURE_CLIENT_SECRET"]
+
+conn_str = (
+    "Driver={ODBC Driver 18 for SQL Server};"
+    f"Server={server},1433;"
+    f"Database={database};"
+    "Encrypt=Yes;"
+    "TrustServerCertificate=No;"
+    "Authentication=ActiveDirectoryServicePrincipal;"
+    f"UID={client_id};"
+    f"PWD={client_secret};"
+)
+
+print(f"[INFO] Connecting to {server} / {database}")
+
+try:
+    conn = pyodbc.connect(conn_str, timeout=30)
+    conn.autocommit = True
+    cursor = conn.cursor()
+    print("[✓] Connected successfully")
+except Exception as e:
+    print(f"[✗] Connection failed: {e}", file=sys.stderr)
+    sys.exit(1)
+
+# Read and split SQL file on GO batch separators
+with open("${SQL_FILE}", "r") as f:
+    sql_content = f.read()
+
+import re
+batches = [b.strip() for b in re.split(r'^\s*GO\s*$', sql_content, flags=re.MULTILINE | re.IGNORECASE)]
+batches = [b for b in batches if b]  # remove empty
+
+print(f"[INFO] Executing {len(batches)} SQL batches...")
+
+for i, batch in enumerate(batches, 1):
+    # Skip comment-only batches
+    stripped = re.sub(r'--[^\n]*', '', batch).strip()
+    if not stripped:
+        continue
+    try:
+        cursor.execute(batch)
+        print(f"[✓] Batch {i}/{len(batches)} OK")
+    except pyodbc.Error as e:
+        # 2714 = object already exists — safe to ignore (idempotent)
+        if "2714" in str(e) or "already exists" in str(e).lower():
+            print(f"[~] Batch {i}/{len(batches)} skipped (already exists)")
+        else:
+            print(f"[✗] Batch {i}/{len(batches)} FAILED: {e}", file=sys.stderr)
+            sys.exit(1)
+
+cursor.close()
+conn.close()
+print("[✓] All batches executed successfully")
+PYEOF
 
     echo "─────────────────────────────────────────────────────────────────"
     echo -e "${GREEN}[✓]${NC} SQL script executed successfully"
@@ -191,7 +244,7 @@ main() {
     fabric_token=$(get_fabric_token)
 
     local details server database
-    details=$(get_warehouse_details "$fabric_token")
+    details=$(bootstrap_fabric_token "$fabric_token")
     server=$(echo "$details" | cut -f1)
     database=$(echo "$details" | cut -f2)
 

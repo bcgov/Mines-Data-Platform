@@ -65,8 +65,7 @@ BEGIN
         [created_date]          DATETIME2       NOT NULL,
         [created_by]            NVARCHAR(200)   NOT NULL,
         [modified_date]         DATETIME2       NOT NULL,
-        [modified_by]           NVARCHAR(200)   NOT NULL,
-        CONSTRAINT [PK_pipeline_control] PRIMARY KEY ([control_id])
+        [modified_by]           NVARCHAR(200)   NOT NULL
     );
 END;
 GO
@@ -101,11 +100,9 @@ BEGIN
         [error_code]          NVARCHAR(100)   NULL,
         [start_time]          DATETIME2       NOT NULL,
         [end_time]            DATETIME2       NULL,
-        [duration_seconds]    AS (DATEDIFF(SECOND, [start_time], [end_time])),
         [environment]         NVARCHAR(20)    NOT NULL,
         [triggered_by]        NVARCHAR(200)   NULL,
-        [created_date]        DATETIME2       NOT NULL,
-        CONSTRAINT [PK_pipeline_log] PRIMARY KEY ([log_id])
+        [created_date]        DATETIME2       NOT NULL
     );
 END;
 GO
@@ -132,8 +129,7 @@ BEGIN
         [created_date]    DATETIME2       NOT NULL,
         [created_by]      NVARCHAR(200)   NOT NULL,
         [modified_date]   DATETIME2       NOT NULL,
-        [modified_by]     NVARCHAR(200)   NOT NULL,
-        CONSTRAINT [PK_config] PRIMARY KEY ([config_id])
+        [modified_by]     NVARCHAR(200)   NOT NULL
     );
 END;
 GO
@@ -161,8 +157,7 @@ BEGIN
         [error_message]   NVARCHAR(MAX)   NOT NULL,
         [error_context]   NVARCHAR(MAX)   NULL,
         [stack_trace]     NVARCHAR(MAX)   NULL,
-        [created_date]    DATETIME2       NOT NULL,
-        CONSTRAINT [PK_error_log] PRIMARY KEY ([error_id])
+        [created_date]    DATETIME2       NOT NULL
     );
 END;
 GO
@@ -183,17 +178,18 @@ BEGIN
         [layer]         NVARCHAR(50)    NOT NULL,
         [description]   NVARCHAR(500)   NULL,
         [owner]         NVARCHAR(200)   NULL,
-        [created_date]  DATETIME2       NOT NULL,
-        CONSTRAINT [PK_schema_registry] PRIMARY KEY ([registry_id])
+        [created_date]  DATETIME2       NOT NULL
     );
+END;
+GO
 
+IF NOT EXISTS (SELECT 1 FROM [app].[schema_registry] WHERE [schema_name] = 'bronze')
     INSERT INTO [app].[schema_registry] ([schema_name], [layer], [description], [created_date])
     VALUES
         ('bronze', 'RAW',      'Raw ingested data — no transformations applied',               SYSUTCDATETIME()),
         ('silver', 'CLEANSED', 'Cleansed and conformed data — business rules applied',         SYSUTCDATETIME()),
         ('gold',   'CURATED',  'Curated aggregates and star schema models for reporting',      SYSUTCDATETIME()),
         ('app',    'APP',      'Application control objects — logging, config, orchestration', SYSUTCDATETIME());
-END;
 GO
 
 -- =============================================================================

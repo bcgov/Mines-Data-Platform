@@ -1,20 +1,28 @@
+# .github/workflows/initialize-warehouse.yml
 name: Initialize Warehouse
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       environment:
-        description: 'Environment to initialize'
         required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - test
-          - prod
-
-permissions:
-  contents: read
+        type: string
+        description: "Environment label (dev | test | prod)"
+      workspace-id:
+        required: true
+        type: string
+        description: "Fabric Workspace ID"
+      warehouse-id:
+        required: true
+        type: string
+        description: "Fabric Warehouse ID"
+    secrets:
+      tenant-id:
+        required: true
+      client-id:
+        required: true
+      client-secret:
+        required: true
 
 jobs:
   initialize-warehouse:
@@ -25,48 +33,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install sqlcmd
         run: |
+          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+            | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+          curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list \
+            | sudo tee /etc/apt/sources.list.d/msprod.list
           sudo apt-get update -q
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev jq curl
+          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev jq
           echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
 
       - name: Make script executable
         run: chmod +x ./initialize/warehouse_init.sh
 
-      - name: Set environment variables
-        id: set-env
-        run: |
-          case "${{ inputs.environment }}" in
-            prod)
-              echo "workspace_id=${{ vars.PROD_WORKSPACE_ID }}" >> $GITHUB_OUTPUT
-              echo "warehouse_id=${{ vars.PROD_WAREHOUSE_ID }}" >> $GITHUB_OUTPUT
-              ;;
-            test)
-              echo "workspace_id=${{ vars.TEST_WORKSPACE_ID }}" >> $GITHUB_OUTPUT
-              echo "warehouse_id=${{ vars.TEST_WAREHOUSE_ID }}" >> $GITHUB_OUTPUT
-              ;;
-            *)
-              echo "workspace_id=${{ vars.DEV_WORKSPACE_ID }}" >> $GITHUB_OUTPUT
-              echo "warehouse_id=${{ vars.DEV_WAREHOUSE_ID }}" >> $GITHUB_OUTPUT
-              ;;
-          esac
-
-      - name: Run warehouse initialization
+      - name: Initialize Warehouse
         env:
-          AZURE_CLIENT_ID:     ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_TENANT_ID:     ${{ secrets.AZURE_TENANT_ID }}
-          WORKSPACE_ID:        ${{ steps.set-env.outputs.workspace_id }}
-          WAREHOUSE_ID:        ${{ steps.set-env.outputs.warehouse_id }}
+          AZURE_TENANT_ID:     ${{ secrets.tenant-id }}
+          AZURE_CLIENT_ID:     ${{ secrets.client-id }}
+          AZURE_CLIENT_SECRET: ${{ secrets.client-secret }}
+          WORKSPACE_ID:        ${{ inputs.workspace-id }}
+          WAREHOUSE_ID:        ${{ inputs.warehouse-id }}
         run: ./initialize/warehouse_init.sh
 
       - name: Summary
         run: |
           echo "### Warehouse Initialization Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Workspace ID**: ${{ steps.set-env.outputs.workspace_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Warehouse ID**: ${{ steps.set-env.outputs.warehouse_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Schemas**: bronze | silver | gold | app" >> $GITHUB_STEP_SUMMARY
-          echo "- **App objects**: pipeline_control | pipeline_log | config | error_log | schema_registry" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ inputs.environment }}"  >> $GITHUB_STEP_SUMMARY
+          echo "- **Workspace ID**: ${{ inputs.workspace-id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Warehouse ID**: ${{ inputs.warehouse-id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Schemas**: bronze | silver | gold | app"    >> $GITHUB_STEP_SUMMARY

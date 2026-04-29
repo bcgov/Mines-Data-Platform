@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - "feature/**"
+      - "hotfix/**"
       - "dev"
+      - "test"
+      - "main"
   pull_request:
     branches:
       - "main"
@@ -12,6 +15,13 @@ on:
       - "dev"
     types: [closed]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy manually"
+        required: true
+        default: "dev"
+        type: choice
+        options: [dev, test, prod]
 
 permissions:
   contents: write
@@ -19,113 +29,253 @@ permissions:
   issues: write
 
 env:
-  WS_PREFIX: feat
-  VAR_PREFIX: ENV_VARS
-  APPROVER: Data-Alchemy
-
-  DEV_CAPACITY_ID:  ${{ vars.DEV_CAPACITY_ID }}
-  TEST_CAPACITY_ID: ${{ vars.TEST_CAPACITY_ID }}
-  PROD_CAPACITY_ID: ${{ vars.PROD_CAPACITY_ID }}
-
-  DEV_WORKSPACE_ID:  ${{ vars.DEV_WORKSPACE_ID }}
-  TEST_WORKSPACE_ID: ${{ vars.TEST_WORKSPACE_ID }}
-  PROD_WORKSPACE_ID: ${{ vars.PROD_WORKSPACE_ID }}
-
-  DEV_WAREHOUSE_ID:  ${{ vars.DEV_WAREHOUSE_ID }}
-  TEST_WAREHOUSE_ID: ${{ vars.TEST_WAREHOUSE_ID }}
-  PROD_WAREHOUSE_ID: ${{ vars.PROD_WAREHOUSE_ID }}
-
-  GITHUB_REPOSITORY_NAME:  ${{ github.event.repository.name }}
-  GITHUB_REPOSITORY_OWNER: ${{ github.event.repository.owner.login }}
-
+  VAR_PREFIX:           ENV_VARS
   FABRIC_VAR_FILE_PATH: variable_template.VariableLibrary/variables.json
   FABRIC_CONNECTION_ID: ${{ vars.FABRIC_CONNECTION_ID }}
   WORKSPACE_ADMIN_ID:   ${{ vars.WORKSPACE_ADMIN_ID }}
 
 jobs:
   # ══════════════════════════════════════════════════════════════
-  # 0. Validate Service Principal Permissions + Capture commit msg
+  # 0. Resolve deployment context
+  #
+  #    Determines which environment to target and whether a
+  #    feature workspace should be created. All downstream jobs
+  #    read these outputs instead of repeating if conditions.
+  #
+  #    Branch → environment mapping:
+  #      feature/** | hotfix/** → dev   (feature workspace created)
+  #      dev                    → dev   (no feature workspace)
+  #      test                   → test
+  #      main                   → prod
+  #      PR merged → test       → test
+  #      PR merged → main       → prod
+  #      workflow_dispatch      → input
   # ══════════════════════════════════════════════════════════════
-  check-spn-permissions:
-    name: "0. Validate SPN Permissions"
+  resolve-context:
+    name: "0. Resolve Deployment Context"
     runs-on: ubuntu-latest
+    # Skip [skip ci] commits from the bot
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     outputs:
-      user_commit_subject: ${{ steps.usermsg.outputs.subject }}
+      environment:        ${{ steps.ctx.outputs.environment }}
+      deploy_dev:         ${{ steps.ctx.outputs.deploy_dev }}
+      deploy_test:        ${{ steps.ctx.outputs.deploy_test }}
+      deploy_prod:        ${{ steps.ctx.outputs.deploy_prod }}
+      is_feature_branch:  ${{ steps.ctx.outputs.is_feature_branch }}
+      has_open_pr:        ${{ steps.ctx.outputs.has_open_pr }}
+      commit_subject:     ${{ steps.ctx.outputs.commit_subject }}
+      run_spn_check:      ${{ steps.ctx.outputs.run_spn_check }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Capture user commit subject
-        id: usermsg
+      - name: Resolve context
+        id: ctx
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
 
-          if [[ "${{ github.event_name }}" == "push" ]]; then
+          EVENT="${{ github.event_name }}"
+          REF="${{ github.ref }}"
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          MERGED="${{ github.event.pull_request.merged }}"
+
+          ENV=""
+          DEPLOY_DEV=false
+          DEPLOY_TEST=false
+          DEPLOY_PROD=false
+          IS_FEATURE=false
+          HAS_OPEN_PR=false
+          RUN_SPN=false
+
+          if [[ "$EVENT" == "push" ]]; then
+            RUN_SPN=true
+            if [[ "$REF" == refs/heads/feature/* || "$REF" == refs/heads/hotfix/* ]]; then
+              ENV=dev
+              DEPLOY_DEV=true
+              IS_FEATURE=true
+
+              # Check if an open PR exists for this branch
+              # Feature workspace only created when a PR is open
+              PR_COUNT=$(gh pr list \
+                --repo "${{ github.repository }}" \
+                --head "${GITHUB_REF_NAME}" \
+                --state open \
+                --json number \
+                --jq length)
+
+              if [[ "$PR_COUNT" -gt 0 ]]; then
+                HAS_OPEN_PR=true
+                echo "Open PR found for '${GITHUB_REF_NAME}' — feature workspace will be created"
+              else
+                HAS_OPEN_PR=false
+                echo "No open PR for '${GITHUB_REF_NAME}' — skipping feature workspace creation"
+              fi
+
+            elif [[ "$REF" == "refs/heads/dev" ]]; then
+              ENV=dev
+              DEPLOY_DEV=true
+            elif [[ "$REF" == "refs/heads/test" ]]; then
+              ENV=test
+              DEPLOY_TEST=true
+            elif [[ "$REF" == "refs/heads/main" ]]; then
+              ENV=prod
+              DEPLOY_PROD=true
+            fi
+
+          elif [[ "$EVENT" == "pull_request" && "$MERGED" == "true" ]]; then
+            if [[ "$BASE_REF" == "dev" ]]; then
+              ENV=dev
+              DEPLOY_DEV=true
+            elif [[ "$BASE_REF" == "test" ]]; then
+              ENV=test
+              DEPLOY_TEST=true
+            elif [[ "$BASE_REF" == "main" ]]; then
+              ENV=prod
+              DEPLOY_PROD=true
+            fi
+
+          elif [[ "$EVENT" == "workflow_dispatch" ]]; then
+            RUN_SPN=true
+            ENV="${{ inputs.environment }}"
+            [[ "$ENV" == "dev"  ]] && DEPLOY_DEV=true
+            [[ "$ENV" == "test" ]] && DEPLOY_TEST=true
+            [[ "$ENV" == "prod" ]] && DEPLOY_PROD=true
+          fi
+
+          # Capture commit subject
+          if [[ "$EVENT" == "push" ]]; then
             subject="$(printf "%s" "${{ github.event.head_commit.message }}" | sed -n '1p' | tr -d '\r')"
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            subject="${subject#chore: }"
+          elif [[ "$EVENT" == "pull_request" ]]; then
             subject="${{ github.event.pull_request.title }}"
           else
-            subject="manual run ${GITHUB_SHA}"
+            subject="manual deploy $ENV — ${GITHUB_SHA::7}"
           fi
 
-          if [[ "$subject" =~ ^chore:\ * ]]; then
-            subject="${subject#chore: }"
-          fi
+          echo "environment=$ENV"              >> "$GITHUB_OUTPUT"
+          echo "deploy_dev=$DEPLOY_DEV"        >> "$GITHUB_OUTPUT"
+          echo "deploy_test=$DEPLOY_TEST"      >> "$GITHUB_OUTPUT"
+          echo "deploy_prod=$DEPLOY_PROD"      >> "$GITHUB_OUTPUT"
+          echo "is_feature_branch=$IS_FEATURE" >> "$GITHUB_OUTPUT"
+          echo "has_open_pr=$HAS_OPEN_PR"      >> "$GITHUB_OUTPUT"
+          echo "commit_subject=$subject"       >> "$GITHUB_OUTPUT"
+          echo "run_spn_check=$RUN_SPN"        >> "$GITHUB_OUTPUT"
 
-          echo "subject=$subject" >> "$GITHUB_OUTPUT"
-
-      - name: Make script executable
-        run: chmod +x ./.github/workflows/scripts/spn_evaluator.sh
+          echo "──────────────────────────────────"
+          echo "Event      : $EVENT"
+          echo "Ref        : $REF"
+          echo "Environment: $ENV"
+          echo "Deploy dev : $DEPLOY_DEV"
+          echo "Deploy test: $DEPLOY_TEST"
+          echo "Deploy prod: $DEPLOY_PROD"
+          echo "Is feature : $IS_FEATURE"
+          echo "──────────────────────────────────"
 
       - name: Run SPN Evaluator
+        if: steps.ctx.outputs.run_spn_check == 'true'
         env:
-          AZURE_TENANT_ID:    ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_ID:    ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID:     ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID:     ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        run: ./.github/workflows/scripts/spn_evaluator.sh --output table
+        run: |
+          chmod +x ./.github/workflows/scripts/spn_evaluator.sh
+          ./.github/workflows/scripts/spn_evaluator.sh --output table
 
   # ══════════════════════════════════════════════════════════════
-  # 1. Create Feature Workspace (feature/**)
+  # 1. Create Feature Workspace
+  #    Only for feature/** and hotfix/** branches
   # ══════════════════════════════════════════════════════════════
   # create-feature-workspace:
-  #   if: startsWith(github.ref, 'refs/heads/feature/')
   #   name: "1. Create Feature Workspace"
-  #   needs: [check-spn-permissions]
+  #   needs: [resolve-context]
+  #   if: >
+  #     needs.resolve-context.outputs.is_feature_branch == 'true' &&
+  #     needs.resolve-context.outputs.has_open_pr == 'true'
   #   uses: ./.github/workflows/create-fabric-workspace.yml
   #   with:
-  #     branch-name: ${{ github.ref_name }}
-  #     workspace-prefix: feat
-  #     capacity-id: ${{ vars.DEV_CAPACITY_ID }}
-  #     git-branch: ${{ github.ref_name }}
+  #     branch-name:          ${{ github.ref_name }}
+  #     workspace-prefix:     feat
+  #     capacity-id:          ${{ vars.DEV_CAPACITY_ID }}
+  #     git-branch:           ${{ github.ref_name }}
   #     fabric-connection-id: ${{ vars.FABRIC_CONNECTION_ID }}
-  #     workspace-admin-id: ${{ vars.WORKSPACE_ADMIN_ID }}
+  #     workspace-admin-id:   ${{ vars.WORKSPACE_ADMIN_ID }}
   #   secrets:
-  #     AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  #     AZURE_CLIENT_ID:     ${{ secrets.AZURE_CLIENT_ID }}
   #     AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  #     AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  #     AZURE_TENANT_ID:     ${{ secrets.AZURE_TENANT_ID }}
 
   # ══════════════════════════════════════════════════════════════
-  # 2. Update Variables for Dev (auto)
+  # 1b. Create PR feature → dev (pipeline pauses here)
+  #     User must manually merge the PR to trigger the dev deploy.
+  #     Only for feature/hotfix branches — direct dev pushes,
+  #     workflow_dispatch and PR-triggered flows skip this gate.
+  # ══════════════════════════════════════════════════════════════
+  create-dev-pr:
+    name: "1b. Create PR feature → dev"
+    needs: [resolve-context]
+    if: >
+      needs.resolve-context.outputs.deploy_dev == 'true' &&
+      needs.resolve-context.outputs.is_feature_branch == 'true' &&
+      github.event_name == 'push'
+    uses: ./.github/workflows/create-gitflow-pr.yml
+    with:
+      source-branch:        ${{ github.ref_name }}
+      target-branch:        dev
+      pr-title:             ${{ needs.resolve-context.outputs.commit_subject }}
+      auto-approve:         false
+      auto-merge:           false
+      delete-source-branch: false
+      squash:               false
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ══════════════════════════════════════════════════════════════
+  # 2. Initialize Dev Warehouse
+  #    Runs first in the dev flow — before variables or deployment.
+  #    Idempotent: safe to run on every deploy.
+  #    Feature/hotfix: runs after PR merged feature → dev
+  #    Direct dev push / workflow_dispatch: runs immediately
+  # ══════════════════════════════════════════════════════════════
+  initialize-dev-warehouse:
+    name: "2. Initialize Dev Warehouse"
+    needs: [resolve-context]
+    if: >
+      needs.resolve-context.outputs.deploy_dev == 'true' &&
+      (
+        (github.event_name == 'pull_request' &&
+         github.event.pull_request.merged == true &&
+         github.event.pull_request.base.ref == 'dev') ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+        (github.event_name == 'workflow_dispatch' && inputs.environment == 'dev')
+      )
+    uses: bcgov/Mines-Data-Platform/.github/workflows/initialize-warehouse.yml@dev
+    with:
+      environment:  dev
+      workspace-id: ${{ vars.DEV_WORKSPACE_ID }}
+      warehouse-id: ${{ vars.DEV_WAREHOUSE_ID }}
+    secrets:
+      tenant-id:     ${{ secrets.AZURE_TENANT_ID }}
+      client-id:     ${{ secrets.AZURE_CLIENT_ID }}
+      client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+  # ══════════════════════════════════════════════════════════════
+  # 3. Update Dev Variables
+  #    Feature/hotfix: runs after PR merged feature → dev
+  #    Direct dev push / workflow_dispatch: runs immediately
   # ══════════════════════════════════════════════════════════════
   update-dev-variables:
-    if: startsWith(github.ref, 'refs/heads/feature/')
-    name: "2. Update Dev Variables"
-    needs: [check-spn-permissions]
+    name: "3. Update Dev Variables"
+    needs: [resolve-context, initialize-dev-warehouse]
+    if: >
+      needs.initialize-dev-warehouse.result == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set commit message
-        id: commitmsg
-        shell: bash
-        run: |
-          set -euo pipefail
-          msg="${{ needs.check-spn-permissions.outputs.user_commit_subject }}"
-          echo "message=${msg} [skip ci]" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
 
       - name: Update variables.json for Dev
         env:
@@ -138,91 +288,46 @@ jobs:
             -f ${{ env.FABRIC_VAR_FILE_PATH }} \
             -r ${{ github.repository }}
 
-      - name: Commit and push changes
+      - name: Commit and push
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "${{ steps.commitmsg.outputs.message }}"
+          git diff --cached --quiet && { echo "No changes"; exit 0; }
+          git commit -m "${{ needs.resolve-context.outputs.commit_subject }} [skip ci]"
           git pull --no-rebase origin "${GITHUB_REF_NAME}" || true
           git push
 
   # ══════════════════════════════════════════════════════════════
-  # 3. Deploy to Dev (auto)
+  # ══════════════════════════════════════════════════════════════
+  # 4. Deploy to Dev
   # ══════════════════════════════════════════════════════════════
   deploy-to-dev:
-    if: startsWith(github.ref, 'refs/heads/feature/')
-    name: "3. Deploy to Dev"
+    name: "4. Deploy to Dev"
     needs: [update-dev-variables]
+    if: needs.update-dev-variables.result == 'success'
     uses: ./.github/workflows/update-workspace-git.yml
     with:
-      workspace-id: ${{ vars.DEV_WORKSPACE_ID }}
+      workspace-id:         ${{ vars.DEV_WORKSPACE_ID }}
       fabric-connection-id: ${{ vars.FABRIC_CONNECTION_ID }}
-      git-branch: ${{ github.ref_name }}
-    secrets:
-      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      client-id: ${{ secrets.AZURE_CLIENT_ID }}
-      client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-
-  # ══════════════════════════════════════════════════════════════
-  # 3b. Initialize Dev Warehouse (auto, after deploy-to-dev)
-  # ══════════════════════════════════════════════════════════════
-  initialize-dev-warehouse:
-    if: startsWith(github.ref, 'refs/heads/feature/')
-    name: "3b. Initialize Dev Warehouse"
-    needs: [deploy-to-dev]
-    uses: ./.github/workflows/initialize-warehouse.yml
-    with:
-      environment:  dev
-      workspace-id: ${{ vars.DEV_WORKSPACE_ID }}
-      warehouse-id: ${{ vars.DEV_WAREHOUSE_ID }}
+      git-branch:           ${{ github.ref_name }}
     secrets:
       tenant-id:     ${{ secrets.AZURE_TENANT_ID }}
       client-id:     ${{ secrets.AZURE_CLIENT_ID }}
       client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
   # ══════════════════════════════════════════════════════════════
-  # 4. Wait for Test Approval (runs in parallel with 3b)
-  # ══════════════════════════════════════════════════════════════
-  wait-for-test-approval:
-    if: startsWith(github.ref, 'refs/heads/feature/')
-    name: "4. Wait for Test Approval"
-    needs: [deploy-to-dev]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.TOKEN }}
-          approvers: ${{ env.APPROVER }}
-          minimum-approvals: 1
-          issue-title: "Deploy to Test Environment"
-          issue-body: "Please approve to proceed with TEST variable update + deployment."
-
-  # ══════════════════════════════════════════════════════════════
-  # 5. Update Variables for Test (after approval)
+  # 5. Update Test Variables
   # ══════════════════════════════════════════════════════════════
   update-test-variables:
-    if: startsWith(github.ref, 'refs/heads/feature/')
     name: "5. Update Test Variables"
-    needs: [wait-for-test-approval, check-spn-permissions]
+    needs: [resolve-context]
+    if: needs.resolve-context.outputs.deploy_test == 'true' 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set commit message
-        id: commitmsg
-        shell: bash
-        run: |
-          set -euo pipefail
-          msg="${{ needs.check-spn-permissions.outputs.user_commit_subject }}"
-          echo "message=${msg} [skip ci]" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
 
       - name: Update variables.json for Test
         env:
@@ -235,73 +340,68 @@ jobs:
             -f ${{ env.FABRIC_VAR_FILE_PATH }} \
             -r ${{ github.repository }}
 
-      - name: Commit and push changes
+      - name: Commit and push
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "${{ steps.commitmsg.outputs.message }}"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git diff --cached --quiet && { echo "No changes"; exit 0; }
+          git commit -m "${{ needs.resolve-context.outputs.commit_subject }} [skip ci]"
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
           git push
 
   # ══════════════════════════════════════════════════════════════
-  # 6. Create PR feature -> test (MANUAL MERGE)
+  # 6. Create PR feature → test
+  #    Only for feature/hotfix branches — direct test pushes skip
   # ══════════════════════════════════════════════════════════════
   create-test-pr:
-    if: startsWith(github.ref, 'refs/heads/feature/')
-    name: "6. Create PR feature -> test (Manual Approval Required)"
-    needs: [update-test-variables, check-spn-permissions]
+    name: "6. Create PR feature → test"
+    needs: [resolve-context, update-test-variables]
+    if: >
+      needs.update-test-variables.result == 'success' &&
+      needs.resolve-context.outputs.is_feature_branch == 'true'
     uses: ./.github/workflows/create-gitflow-pr.yml
     with:
-      source-branch: ${{ github.ref_name }}
-      target-branch: test
-      pr-title: ${{ needs.check-spn-permissions.outputs.user_commit_subject }}
-      auto-approve: false
-      auto-merge: false
+      source-branch:        ${{ github.ref_name }}
+      target-branch:        test
+      pr-title:             ${{ needs.resolve-context.outputs.commit_subject }}
+      auto-approve:         false
+      auto-merge:           false
       delete-source-branch: false
-      squash: false
+      squash:               false
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # ══════════════════════════════════════════════════════════════
-  # 7. Deploy to Test (after PR merged feature -> test)
+  # 7. Deploy to Test
+  #    Triggered by: PR merged feature→test, direct test push,
+  #                  workflow_dispatch test, update-test-variables
   # ══════════════════════════════════════════════════════════════
   deploy-to-test:
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'test' &&
-      startsWith(github.event.pull_request.head.ref, 'feature/')
     name: "7. Deploy to Test"
-    needs: [check-spn-permissions]
+    needs: [resolve-context, update-test-variables]
+    if: >
+      always() &&
+      needs.resolve-context.outputs.deploy_test == 'true' &&
+      (needs.update-test-variables.result == 'success' ||
+       needs.update-test-variables.result == 'skipped')
     uses: ./.github/workflows/update-workspace-git.yml
     with:
-      workspace-id: ${{ vars.TEST_WORKSPACE_ID }}
+      workspace-id:         ${{ vars.TEST_WORKSPACE_ID }}
       fabric-connection-id: ${{ vars.FABRIC_CONNECTION_ID }}
-      git-branch: test
+      git-branch:           test
     secrets:
-      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      tenant-id:     ${{ secrets.AZURE_TENANT_ID }}
+      client-id:     ${{ secrets.AZURE_CLIENT_ID }}
       client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-  # ══════════════════════════════════════════════════════════════
-  # 7b. Initialize Test Warehouse (after deploy-to-test)
-  # ══════════════════════════════════════════════════════════════
   initialize-test-warehouse:
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'test' &&
-      startsWith(github.event.pull_request.head.ref, 'feature/')
     name: "7b. Initialize Test Warehouse"
     needs: [deploy-to-test]
-    uses: ./.github/workflows/initialize-warehouse.yml
+    if: needs.deploy-to-test.result == 'success'
+    uses: bcgov/Mines-Data-Platform/.github/workflows/initialize-warehouse.yml@dev
     with:
       environment:  test
       workspace-id: ${{ vars.TEST_WORKSPACE_ID }}
@@ -311,54 +411,40 @@ jobs:
       client-id:     ${{ secrets.AZURE_CLIENT_ID }}
       client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-  # ══════════════════════════════════════════════════════════════
-  # 8. Create PR test -> main (manual merge)
-  # ══════════════════════════════════════════════════════════════
+  # Waits on warehouse init — prod PR only raised once test is fully ready
   create-prod-pr:
+    name: "8. Create PR test → main"
+    needs: [resolve-context, deploy-to-test, initialize-test-warehouse]
     if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'test' &&
-      startsWith(github.event.pull_request.head.ref, 'feature/')
-    name: "8. Create PR test -> main (manual merge)"
-    needs: [deploy-to-test, check-spn-permissions]
+      needs.deploy-to-test.result == 'success' &&
+      needs.initialize-test-warehouse.result == 'success' &&
+      needs.resolve-context.outputs.is_feature_branch == 'true'
     uses: ./.github/workflows/create-gitflow-pr.yml
     with:
-      source-branch: test
-      target-branch: main
-      pr-title: ${{ needs.check-spn-permissions.outputs.user_commit_subject }}
-      auto-approve: false
-      auto-merge: false
+      source-branch:        test
+      target-branch:        main
+      pr-title:             ${{ needs.resolve-context.outputs.commit_subject }}
+      auto-approve:         false
+      auto-merge:           false
       delete-source-branch: false
-      squash: true
+      squash:               true
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # ══════════════════════════════════════════════════════════════
-  # 9. Update Prod Variables (after PR merged test -> main)
+  # 9. Update Prod Variables
+  #    Triggered by: PR merged test→main, direct main push,
+  #                  workflow_dispatch prod
   # ══════════════════════════════════════════════════════════════
   update-prod-variables:
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.pull_request.head.ref == 'test'
     name: "9. Update Prod Variables"
-    needs: [check-spn-permissions]
+    needs: [resolve-context]
+    if: needs.resolve-context.outputs.deploy_prod == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository (main)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: main
-
-      - name: Set commit message
-        id: commitmsg
-        shell: bash
-        run: |
-          set -euo pipefail
-          msg="${{ needs.check-spn-permissions.outputs.user_commit_subject }}"
-          echo "message=${msg} [skip ci]" >> "$GITHUB_OUTPUT"
 
       - name: Update variables.json for Production
         env:
@@ -371,54 +457,37 @@ jobs:
             -f ${{ env.FABRIC_VAR_FILE_PATH }} \
             -r ${{ github.repository }}
 
-      - name: Commit and push changes
+      - name: Commit and push
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "${{ steps.commitmsg.outputs.message }}"
+          git diff --cached --quiet && { echo "No changes"; exit 0; }
+          git commit -m "${{ needs.resolve-context.outputs.commit_subject }} [skip ci]"
           git pull --rebase origin main
           git push origin main
 
-  # ══════════════════════════════════════════════════════════════
-  # 10. Deploy to Production
-  # ══════════════════════════════════════════════════════════════
   deploy-to-prod:
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.pull_request.head.ref == 'test'
     name: "10. Deploy to Production"
     needs: [update-prod-variables]
+    if: needs.update-prod-variables.result == 'success'
     uses: ./.github/workflows/update-workspace-git.yml
     with:
-      workspace-id: ${{ vars.PROD_WORKSPACE_ID }}
+      workspace-id:         ${{ vars.PROD_WORKSPACE_ID }}
       fabric-connection-id: ${{ vars.FABRIC_CONNECTION_ID }}
-      git-branch: main
+      git-branch:           main
     secrets:
-      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      tenant-id:     ${{ secrets.AZURE_TENANT_ID }}
+      client-id:     ${{ secrets.AZURE_CLIENT_ID }}
       client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-  # ══════════════════════════════════════════════════════════════
-  # 10b. Initialize Prod Warehouse (after deploy-to-prod)
-  # ══════════════════════════════════════════════════════════════
   initialize-prod-warehouse:
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.pull_request.head.ref == 'test'
     name: "10b. Initialize Prod Warehouse"
     needs: [deploy-to-prod]
-    uses: ./.github/workflows/initialize-warehouse.yml
+    if: needs.deploy-to-prod.result == 'success'
+    uses: bcgov/Mines-Data-Platform/.github/workflows/initialize-warehouse.yml@dev
     with:
       environment:  prod
       workspace-id: ${{ vars.PROD_WORKSPACE_ID }}

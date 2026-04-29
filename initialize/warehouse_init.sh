@@ -144,35 +144,12 @@ get_warehouse_details() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# Get SQL access token
-# sqlcmd -G does not support service principals — pass token directly
-# via SQLCMDPASSWORD with ActiveDirectoryToken authentication
-# ══════════════════════════════════════════════════════════════
-
-get_sql_token() {
-    echo -e "${BLUE}[INFO]${NC} Fetching SQL access token for Fabric Warehouse..." >&2
-    local token
-    # Fabric Warehouse uses the database.windows.net scope for SQL connections
-    token=$(az account get-access-token         --resource https://database.windows.net/         --query accessToken         -o tsv)
-
-    if [[ -z "$token" ]]; then
-        echo -e "${RED}[✗]${NC} Failed to obtain SQL access token" >&2
-        exit 1
-    fi
-
-    echo "::add-mask::${token}" >&2
-    echo -e "${GREEN}[✓]${NC} SQL token obtained" >&2
-    echo "$token"
-}
-
-# ══════════════════════════════════════════════════════════════
 # Execute SQL initialization script
 # ══════════════════════════════════════════════════════════════
 
 run_sql_init() {
     local server="$1"
     local database="$2"
-    local sql_token="$3"
 
     if [[ ! -f "$SQL_FILE" ]]; then
         echo -e "${RED}[✗]${NC} SQL file not found: ${SQL_FILE}"
@@ -183,14 +160,16 @@ run_sql_init() {
     echo -e "${BOLD}Running warehouse_init.sql...${NC}"
     echo "─────────────────────────────────────────────────────────────────"
 
-    # Use ActiveDirectoryToken auth — works with service principals
-    # Server format: <hostname>,1433 (comma, not semicolon)
-    SQLCMDPASSWORD="$sql_token" sqlcmd \
+    # go-sqlcmd ActiveDirectoryServicePrincipal auth:
+    # -U must be in the form <client_id>@<tenant_id>
+    # SQLCMDPASSWORD must be set to the client secret
+    # --authentication-method ActiveDirectoryServicePrincipal
+    SQLCMDPASSWORD="$CLIENT_SECRET" sqlcmd \
         -S "${server},1433" \
         -d "$database" \
-        -G \
+        -U "${CLIENT_ID}@${TENANT_ID}" \
+        --authentication-method ActiveDirectoryServicePrincipal \
         -C \
-        -b \
         -i "$SQL_FILE"
 
     echo "─────────────────────────────────────────────────────────────────"
@@ -213,10 +192,7 @@ main() {
     server=$(echo "$details" | cut -f1)
     database=$(echo "$details" | cut -f2)
 
-    local sql_token
-    sql_token=$(get_sql_token)
-
-    run_sql_init "$server" "$database" "$sql_token"
+    run_sql_init "$server" "$database"
 
     echo ""
     echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════${NC}"

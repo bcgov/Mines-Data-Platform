@@ -8,6 +8,7 @@ on:
     branches:
       - "main"
       - "test"
+      - "dev"
     types: [closed]
   workflow_dispatch:
 
@@ -86,22 +87,22 @@ jobs:
   # ══════════════════════════════════════════════════════════════
   # 1. Create Feature Workspace (feature/**)
   # ══════════════════════════════════════════════════════════════
-  create-feature-workspace:
-    if: startsWith(github.ref, 'refs/heads/feature/')
-    name: "1. Create Feature Workspace"
-    needs: [check-spn-permissions]
-    uses: ./.github/workflows/create-fabric-workspace.yml
-    with:
-      branch-name: ${{ github.ref_name }}
-      workspace-prefix: feat
-      capacity-id: ${{ vars.DEV_CAPACITY_ID }}
-      git-branch: ${{ github.ref_name }}
-      fabric-connection-id: ${{ vars.FABRIC_CONNECTION_ID }}
-      workspace-admin-id: ${{ vars.WORKSPACE_ADMIN_ID }}
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  # create-feature-workspace:
+  #   if: startsWith(github.ref, 'refs/heads/feature/')
+  #   name: "1. Create Feature Workspace"
+  #   needs: [check-spn-permissions]
+  #   uses: ./.github/workflows/create-fabric-workspace.yml
+  #   with:
+  #     branch-name: ${{ github.ref_name }}
+  #     workspace-prefix: feat
+  #     capacity-id: ${{ vars.DEV_CAPACITY_ID }}
+  #     git-branch: ${{ github.ref_name }}
+  #     fabric-connection-id: ${{ vars.FABRIC_CONNECTION_ID }}
+  #     workspace-admin-id: ${{ vars.WORKSPACE_ADMIN_ID }}
+  #   secrets:
+  #     AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  #     AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  #     AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
   # ══════════════════════════════════════════════════════════════
   # 2. Update Variables for Dev (auto)
@@ -109,7 +110,8 @@ jobs:
   update-dev-variables:
     if: startsWith(github.ref, 'refs/heads/feature/')
     name: "2. Update Dev Variables"
-    needs: [create-feature-workspace, check-spn-permissions]
+    # needs: [create-feature-workspace, check-spn-permissions]
+    needs: [ check-spn-permissions]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

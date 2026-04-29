@@ -44,28 +44,32 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [app].[pipeline_control] (
-        [control_id]            BIGINT IDENTITY,
-        [pipeline_name]         VARCHAR(200)   NOT NULL,
-        [source_system]         VARCHAR(100)   NOT NULL,
-        [source_entity]         VARCHAR(200)   NOT NULL,
-        [target_schema]         VARCHAR(50)    NOT NULL,
-        [target_table]          VARCHAR(200)   NOT NULL,
-        [source_query_template] VARCHAR(MAX)   NULL,
-        [from_date]             DATETIME2(6)       NULL,
-        [to_date]               DATETIME2(6)       NULL,
-        [watermark_column]      VARCHAR(200)   NULL,
-        [last_watermark]        VARCHAR(500)   NULL,
-        [load_type]             VARCHAR(20)    NOT NULL,
+        [control_id]            BIGINT          IDENTITY,
+        [pipeline_name]         VARCHAR(200)    NOT NULL,
+        [source_system]         VARCHAR(100)    NOT NULL,
+        [source_entity]         VARCHAR(200)    NOT NULL,
+        [source_connection_string] VARCHAR(500) NULL,
+        [key_vault_url]         VARCHAR(500)    NULL,
+        [target_schema]         VARCHAR(50)     NOT NULL,
+        [target_table]          VARCHAR(200)    NOT NULL,
+        [source_query_template] VARCHAR(MAX)    NULL,
+        [from_date]             DATETIME2(6)    NULL,
+        [to_date]               DATETIME2(6)    NULL,
+        [watermark_column]      VARCHAR(200)    NULL,
+        [last_watermark]        VARCHAR(500)    NULL,
+        [load_type]             VARCHAR(20)     NOT NULL,
         [is_active]             BIT             NOT NULL,
-        [load_frequency]        VARCHAR(50)    NULL,
+        [load_frequency]        VARCHAR(50)     NULL,
         [priority]              INT             NOT NULL,
-        [dependency_on]         VARCHAR(200)   NULL,
-        [last_run_status]       VARCHAR(20)    NULL,
-        [last_run_date]         DATETIME2(6)       NULL,
-        [created_date]          DATETIME2(6)       NOT NULL,
-        [created_by]            VARCHAR(200)   NOT NULL,
-        [modified_date]         DATETIME2(6)       NOT NULL,
-        [modified_by]           VARCHAR(200)   NOT NULL
+        [dependency_on]         VARCHAR(200)    NULL,
+        [last_run_status]       VARCHAR(20)     NULL,
+        [last_run_date]         DATETIME2(6)    NULL,
+        [version_number]        INT             NOT NULL,
+        [row_hash]              VARCHAR(64)     NULL,
+        [created_date]          DATETIME2(6)    NOT NULL,
+        [created_by]            VARCHAR(200)    NOT NULL,
+        [modified_date]         DATETIME2(6)    NOT NULL,
+        [modified_by]           VARCHAR(200)    NOT NULL
     );
 END;
 GO
@@ -228,23 +232,187 @@ GO
 IF NOT EXISTS (SELECT 1 FROM [app].[pipeline_control] WHERE [pipeline_name] = 'pl_ingest_orders')
     INSERT INTO [app].[pipeline_control] (
         [pipeline_name], [source_system], [source_entity],
+        [source_connection_string], [key_vault_url],
         [target_schema], [target_table], [load_type],
         [watermark_column], [from_date], [to_date],
-        [is_active], [priority],
+        [is_active], [priority], [version_number], [row_hash],
         [created_date], [created_by], [modified_date], [modified_by],
         [source_query_template]
     )
     VALUES (
         'pl_ingest_orders', 'SourceDB', 'dbo.Orders',
+        'Server=tcp:source-server.database.windows.net,1433;Database=SourceDB', NULL,
         'bronze', 'orders', 'INCREMENTAL',
         'updated_at', '2024-01-01 00:00:00', CAST(SYSUTCDATETIME() AS DATETIME2(6)),
-        1, 100,
-        CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(), CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(),
+        1, 100, 1,
+        CONVERT(VARCHAR(64), HASHBYTES('SHA2_256',
+            CONCAT('SourceDB','|','dbo.Orders','|',
+                   'Server=tcp:source-server.database.windows.net,1433;Database=SourceDB',
+                   '|','bronze','|','orders')), 2),
+        CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(),
+        CAST(SYSUTCDATETIME() AS DATETIME2(6)), SUSER_SNAME(),
         'SELECT order_id, customer_id, order_date, total_amount, updated_at
 FROM dbo.Orders
 WHERE updated_at >= ''@from_date''
   AND updated_at <  ''@to_date'''
     );
+GO
+-- =============================================================================
+-- STORED PROCEDURE: usp_upsert_pipeline_control
+--
+-- Purpose: Insert or version a pipeline control record.
+--   - Computes SHA2_256 hash over source_system, source_entity,
+--     source_connection_string, target_schema, target_table
+--   - If an identical hash already exists and is active -> no-op (duplicate)
+--   - If same source+target mapping exists with a different hash ->
+--     mark existing rows inactive, insert new row with version_number + 1
+--   - If no existing mapping -> insert as version 1
+--
+-- Parameters match pipeline_control columns except auto-managed fields:
+--   control_id, is_active, version_number, row_hash,
+--   created_date, created_by, modified_date, modified_by
+-- =============================================================================
+
+IF EXISTS (
+    SELECT 1 FROM sys.procedures p
+    JOIN sys.schemas s ON p.schema_id = s.schema_id
+    WHERE s.name = 'app' AND p.name = 'usp_upsert_pipeline_control'
+)
+    DROP PROCEDURE [app].[usp_upsert_pipeline_control];
+GO
+
+CREATE PROCEDURE [app].[usp_upsert_pipeline_control]
+    @pipeline_name          VARCHAR(200),
+    @source_system          VARCHAR(100),
+    @source_entity          VARCHAR(200),
+    @source_connection_string VARCHAR(500) = NULL,
+    @key_vault_url          VARCHAR(500)  = NULL,
+    @target_schema          VARCHAR(50),
+    @target_table           VARCHAR(200),
+    @source_query_template  VARCHAR(MAX)  = NULL,
+    @from_date              DATETIME2(6)  = NULL,
+    @to_date                DATETIME2(6)  = NULL,
+    @watermark_column       VARCHAR(200)  = NULL,
+    @last_watermark         VARCHAR(500)  = NULL,
+    @load_type              VARCHAR(20)   = 'INCREMENTAL',
+    @load_frequency         VARCHAR(50)   = NULL,
+    @priority               INT           = 100,
+    @dependency_on          VARCHAR(200)  = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- ── 1. Compute hash over source-to-target identity fields ────────────────
+    DECLARE @new_hash VARCHAR(64);
+    SET @new_hash = CONVERT(VARCHAR(64), HASHBYTES('SHA2_256',
+        CONCAT(
+            ISNULL(@source_system,              ''),   '|',
+            ISNULL(@source_entity,              ''),   '|',
+            ISNULL(@source_connection_string,   ''),   '|',
+            ISNULL(@target_schema,              ''),   '|',
+            ISNULL(@target_table,               ''),   '|',
+            ISNULL(@source_query_template,      ''),   '|',
+            ISNULL(@load_type,                  ''),   '|',
+            ISNULL(@watermark_column,           '')
+        )
+    ), 2);
+
+    -- ── 2. Check for exact duplicate (same hash, already active) ────────────
+    IF EXISTS (
+        SELECT 1 FROM [app].[pipeline_control]
+        WHERE [source_system]   = @source_system
+          AND [source_entity]   = @source_entity
+          AND [target_schema]   = @target_schema
+          AND [target_table]    = @target_table
+          AND [row_hash]        = @new_hash
+          AND [is_active]       = 1
+    )
+    BEGIN
+        PRINT 'No changes detected — active record with identical hash already exists. Skipping.';
+        RETURN;
+    END
+
+    -- ── 3. Get current max version for this source-to-target mapping ─────────
+    DECLARE @next_version INT;
+    SELECT @next_version = ISNULL(MAX([version_number]), 0) + 1
+    FROM [app].[pipeline_control]
+    WHERE [source_system] = @source_system
+      AND [source_entity] = @source_entity
+      AND [target_schema] = @target_schema
+      AND [target_table]  = @target_table;
+
+    -- ── 4. Mark all existing active records for this mapping as inactive ─────
+    UPDATE [app].[pipeline_control]
+    SET
+        [is_active]     = 0,
+        [modified_date] = CAST(SYSUTCDATETIME() AS DATETIME2(6)),
+        [modified_by]   = SUSER_SNAME()
+    WHERE [source_system] = @source_system
+      AND [source_entity] = @source_entity
+      AND [target_schema] = @target_schema
+      AND [target_table]  = @target_table
+      AND [is_active]     = 1;
+
+    -- ── 5. Insert new active version ─────────────────────────────────────────
+    INSERT INTO [app].[pipeline_control] (
+        [pipeline_name],
+        [source_system],
+        [source_entity],
+        [source_connection_string],
+        [key_vault_url],
+        [target_schema],
+        [target_table],
+        [source_query_template],
+        [from_date],
+        [to_date],
+        [watermark_column],
+        [last_watermark],
+        [load_type],
+        [is_active],
+        [load_frequency],
+        [priority],
+        [dependency_on],
+        [last_run_status],
+        [last_run_date],
+        [version_number],
+        [row_hash],
+        [created_date],
+        [created_by],
+        [modified_date],
+        [modified_by]
+    )
+    VALUES (
+        @pipeline_name,
+        @source_system,
+        @source_entity,
+        @source_connection_string,
+        @key_vault_url,
+        @target_schema,
+        @target_table,
+        @source_query_template,
+        @from_date,
+        @to_date,
+        @watermark_column,
+        @last_watermark,
+        @load_type,
+        1,                                              -- is_active = true
+        @load_frequency,
+        @priority,
+        @dependency_on,
+        NULL,                                           -- last_run_status
+        NULL,                                           -- last_run_date
+        @next_version,
+        @new_hash,
+        CAST(SYSUTCDATETIME() AS DATETIME2(6)),
+        SUSER_SNAME(),
+        CAST(SYSUTCDATETIME() AS DATETIME2(6)),
+        SUSER_SNAME()
+    );
+
+    PRINT CONCAT('Inserted pipeline_control record: ', @pipeline_name,
+                 ' v', CAST(@next_version AS VARCHAR(10)),
+                 ' | hash: ', @new_hash);
+END;
 GO
 
 -- =============================================================================
@@ -252,8 +420,8 @@ GO
 -- =============================================================================
 
 SELECT
-    s.name          AS schema_name,
-    COUNT(t.name)   AS table_count
+    s.name        AS schema_name,
+    COUNT(t.name) AS table_count
 FROM sys.schemas s
 LEFT JOIN sys.tables t ON t.schema_id = s.schema_id
 WHERE s.name IN ('bronze', 'silver', 'gold', 'app')

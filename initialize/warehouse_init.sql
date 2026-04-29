@@ -53,60 +53,60 @@ IF NOT EXISTS (
 BEGIN
     CREATE TABLE [app].[pipeline_control] (
 
-        -- ── Identity ────────────────────────────────────────────────────────
+
         [control_id]              INT             NOT NULL IDENTITY(1,1),
         [pipeline_name]           NVARCHAR(200)   NOT NULL,
         [source_system]           NVARCHAR(100)   NOT NULL,
-        [source_entity]           NVARCHAR(200)   NOT NULL,   -- table / endpoint / file pattern
+        [source_entity]           NVARCHAR(200)   NOT NULL,
 
-        -- ── Target ──────────────────────────────────────────────────────────
+
         [target_schema]           NVARCHAR(50)    NOT NULL,
         [target_table]            NVARCHAR(200)   NOT NULL,
 
-        -- ── ADF source query ────────────────────────────────────────────────
-        -- Full query template to be executed by ADF.
-        -- Use the literal tokens @from_date and @to_date as placeholders.
-        -- ADF replaces them at runtime using the from_date / to_date columns.
+
+
+
+
         --
-        -- Example (SQL source):
-        --   SELECT id, name, updated_at
-        --   FROM dbo.Customers
-        --   WHERE updated_at >= '@from_date'
-        --     AND updated_at <  '@to_date'
+
+
+
+
+
         --
-        -- Example (REST source — embed as the query parameter or path):
-        --   /api/v1/orders?updatedAfter=@from_date&updatedBefore=@to_date
+
+
         [source_query_template]   NVARCHAR(MAX)   NULL,
 
-        -- ── Incremental filter window ────────────────────────────────────────
-        -- ADF reads these two columns from the Lookup result and injects them
-        -- into source_query_template before executing the copy activity.
-        -- For FULL loads these are NULL and the template runs unfiltered.
-        [from_date]               DATETIME2       NULL,       -- inclusive lower bound (@from_date)
-        [to_date]                 DATETIME2       NULL,       -- exclusive upper bound (@to_date)
 
-        -- ── Watermark tracking ───────────────────────────────────────────────
-        -- After a successful run ADF writes the high-watermark back here so the
-        -- next run's from_date is derived from it.
-        [watermark_column]        NVARCHAR(200)   NULL,       -- source column driving the window
-        [last_watermark]          NVARCHAR(500)   NULL,       -- last committed high-watermark value
 
-        -- ── Load behaviour ───────────────────────────────────────────────────
-        [load_type]               NVARCHAR(20)    NOT NULL DEFAULT 'INCREMENTAL', -- FULL | INCREMENTAL | CDC
+
+
+        [from_date]               DATETIME2       NULL,
+        [to_date]                 DATETIME2       NULL,
+
+
+
+
+        [watermark_column]        NVARCHAR(200)   NULL,
+        [last_watermark]          NVARCHAR(500)   NULL,
+
+
+        [load_type]               NVARCHAR(20)    NOT NULL DEFAULT 'INCREMENTAL',
         [is_active]               BIT             NOT NULL DEFAULT 1,
-        [load_frequency]          NVARCHAR(50)    NULL,       -- DAILY | HOURLY | ON_DEMAND
-        [priority]                INT             NOT NULL DEFAULT 100,           -- lower = runs first
-        [dependency_on]           NVARCHAR(200)   NULL,       -- pipeline_name this must wait for
+        [load_frequency]          NVARCHAR(50)    NULL,
+        [priority]                INT             NOT NULL DEFAULT 100,
+        [dependency_on]           NVARCHAR(200)   NULL,
 
-        -- ── Last run outcome (written back by ADF) ───────────────────────────
-        [last_run_status]         NVARCHAR(20)    NULL,       -- SUCCESS | FAILED | SKIPPED
-        [last_run_date]           DATETIME2       NULL,       -- UTC timestamp of last completed run
 
-        -- ── Audit ────────────────────────────────────────────────────────────
+        [last_run_status]         NVARCHAR(20)    NULL,
+        [last_run_date]           DATETIME2       NULL,
+
+
         [created_date]            DATETIME2       NOT NULL DEFAULT SYSUTCDATETIME(),
-        [created_by]              NVARCHAR(200)   NOT NULL DEFAULT SYSTEM_USER,
+        [created_by]              NVARCHAR(200)   NOT NULL DEFAULT SUSER_SNAME(),
         [modified_date]           DATETIME2       NOT NULL DEFAULT SYSUTCDATETIME(),
-        [modified_by]             NVARCHAR(200)   NOT NULL DEFAULT SYSTEM_USER,
+        [modified_by]             NVARCHAR(200)   NOT NULL DEFAULT SUSER_SNAME(),
 
         CONSTRAINT [PK_pipeline_control]       PRIMARY KEY ([control_id]),
         CONSTRAINT [UQ_pipeline_control_entity] UNIQUE ([pipeline_name], [source_entity], [target_table]),
@@ -132,25 +132,25 @@ IF NOT EXISTS (
 BEGIN
     CREATE TABLE [app].[pipeline_log] (
         [log_id]              BIGINT         NOT NULL IDENTITY(1,1),
-        [run_id]              NVARCHAR(100)  NOT NULL,                  -- ADF pipeline run ID
-        [activity_run_id]     NVARCHAR(100)  NULL,                      -- ADF activity run ID
+        [run_id]              NVARCHAR(100)  NOT NULL,
+        [activity_run_id]     NVARCHAR(100)  NULL,
         [pipeline_name]       NVARCHAR(200)  NOT NULL,
         [source_entity]       NVARCHAR(200)  NOT NULL,
         [target_schema]       NVARCHAR(50)   NOT NULL,
         [target_table]        NVARCHAR(200)  NOT NULL,
-        [status]              NVARCHAR(20)   NOT NULL DEFAULT 'RUNNING', -- RUNNING | SUCCESS | FAILED | SKIPPED
+        [status]              NVARCHAR(20)   NOT NULL DEFAULT 'RUNNING',
         [rows_read]           BIGINT         NULL,
         [rows_written]        BIGINT         NULL,
         [rows_skipped]        BIGINT         NULL,
-        [from_date]           DATETIME2      NULL,                       -- filter window used for this run
+        [from_date]           DATETIME2      NULL,
         [to_date]             DATETIME2      NULL,
-        [watermark_start]     NVARCHAR(500)  NULL,                       -- watermark at run start
-        [watermark_end]       NVARCHAR(500)  NULL,                       -- watermark at run end
+        [watermark_start]     NVARCHAR(500)  NULL,
+        [watermark_end]       NVARCHAR(500)  NULL,
         [error_message]       NVARCHAR(MAX)  NULL,
         [error_code]          NVARCHAR(100)  NULL,
         [start_time]          DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME(),
         [end_time]            DATETIME2      NULL,
-        [duration_seconds]    AS (DATEDIFF(SECOND, [start_time], [end_time])) PERSISTED,
+        [duration_seconds]    AS (DATEDIFF(SECOND, [start_time], [end_time])),
         [environment]         NVARCHAR(20)   NOT NULL DEFAULT 'dev',
         [triggered_by]        NVARCHAR(200)  NULL,
         [created_date]        DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME(),
@@ -182,9 +182,9 @@ BEGIN
         [is_secret]       BIT            NOT NULL DEFAULT 0,
         [is_active]       BIT            NOT NULL DEFAULT 1,
         [created_date]    DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME(),
-        [created_by]      NVARCHAR(200)  NOT NULL DEFAULT SYSTEM_USER,
+        [created_by]      NVARCHAR(200)  NOT NULL DEFAULT SUSER_SNAME(),
         [modified_date]   DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME(),
-        [modified_by]     NVARCHAR(200)  NOT NULL DEFAULT SYSTEM_USER,
+        [modified_by]     NVARCHAR(200)  NOT NULL DEFAULT SUSER_SNAME(),
         CONSTRAINT [PK_config] PRIMARY KEY ([config_id]),
         CONSTRAINT [UQ_config_key_env] UNIQUE ([config_key], [environment])
     );

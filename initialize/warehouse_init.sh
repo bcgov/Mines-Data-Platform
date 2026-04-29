@@ -69,16 +69,15 @@ authenticate_azure() {
 get_fabric_token() {
     echo -e "${BLUE}[INFO]${NC} Fetching Fabric access token..." >&2
     local token
-    token=$(az account get-access-token \
-        --resource https://api.fabric.microsoft.com \
-        --query accessToken \
-        -o tsv)
+    token=$(az account get-access-token         --resource https://api.fabric.microsoft.com         --query accessToken         -o tsv)
 
     if [[ -z "$token" ]]; then
         echo -e "${RED}[✗]${NC} Failed to obtain Fabric access token" >&2
         exit 1
     fi
 
+    # Mask token from logs
+    echo "::add-mask::${token}" >&2
     echo -e "${GREEN}[✓]${NC} Fabric token obtained" >&2
     echo "$token"
 }

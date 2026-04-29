@@ -2,26 +2,16 @@
 # =============================================================================
 # initialize/warehouse_init.sh
 # Initializes a Fabric Warehouse with medallion schemas and app control objects
-# Follows the same auth pattern as create_workspace.sh
 # =============================================================================
 
 set -euo pipefail
 
-# ══════════════════════════════════════════════════════════════
-# Colors
-# ══════════════════════════════════════════════════════════════
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 BOLD='\033[1m'
-
-# ══════════════════════════════════════════════════════════════
-# Configuration & Validation
-# ══════════════════════════════════════════════════════════════
 
 WORKSPACE_ID="${WORKSPACE_ID:?WORKSPACE_ID is required}"
 WAREHOUSE_ID="${WAREHOUSE_ID:?WAREHOUSE_ID is required}"
@@ -49,7 +39,6 @@ echo -e "${BLUE}[INFO]${NC} SQL Script   : ${SQL_FILE}"
 
 check_dependencies() {
     local missing=()
-
     command -v az      &>/dev/null || missing+=("azure-cli")
     command -v curl    &>/dev/null || missing+=("curl")
     command -v jq      &>/dev/null || missing+=("jq")
@@ -57,19 +46,13 @@ check_dependencies() {
 
     if [[ ${#missing[@]} -gt 0 ]]; then
         echo -e "${RED}[✗]${NC} Missing required tools: ${missing[*]}"
-        echo ""
-        echo "Install sqlcmd on Ubuntu:"
-        echo "  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg"
-        echo "  curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list"
-        echo "  sudo apt-get update && sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev"
         exit 1
     fi
-
     echo -e "${GREEN}[✓]${NC} All dependencies present"
 }
 
 # ══════════════════════════════════════════════════════════════
-# Authentication — identical pattern to create_workspace.sh
+# Authentication
 # ══════════════════════════════════════════════════════════════
 
 authenticate_azure() {
@@ -84,11 +67,20 @@ authenticate_azure() {
 }
 
 get_fabric_token() {
-    echo -e "${BLUE}[INFO]${NC} Fetching Fabric access token..."
-    az account get-access-token \
+    echo -e "${BLUE}[INFO]${NC} Fetching Fabric access token..." >&2
+    local token
+    token=$(az account get-access-token \
         --resource https://api.fabric.microsoft.com \
         --query accessToken \
-        -o tsv
+        -o tsv)
+
+    if [[ -z "$token" ]]; then
+        echo -e "${RED}[✗]${NC} Failed to obtain Fabric access token" >&2
+        exit 1
+    fi
+
+    echo -e "${GREEN}[✓]${NC} Fabric token obtained" >&2
+    echo "$token"
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -100,17 +92,43 @@ get_connection_string() {
 
     echo -e "${BLUE}[INFO]${NC} Resolving warehouse connection string..." >&2
 
-    local response
-    response=$(curl -s \
-        -H "Authorization: Bearer ${token}" \
-        "https://api.fabric.microsoft.com/v1/workspaces/${WORKSPACE_ID}/warehouses/${WAREHOUSE_ID}")
+    local url="https://api.fabric.microsoft.com/v1/workspaces/${WORKSPACE_ID}/warehouses/${WAREHOUSE_ID}"
+    echo -e "${BLUE}[INFO]${NC} GET ${url}" >&2
 
+    local http_code response body
+    response=$(curl -s -w "\n%{http_code}" \
+        -H "Authorization: Bearer ${token}" \
+        -H "Content-Type: application/json" \
+        "$url")
+
+    http_code=$(echo "$response" | tail -n1)
+    body=$(echo "$response" | sed '$d')
+
+    echo -e "${BLUE}[INFO]${NC} HTTP status: ${http_code}" >&2
+
+    if [[ "$http_code" != "200" ]]; then
+        echo -e "${RED}[✗]${NC} API call failed (HTTP ${http_code})" >&2
+        echo "$body" | jq . 2>/dev/null || echo "$body" >&2
+        exit 1
+    fi
+
+    echo -e "${BLUE}[INFO]${NC} Raw response:" >&2
+    echo "$body" | jq . 2>/dev/null || echo "$body" >&2
+
+    # Try camelCase first (Fabric API), then snake_case (Terraform state)
     local conn_string
-    conn_string=$(echo "$response" | jq -r '.properties.connectionString // empty')
+    conn_string=$(echo "$body" | jq -r '
+        .properties.connectionString //
+        .properties.connection_string //
+        .connectionString //
+        .connection_string //
+        empty
+    ')
 
     if [[ -z "$conn_string" || "$conn_string" == "null" ]]; then
-        echo -e "${RED}[✗]${NC} Could not resolve connection string. Response:" >&2
-        echo "$response" >&2
+        echo -e "${RED}[✗]${NC} Could not find connection string in response." >&2
+        echo -e "${BLUE}[INFO]${NC} Available properties:" >&2
+        echo "$body" | jq '.properties // .' 2>/dev/null >&2
         exit 1
     fi
 
@@ -134,10 +152,6 @@ run_sql_init() {
     echo -e "${BOLD}Running warehouse_init.sql...${NC}"
     echo "─────────────────────────────────────────────────────────────────"
 
-    # -G  = Azure AD authentication (uses the SP credentials from az login)
-    # -C  = trust server certificate
-    # -b  = exit on first error
-    # -i  = input file
     sqlcmd \
         -S "$conn_string" \
         -G \

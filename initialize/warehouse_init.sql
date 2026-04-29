@@ -44,28 +44,28 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [app].[pipeline_control] (
-        [control_id]            INT             NOT NULL IDENTITY(1,1),
-        [pipeline_name]         NVARCHAR(200)   NOT NULL,
-        [source_system]         NVARCHAR(100)   NOT NULL,
-        [source_entity]         NVARCHAR(200)   NOT NULL,
-        [target_schema]         NVARCHAR(50)    NOT NULL,
-        [target_table]          NVARCHAR(200)   NOT NULL,
-        [source_query_template] NVARCHAR(MAX)   NULL,
+        [control_id]            BIGINT IDENTITY,
+        [pipeline_name]         VARCHAR(200)   NOT NULL,
+        [source_system]         VARCHAR(100)   NOT NULL,
+        [source_entity]         VARCHAR(200)   NOT NULL,
+        [target_schema]         VARCHAR(50)    NOT NULL,
+        [target_table]          VARCHAR(200)   NOT NULL,
+        [source_query_template] VARCHAR(MAX)   NULL,
         [from_date]             DATETIME2       NULL,
         [to_date]               DATETIME2       NULL,
-        [watermark_column]      NVARCHAR(200)   NULL,
-        [last_watermark]        NVARCHAR(500)   NULL,
-        [load_type]             NVARCHAR(20)    NOT NULL,
+        [watermark_column]      VARCHAR(200)   NULL,
+        [last_watermark]        VARCHAR(500)   NULL,
+        [load_type]             VARCHAR(20)    NOT NULL,
         [is_active]             BIT             NOT NULL,
-        [load_frequency]        NVARCHAR(50)    NULL,
+        [load_frequency]        VARCHAR(50)    NULL,
         [priority]              INT             NOT NULL,
-        [dependency_on]         NVARCHAR(200)   NULL,
-        [last_run_status]       NVARCHAR(20)    NULL,
+        [dependency_on]         VARCHAR(200)   NULL,
+        [last_run_status]       VARCHAR(20)    NULL,
         [last_run_date]         DATETIME2       NULL,
         [created_date]          DATETIME2       NOT NULL,
-        [created_by]            NVARCHAR(200)   NOT NULL,
+        [created_by]            VARCHAR(200)   NOT NULL,
         [modified_date]         DATETIME2       NOT NULL,
-        [modified_by]           NVARCHAR(200)   NOT NULL
+        [modified_by]           VARCHAR(200)   NOT NULL
     );
 END;
 GO
@@ -81,27 +81,27 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [app].[pipeline_log] (
-        [log_id]              BIGINT          NOT NULL IDENTITY(1,1),
-        [run_id]              NVARCHAR(100)   NOT NULL,
-        [activity_run_id]     NVARCHAR(100)   NULL,
-        [pipeline_name]       NVARCHAR(200)   NOT NULL,
-        [source_entity]       NVARCHAR(200)   NOT NULL,
-        [target_schema]       NVARCHAR(50)    NOT NULL,
-        [target_table]        NVARCHAR(200)   NOT NULL,
-        [status]              NVARCHAR(20)    NOT NULL,
+        [log_id]              BIGINT IDENTITY,
+        [run_id]              VARCHAR(100)   NOT NULL,
+        [activity_run_id]     VARCHAR(100)   NULL,
+        [pipeline_name]       VARCHAR(200)   NOT NULL,
+        [source_entity]       VARCHAR(200)   NOT NULL,
+        [target_schema]       VARCHAR(50)    NOT NULL,
+        [target_table]        VARCHAR(200)   NOT NULL,
+        [status]              VARCHAR(20)    NOT NULL,
         [rows_read]           BIGINT          NULL,
         [rows_written]        BIGINT          NULL,
         [rows_skipped]        BIGINT          NULL,
         [from_date]           DATETIME2       NULL,
         [to_date]             DATETIME2       NULL,
-        [watermark_start]     NVARCHAR(500)   NULL,
-        [watermark_end]       NVARCHAR(500)   NULL,
-        [error_message]       NVARCHAR(MAX)   NULL,
-        [error_code]          NVARCHAR(100)   NULL,
+        [watermark_start]     VARCHAR(500)   NULL,
+        [watermark_end]       VARCHAR(500)   NULL,
+        [error_message]       VARCHAR(MAX)   NULL,
+        [error_code]          VARCHAR(100)   NULL,
         [start_time]          DATETIME2       NOT NULL,
         [end_time]            DATETIME2       NULL,
-        [environment]         NVARCHAR(20)    NOT NULL,
-        [triggered_by]        NVARCHAR(200)   NULL,
+        [environment]         VARCHAR(20)    NOT NULL,
+        [triggered_by]        VARCHAR(200)   NULL,
         [created_date]        DATETIME2       NOT NULL
     );
 END;
@@ -118,18 +118,18 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [app].[config] (
-        [config_id]       INT             NOT NULL IDENTITY(1,1),
-        [config_key]      NVARCHAR(200)   NOT NULL,
-        [config_value]    NVARCHAR(MAX)   NOT NULL,
-        [config_group]    NVARCHAR(100)   NOT NULL,
-        [environment]     NVARCHAR(20)    NOT NULL,
-        [description]     NVARCHAR(500)   NULL,
+        [config_id]       BIGINT IDENTITY,
+        [config_key]      VARCHAR(200)   NOT NULL,
+        [config_value]    VARCHAR(MAX)   NOT NULL,
+        [config_group]    VARCHAR(100)   NOT NULL,
+        [environment]     VARCHAR(20)    NOT NULL,
+        [description]     VARCHAR(500)   NULL,
         [is_secret]       BIT             NOT NULL,
         [is_active]       BIT             NOT NULL,
         [created_date]    DATETIME2       NOT NULL,
-        [created_by]      NVARCHAR(200)   NOT NULL,
+        [created_by]      VARCHAR(200)   NOT NULL,
         [modified_date]   DATETIME2       NOT NULL,
-        [modified_by]     NVARCHAR(200)   NOT NULL
+        [modified_by]     VARCHAR(200)   NOT NULL
     );
 END;
 GO
@@ -145,18 +145,18 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [app].[error_log] (
-        [error_id]        BIGINT          NOT NULL IDENTITY(1,1),
+        [error_id]        BIGINT IDENTITY,
         [log_id]          BIGINT          NULL,
-        [run_id]          NVARCHAR(100)   NULL,
-        [pipeline_name]   NVARCHAR(200)   NULL,
+        [run_id]          VARCHAR(100)   NULL,
+        [pipeline_name]   VARCHAR(200)   NULL,
         [error_number]    INT             NULL,
         [error_severity]  INT             NULL,
         [error_state]     INT             NULL,
-        [error_procedure] NVARCHAR(200)   NULL,
+        [error_procedure] VARCHAR(200)   NULL,
         [error_line]      INT             NULL,
-        [error_message]   NVARCHAR(MAX)   NOT NULL,
-        [error_context]   NVARCHAR(MAX)   NULL,
-        [stack_trace]     NVARCHAR(MAX)   NULL,
+        [error_message]   VARCHAR(MAX)   NOT NULL,
+        [error_context]   VARCHAR(MAX)   NULL,
+        [stack_trace]     VARCHAR(MAX)   NULL,
         [created_date]    DATETIME2       NOT NULL
     );
 END;
@@ -173,11 +173,11 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [app].[schema_registry] (
-        [registry_id]   INT             NOT NULL IDENTITY(1,1),
-        [schema_name]   NVARCHAR(50)    NOT NULL,
-        [layer]         NVARCHAR(50)    NOT NULL,
-        [description]   NVARCHAR(500)   NULL,
-        [owner]         NVARCHAR(200)   NULL,
+        [registry_id]   BIGINT IDENTITY,
+        [schema_name]   VARCHAR(50)    NOT NULL,
+        [layer]         VARCHAR(50)    NOT NULL,
+        [description]   VARCHAR(500)   NULL,
+        [owner]         VARCHAR(200)   NULL,
         [created_date]  DATETIME2       NOT NULL
     );
 END;

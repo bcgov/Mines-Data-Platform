@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "jobMode": "Batch",
+    "source": {
+      "type": "PostgreSqlTable",
+      "connectionSettings": {
+        "type": "PostgreSql",
+        "typeProperties": {
+          "database": "mds"
+        },
+        "externalReferences": {
+          "connection": "351f4f16-0e5d-48f8-a05a-e0a6849f0343"
+        }
+      }
+    },
+    "destination": {
+      "type": "DataWarehouseTable",
+      "connectionSettings": {
+        "type": "DataWarehouse",
+        "typeProperties": {
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "artifactId": "dad1e7ab-adc2-bd51-408b-33e59ed9a608"
+        }
+      }
+    },
+    "policy": {
+      "timeout": "0.12:00:00",
+      "retry": 0
+    }
+  },
+  "activities": [
+    {
+      "id": "bd5ae5c5-54c2-469b-9eca-f7fdb40dcd2f",
+      "properties": {
+        "source": {
+          "datasetSettings": {
+            "schema": "public",
+            "table": "camp_detail"
+          }
+        },
+        "destination": {
+          "tableOption": "autoCreate",
+          "writeBehavior": "Append",
+          "datasetSettings": {
+            "schema": "bronze",
+            "table": "camp_detail"
+          }
+        },
+        "translator": {
+          "type": "TabularTranslator"
+        },
+        "typeConversionSettings": {
+          "typeConversion": {
+            "allowDataTruncation": true,
+            "treatBooleanAsNumber": false
+          }
+        }
+      }
+    }
+  ]
+}

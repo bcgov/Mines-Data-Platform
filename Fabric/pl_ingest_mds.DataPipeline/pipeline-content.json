@@ -1,0 +1,289 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "Lookup",
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "partitionOption": "None",
+            "queryTimeout": "02:00:00",
+            "query": {
+              "type": "Expression",
+              "value": "@concat('SELECT control_id, pipeline_name, source_system, source_entity, target_schema, target_table, source_query_template, watermark_column, last_watermark, load_type, priority, from_date, to_date FROM [app].[pipeline_control] WHERE [pipeline_name] = ''', pipeline().parameters.pipeline_name, ''' AND [is_active] = 1 ORDER BY [priority] ASC')"
+            },
+            "datasetSettings": {
+              "type": "DataWarehouseTable",
+              "typeProperties": {
+                "schema": "app",
+                "table": "pipeline_control"
+              },
+              "schema": [],
+              "externalReferences": {
+                "connection": "586bcc06-4cf2-4a33-93c0-f1d1b4cd9420"
+              },
+              "annotations": []
+            }
+          },
+          "datasetSettings": {
+            "type": "AzureSqlTable",
+            "typeProperties": {
+              "schema": "app",
+              "table": "pipeline_control",
+              "database": "mines-data-platform-fabwh1"
+            },
+            "schema": [],
+            "externalReferences": {
+              "connection": "586bcc06-4cf2-4a33-93c0-f1d1b4cd9420"
+            },
+            "annotations": []
+          },
+          "firstRowOnly": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Lookup_ControlTable",
+        "dependsOn": []
+      },
+      {
+        "type": "ForEach",
+        "typeProperties": {
+          "isSequential": false,
+          "batchCount": 10,
+          "items": {
+            "value": "@activity('Lookup_ControlTable').output.value",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "type": "Script",
+              "typeProperties": {
+                "scripts": [
+                  {
+                    "text": {
+                      "value": "@concat('INSERT INTO [app].[pipeline_log] ([run_id],[activity_run_id],[pipeline_name],[source_entity],[target_schema],[target_table],[status],[from_date],[to_date],[watermark_start],[start_time],[environment],[triggered_by],[created_date]) VALUES (''', pipeline().RunId, ''',''', pipeline().RunId, ''',''', pipeline().parameters.pipeline_name, ''',''', item().source_entity, ''',''', item().target_schema, ''',''', item().target_table, ''',''RUNNING'',', if(empty(string(item().from_date)), 'NULL', concat('''', string(item().from_date), '''')), ',', if(empty(string(item().to_date)), 'NULL', concat('''', string(item().to_date), '''')), ',', if(empty(item().last_watermark), 'NULL', concat('''', item().last_watermark, '''')), ',''', utcNow(), ''',''', pipeline().parameters.environment, ''',''', pipeline().parameters.triggered_by, ''',''', utcNow(), ''')')",
+                      "type": "Expression"
+                    },
+                    "type": "NonQuery"
+                  }
+                ],
+                "scriptBlockExecutionTimeout": "02:00:00"
+              },
+              "externalReferences": {
+                "connection": "586bcc06-4cf2-4a33-93c0-f1d1b4cd9420"
+              },
+              "policy": {
+                "timeout": "0.00:05:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Log_Start",
+              "dependsOn": []
+            },
+            {
+              "type": "Copy",
+              "typeProperties": {
+                "source": {
+                  "type": "PostgreSqlSource",
+                  "query": {
+                    "value": "@if(empty(item().source_query_template), concat('SELECT * FROM ', item().target_schema, '.', item().source_entity), replace(replace(item().source_query_template, '@from_date', if(empty(string(item().from_date)), '1900-01-01 00:00:00', formatDateTime(item().from_date, 'yyyy-MM-dd HH:mm:ss'))), '@to_date', if(empty(string(item().to_date)), formatDateTime(utcNow(), 'yyyy-MM-dd HH:mm:ss'), formatDateTime(item().to_date, 'yyyy-MM-dd HH:mm:ss'))))",
+                    "type": "Expression"
+                  },
+                  "queryTimeout": "02:00:00",
+                  "datasetSettings": {
+                    "type": "PostgreSqlTable",
+                    "typeProperties": {
+                      "table": {
+                        "value": "@item().source_entity",
+                        "type": "Expression"
+                      },
+                      "schema": {
+                        "value": "@item().target_schema",
+                        "type": "Expression"
+                      }
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "21b383a1-c561-4540-980d-ce3683e89236"
+                    },
+                    "annotations": []
+                  }
+                },
+                "sink": {
+                  "type": "ParquetSink",
+                  "formatSettings": {
+                    "type": "ParquetWriteSettings",
+                    "enableVertiParquet": true
+                  },
+                  "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings"
+                  },
+                  "datasetSettings": {
+                    "type": "Parquet",
+                    "typeProperties": {
+                      "location": {
+                        "type": "LakehouseLocation",
+                        "folderPath": {
+                          "value": "@concat('raw/', item().source_entity, '/', formatDateTime(utcNow(), 'yyyy'), '/', formatDateTime(utcNow(), 'MM'), '/', formatDateTime(utcNow(), 'dd'))",
+                          "type": "Expression"
+                        },
+                        "fileName": {
+                          "value": "@concat(item().source_entity, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.parquet')",
+                          "type": "Expression"
+                        }
+                      },
+                      "compressionCodec": "snappy"
+                    },
+                    "schema": [],
+                    "linkedService": {
+                      "name": "mines_data_platform_lh1",
+                      "properties": {
+                        "type": "Lakehouse",
+                        "typeProperties": {
+                          "artifactId": "c2149858-5ad0-aa2d-47d9-500a8cd34a44",
+                          "workspaceId": "00000000-0000-0000-0000-000000000000",
+                          "rootFolder": "Files"
+                        },
+                        "annotations": []
+                      }
+                    },
+                    "annotations": []
+                  }
+                },
+                "enableStaging": false
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Copy_to_Raw",
+              "dependsOn": [
+                {
+                  "activity": "Log_Start",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Script",
+              "typeProperties": {
+                "scripts": [
+                  {
+                    "text": {
+                      "value": "@concat('UPDATE [app].[pipeline_log] SET [status]=''SUCCEEDED'', [rows_read]=', string(activity('Copy_to_Raw').output.rowsRead), ', [rows_written]=', string(activity('Copy_to_Raw').output.rowsCopied), ', [end_time]=''', utcNow(), ''' WHERE [run_id]=''', pipeline().RunId, ''' AND [source_entity]=''', item().source_entity, '''')",
+                      "type": "Expression"
+                    },
+                    "type": "NonQuery"
+                  },
+                  {
+                    "text": {
+                      "value": "@concat('UPDATE [app].[pipeline_control] SET [last_run_status]=''SUCCEEDED'', [last_run_date]=''', utcNow(), ''', [last_watermark]=', if(empty(item().watermark_column), 'NULL', concat('''', utcNow(), '''')), ', [modified_date]=''', utcNow(), ''' WHERE [control_id]=', string(item().control_id))",
+                      "type": "Expression"
+                    },
+                    "type": "NonQuery"
+                  }
+                ],
+                "scriptBlockExecutionTimeout": "02:00:00"
+              },
+              "externalReferences": {
+                "connection": "586bcc06-4cf2-4a33-93c0-f1d1b4cd9420"
+              },
+              "policy": {
+                "timeout": "0.00:05:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Log_Success",
+              "dependsOn": [
+                {
+                  "activity": "Copy_to_Raw",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Script",
+              "typeProperties": {
+                "scripts": [
+                  {
+                    "text": {
+                      "value": "@concat('UPDATE [app].[pipeline_log] SET [status]=''FAILED'', [end_time]=''', utcNow(), ''', [error_message]=''', replace(activity('Copy_to_Raw').output.errors[0].Message, '''', ''''''), ''', [error_code]=''', activity('Copy_to_Raw').output.errors[0].Code, ''' WHERE [run_id]=''', pipeline().RunId, ''' AND [source_entity]=''', item().source_entity, '''')",
+                      "type": "Expression"
+                    },
+                    "type": "NonQuery"
+                  },
+                  {
+                    "text": {
+                      "value": "@concat('UPDATE [app].[pipeline_control] SET [last_run_status]=''FAILED'', [last_run_date]=''', utcNow(), ''', [modified_date]=''', utcNow(), ''' WHERE [control_id]=', string(item().control_id))",
+                      "type": "Expression"
+                    },
+                    "type": "NonQuery"
+                  }
+                ],
+                "scriptBlockExecutionTimeout": "02:00:00"
+              },
+              "externalReferences": {
+                "connection": "586bcc06-4cf2-4a33-93c0-f1d1b4cd9420"
+              },
+              "policy": {
+                "timeout": "0.00:05:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Log_Failure",
+              "dependsOn": [
+                {
+                  "activity": "Copy_to_Raw",
+                  "dependencyConditions": [
+                    "Failed"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "name": "ForEach_ControlRows",
+        "dependsOn": [
+          {
+            "activity": "Lookup_ControlTable",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "environment": {
+        "type": "String",
+        "defaultValue": "dev"
+      },
+      "pipeline_name": {
+        "type": "String",
+        "defaultValue": "pl_ingest_mds"
+      },
+      "triggered_by": {
+        "type": "String",
+        "defaultValue": "manual"
+      }
+    }
+  }
+}

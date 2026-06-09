@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Lakehouse",
+    "displayName": "mines_data_platform_lh1",
+    "description": "Default Lakehouse Description"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "c2149858-5ad0-aa2d-47d9-500a8cd34a44"
+  }
+}

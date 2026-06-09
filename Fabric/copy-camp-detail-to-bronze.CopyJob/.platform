@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "CopyJob",
+    "displayName": "copy-camp-detail-to-bronze",
+    "description": "On-demand copy: PostgreSQL public.camp_detail → Fabric Warehouse mines-data-platform-fabwh1.bronze.camp_detail"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "dba630b7-26ef-9221-410f-44e4e78c7ecf"
+  }
+}

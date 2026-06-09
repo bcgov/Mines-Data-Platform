@@ -1,0 +1,25 @@
+CREATE TABLE [app].[pipeline_log] (
+
+	[log_id] bigint IDENTITY NOT NULL, 
+	[run_id] varchar(100) NOT NULL, 
+	[activity_run_id] varchar(100) NULL, 
+	[pipeline_name] varchar(200) NOT NULL, 
+	[source_entity] varchar(200) NOT NULL, 
+	[target_schema] varchar(50) NOT NULL, 
+	[target_table] varchar(200) NOT NULL, 
+	[status] varchar(20) NOT NULL, 
+	[rows_read] bigint NULL, 
+	[rows_written] bigint NULL, 
+	[rows_skipped] bigint NULL, 
+	[from_date] datetime2(6) NULL, 
+	[to_date] datetime2(6) NULL, 
+	[watermark_start] varchar(500) NULL, 
+	[watermark_end] varchar(500) NULL, 
+	[error_message] varchar(max) NULL, 
+	[error_code] varchar(100) NULL, 
+	[start_time] datetime2(6) NOT NULL, 
+	[end_time] datetime2(6) NULL, 
+	[environment] varchar(20) NOT NULL, 
+	[triggered_by] varchar(200) NULL, 
+	[created_date] datetime2(6) NOT NULL
+);

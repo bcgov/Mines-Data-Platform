@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "GIS"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f060e4e7-575a-b5ab-41d2-4867939d957e"
+  }
+}

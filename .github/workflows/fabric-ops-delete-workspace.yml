@@ -1,0 +1,32 @@
+# Ops utility: delete a Fabric workspace by ID as the service principal.
+# Runs on push to chore/** (which the team's feature/** deployment pipeline ignores,
+# so it never spawns a feature workspace) or via manual dispatch.
+name: Fabric Ops - Delete Workspace
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        description: 'Workspace ID to delete'
+        required: true
+  push:
+    branches: ['chore/**']
+    paths:
+      - '.github/workflows/fabric-ops-delete-workspace.yml'
+      - '.github/workflows/scripts/delete_workspace_by_id.sh'
+
+jobs:
+  delete:
+    name: Delete workspace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y jq curl
+      - run: chmod +x .github/workflows/scripts/delete_workspace_by_id.sh
+      - run: .github/workflows/scripts/delete_workspace_by_id.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          # On push (no inputs) defaults to the orphan workspace created 2026-06-23.
+          WORKSPACE_ID: ${{ github.event.inputs.workspace_id || '0c186e4e-5af4-420f-b866-6343335aee74' }}

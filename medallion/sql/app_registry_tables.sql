@@ -3,10 +3,10 @@
 -- Fabric Warehouse-compatible DDL for the medallion app.* control/registry tables.
 -- Idempotent (safe to re-run). Deployed directly to the workspace warehouse via SPN.
 --
--- Fabric Warehouse T-SQL constraints respected: NO IDENTITY, NO DEFAULT, NO CHECK,
--- NO computed columns. Surrogate *_id columns are populated by the loading notebooks
--- (row_number()+max). PKs declared NONCLUSTERED ... NOT ENFORCED (the only PK form
--- Fabric Warehouse allows) for optimizer/metadata only.
+-- Fabric Warehouse T-SQL constraints respected (verified empirically 2026-06-23):
+--   NO IDENTITY, NO DEFAULT, NO CHECK, NO computed columns, and NO PRIMARY KEY /
+--   constraint keyword in CREATE TABLE (error 24584). Surrogate *_id columns are
+--   populated by the loading notebooks (row_number()+max); keys are documented, not enforced.
 -- =============================================================================
 
 IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'app')
@@ -33,8 +33,7 @@ BEGIN
         [created_date]     datetime2(6)  NOT NULL,
         [created_by]       varchar(200)  NOT NULL,
         [modified_date]    datetime2(6)  NOT NULL,
-        [modified_by]      varchar(200)  NOT NULL,
-        CONSTRAINT [PK_object_registry] PRIMARY KEY NONCLUSTERED ([object_id]) NOT ENFORCED
+        [modified_by]      varchar(200)  NOT NULL
     );
 END;
 GO
@@ -56,8 +55,7 @@ BEGIN
         [created_date]    datetime2(6)  NOT NULL,
         [created_by]      varchar(200)  NOT NULL,
         [modified_date]   datetime2(6)  NOT NULL,
-        [modified_by]     varchar(200)  NOT NULL,
-        CONSTRAINT [PK_field_registry] PRIMARY KEY NONCLUSTERED ([field_id]) NOT ENFORCED
+        [modified_by]     varchar(200)  NOT NULL
     );
 END;
 GO
@@ -79,8 +77,7 @@ BEGIN
         [created_date]   datetime2(6)  NOT NULL,
         [created_by]     varchar(200)  NOT NULL,
         [modified_date]  datetime2(6)  NOT NULL,
-        [modified_by]    varchar(200)  NOT NULL,
-        CONSTRAINT [PK_transform_registry] PRIMARY KEY NONCLUSTERED ([transform_id]) NOT ENFORCED
+        [modified_by]    varchar(200)  NOT NULL
     );
 END;
 GO
@@ -99,8 +96,7 @@ BEGIN
         [created_date]  datetime2(6)  NOT NULL,
         [created_by]    varchar(200)  NOT NULL,
         [modified_date] datetime2(6)  NOT NULL,
-        [modified_by]   varchar(200)  NOT NULL,
-        CONSTRAINT [PK_dq_rule] PRIMARY KEY NONCLUSTERED ([rule_id]) NOT ENFORCED
+        [modified_by]   varchar(200)  NOT NULL
     );
 END;
 GO
@@ -116,8 +112,7 @@ BEGIN
         [rows_evaluated] bigint        NOT NULL,
         [rows_failed]    bigint        NOT NULL,
         [status]         varchar(20)   NOT NULL,
-        [run_ts]         datetime2(6)  NOT NULL,
-        CONSTRAINT [PK_dq_result] PRIMARY KEY NONCLUSTERED ([result_id]) NOT ENFORCED
+        [run_ts]         datetime2(6)  NOT NULL
     );
 END;
 GO
@@ -133,8 +128,7 @@ BEGIN
         [error_message] varchar(max)  NOT NULL,
         [error_context] varchar(max)  NULL,
         [stack_trace]   varchar(max)  NULL,
-        [created_date]  datetime2(6)  NOT NULL,
-        CONSTRAINT [PK_error_log_bronze] PRIMARY KEY NONCLUSTERED ([error_id]) NOT ENFORCED
+        [created_date]  datetime2(6)  NOT NULL
     );
 END;
 GO
@@ -149,8 +143,7 @@ BEGIN
         [error_message] varchar(max)  NOT NULL,
         [error_context] varchar(max)  NULL,
         [stack_trace]   varchar(max)  NULL,
-        [created_date]  datetime2(6)  NOT NULL,
-        CONSTRAINT [PK_error_log_silver] PRIMARY KEY NONCLUSTERED ([error_id]) NOT ENFORCED
+        [created_date]  datetime2(6)  NOT NULL
     );
 END;
 GO
@@ -165,8 +158,7 @@ BEGIN
         [error_message] varchar(max)  NOT NULL,
         [error_context] varchar(max)  NULL,
         [stack_trace]   varchar(max)  NULL,
-        [created_date]  datetime2(6)  NOT NULL,
-        CONSTRAINT [PK_error_log_gold] PRIMARY KEY NONCLUSTERED ([error_id]) NOT ENFORCED
+        [created_date]  datetime2(6)  NOT NULL
     );
 END;
 GO

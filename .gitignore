@@ -1,0 +1,9 @@
+# Local-only design/plan docs — never checked in (per project decision)
+docs/_local/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/

@@ -1,0 +1,53 @@
+# Provisions the Silver/Gold medallion lakehouses in the Fabric workspace
+# as the CI service principal. The SPN secret stays in GitHub Actions and is
+# never exposed. Trigger manually (workflow_dispatch) once this file is on the
+# default branch, OR it auto-runs on first push of this branch (path-filtered).
+name: Provision Medallion Lakehouses
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        description: 'Fabric workspace ID'
+        required: true
+        default: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+      lakehouses:
+        description: 'Space-separated lakehouse names to create'
+        required: false
+        default: 'lh_silver lh_gold'
+      bronze_lh_id:
+        description: 'Existing Bronze lakehouse id (optional, for the mapping output)'
+        required: false
+        default: ''
+  push:
+    branches: [feature/medallion_architecture]
+    paths:
+      - '.github/workflows/provision-medallion-lakehouses.yml'
+      - '.github/workflows/scripts/provision_lakehouses.sh'
+
+jobs:
+  provision:
+    name: Provision lakehouses
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl
+
+      - name: Make script executable
+        run: chmod +x .github/workflows/scripts/provision_lakehouses.sh
+
+      - name: Provision lakehouses
+        id: provision
+        run: .github/workflows/scripts/provision_lakehouses.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: ${{ github.event.inputs.workspace_id || '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0' }}
+          LAKEHOUSES: ${{ github.event.inputs.lakehouses || 'lh_silver lh_gold' }}
+          BRONZE_LH_ID: ${{ github.event.inputs.bronze_lh_id || '' }}

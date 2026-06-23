@@ -1,0 +1,40 @@
+# Deploy medallion app.* tables directly to the workspace warehouse via the SPN.
+# Triggers on medallion/** pushes (ignored by the team's feature/** pipeline) or manual dispatch.
+name: Deploy App Tables
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        description: 'Fabric workspace ID'
+        required: true
+        default: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+  push:
+    branches: ['medallion/**']
+    paths:
+      - 'medallion/sql/app_registry_tables.sql'
+      - '.github/workflows/scripts/deploy_app_tables.sh'
+      - '.github/workflows/deploy-app-tables.yml'
+
+jobs:
+  deploy:
+    name: Deploy app.* tables
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies (sqlcmd + tools)
+        run: |
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev jq curl
+          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+      - name: Make script executable
+        run: chmod +x .github/workflows/scripts/deploy_app_tables.sh
+      - name: Deploy
+        run: .github/workflows/scripts/deploy_app_tables.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: ${{ github.event.inputs.workspace_id || '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0' }}
+          WAREHOUSE_NAME: 'mines-data-platform-fabwh1'
+          SQL_FILE: 'medallion/sql/app_registry_tables.sql'

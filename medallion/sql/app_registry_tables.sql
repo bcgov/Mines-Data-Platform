@@ -1,0 +1,181 @@
+-- =============================================================================
+-- medallion/sql/app_registry_tables.sql
+-- Fabric Warehouse-compatible DDL for the medallion app.* control/registry tables.
+-- Idempotent (safe to re-run). Deployed directly to the workspace warehouse via SPN.
+--
+-- Fabric Warehouse T-SQL constraints respected: NO IDENTITY, NO DEFAULT, NO CHECK,
+-- NO computed columns. Surrogate *_id columns are populated by the loading notebooks
+-- (row_number()+max). PKs declared NONCLUSTERED ... NOT ENFORCED (the only PK form
+-- Fabric Warehouse allows) for optimizer/metadata only.
+-- =============================================================================
+
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'app')
+    EXEC('CREATE SCHEMA [app]');
+GO
+
+-- ── object_registry (bronze/silver entities) ────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='object_registry')
+BEGIN
+    CREATE TABLE [app].[object_registry] (
+        [object_id]        bigint        NOT NULL,
+        [source_entity]    varchar(200)  NOT NULL,
+        [bronze_schema]    varchar(50)   NOT NULL,
+        [bronze_table]     varchar(200)  NOT NULL,
+        [silver_schema]    varchar(50)   NOT NULL,
+        [silver_table]     varchar(200)  NOT NULL,
+        [load_type]        varchar(20)   NOT NULL,
+        [primary_key]      varchar(400)  NULL,
+        [watermark_column] varchar(200)  NULL,
+        [is_active]        bit           NOT NULL,
+        [load_group]       int           NOT NULL,
+        [priority]         int           NOT NULL,
+        [dependency_on]    varchar(200)  NULL,
+        [created_date]     datetime2(6)  NOT NULL,
+        [created_by]       varchar(200)  NOT NULL,
+        [modified_date]    datetime2(6)  NOT NULL,
+        [modified_by]      varchar(200)  NOT NULL,
+        CONSTRAINT [PK_object_registry] PRIMARY KEY NONCLUSTERED ([object_id]) NOT ENFORCED
+    );
+END;
+GO
+
+-- ── field_registry (column conformance) ─────────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='field_registry')
+BEGIN
+    CREATE TABLE [app].[field_registry] (
+        [field_id]        bigint        NOT NULL,
+        [object_id]       bigint        NOT NULL,
+        [entity]          varchar(200)  NOT NULL,
+        [column_name]     varchar(200)  NOT NULL,
+        [spark_type]      varchar(100)  NOT NULL,
+        [nullable]        bit           NOT NULL,
+        [is_pk]           bit           NOT NULL,
+        [include_in_load] bit           NOT NULL,
+        [pii_type]        varchar(50)   NULL,
+        [ordinal]         int           NOT NULL,
+        [created_date]    datetime2(6)  NOT NULL,
+        [created_by]      varchar(200)  NOT NULL,
+        [modified_date]   datetime2(6)  NOT NULL,
+        [modified_by]     varchar(200)  NOT NULL,
+        CONSTRAINT [PK_field_registry] PRIMARY KEY NONCLUSTERED ([field_id]) NOT ENFORCED
+    );
+END;
+GO
+
+-- ── transform_registry (gold dim/fact) ──────────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='transform_registry')
+BEGIN
+    CREATE TABLE [app].[transform_registry] (
+        [transform_id]   bigint        NOT NULL,
+        [transform_name] varchar(200)  NOT NULL,
+        [source_view]    varchar(200)  NOT NULL,
+        [transform_type] varchar(20)   NOT NULL,
+        [scd_type]       int           NULL,
+        [surrogate_key]  varchar(200)  NULL,
+        [natural_keys]   varchar(400)  NULL,
+        [load_group]     int           NOT NULL,
+        [load_order]     int           NOT NULL,
+        [is_active]      bit           NOT NULL,
+        [created_date]   datetime2(6)  NOT NULL,
+        [created_by]     varchar(200)  NOT NULL,
+        [modified_date]  datetime2(6)  NOT NULL,
+        [modified_by]    varchar(200)  NOT NULL,
+        CONSTRAINT [PK_transform_registry] PRIMARY KEY NONCLUSTERED ([transform_id]) NOT ENFORCED
+    );
+END;
+GO
+
+-- ── dq_rule (data-quality rules) ─────────────────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='dq_rule')
+BEGIN
+    CREATE TABLE [app].[dq_rule] (
+        [rule_id]       bigint        NOT NULL,
+        [entity]        varchar(200)  NOT NULL,
+        [column_name]   varchar(200)  NULL,
+        [rule_type]     varchar(50)   NOT NULL,
+        [params]        varchar(max)  NULL,
+        [severity]      varchar(20)   NOT NULL,
+        [is_active]     bit           NOT NULL,
+        [created_date]  datetime2(6)  NOT NULL,
+        [created_by]    varchar(200)  NOT NULL,
+        [modified_date] datetime2(6)  NOT NULL,
+        [modified_by]   varchar(200)  NOT NULL,
+        CONSTRAINT [PK_dq_rule] PRIMARY KEY NONCLUSTERED ([rule_id]) NOT ENFORCED
+    );
+END;
+GO
+
+-- ── dq_result (DQ run log) ───────────────────────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='dq_result')
+BEGIN
+    CREATE TABLE [app].[dq_result] (
+        [result_id]      bigint        NOT NULL,
+        [run_id]         varchar(100)  NOT NULL,
+        [entity]         varchar(200)  NOT NULL,
+        [rule_name]      varchar(200)  NOT NULL,
+        [rows_evaluated] bigint        NOT NULL,
+        [rows_failed]    bigint        NOT NULL,
+        [status]         varchar(20)   NOT NULL,
+        [run_ts]         datetime2(6)  NOT NULL,
+        CONSTRAINT [PK_dq_result] PRIMARY KEY NONCLUSTERED ([result_id]) NOT ENFORCED
+    );
+END;
+GO
+
+-- ── per-phase error logs (bronze / silver / gold) ────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log_bronze')
+BEGIN
+    CREATE TABLE [app].[error_log_bronze] (
+        [error_id]      bigint        NOT NULL,
+        [run_id]        varchar(100)  NULL,
+        [entity]        varchar(200)  NULL,
+        [target_table]  varchar(200)  NULL,
+        [error_message] varchar(max)  NOT NULL,
+        [error_context] varchar(max)  NULL,
+        [stack_trace]   varchar(max)  NULL,
+        [created_date]  datetime2(6)  NOT NULL,
+        CONSTRAINT [PK_error_log_bronze] PRIMARY KEY NONCLUSTERED ([error_id]) NOT ENFORCED
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log_silver')
+BEGIN
+    CREATE TABLE [app].[error_log_silver] (
+        [error_id]      bigint        NOT NULL,
+        [run_id]        varchar(100)  NULL,
+        [entity]        varchar(200)  NULL,
+        [target_table]  varchar(200)  NULL,
+        [error_message] varchar(max)  NOT NULL,
+        [error_context] varchar(max)  NULL,
+        [stack_trace]   varchar(max)  NULL,
+        [created_date]  datetime2(6)  NOT NULL,
+        CONSTRAINT [PK_error_log_silver] PRIMARY KEY NONCLUSTERED ([error_id]) NOT ENFORCED
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log_gold')
+BEGIN
+    CREATE TABLE [app].[error_log_gold] (
+        [error_id]      bigint        NOT NULL,
+        [run_id]        varchar(100)  NULL,
+        [entity]        varchar(200)  NULL,
+        [target_table]  varchar(200)  NULL,
+        [error_message] varchar(max)  NOT NULL,
+        [error_context] varchar(max)  NULL,
+        [stack_trace]   varchar(max)  NULL,
+        [created_date]  datetime2(6)  NOT NULL,
+        CONSTRAINT [PK_error_log_gold] PRIMARY KEY NONCLUSTERED ([error_id]) NOT ENFORCED
+    );
+END;
+GO
+
+-- ── verify ───────────────────────────────────────────────────────────────────
+SELECT t.name AS table_name
+FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id
+WHERE s.name='app' AND t.name IN
+    ('object_registry','field_registry','transform_registry','dq_rule','dq_result',
+     'error_log_bronze','error_log_silver','error_log_gold')
+ORDER BY t.name;
+GO

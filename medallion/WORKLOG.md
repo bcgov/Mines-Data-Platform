@@ -22,9 +22,20 @@
 
 ## To deploy (direct-to-workspace, via SPN)
 
-- [ ] `app.*` warehouse tables (object/field/transform registry, dq_rule, dq_result, error_log_bronze/silver/gold) → into warehouse `mines-data-platform-fabwh1` (reuse the repo's `initialize-warehouse` SPN→SQL pattern).
+- [x] `app.*` warehouse tables (object/field/transform registry, dq_rule, dq_result, error_log_bronze/silver/gold) → **DEPLOYED 2026-06-23** into warehouse `mines-data-platform-fabwh1` (id `9ed9a608-33e5-408b-bd51-adc2dad1e7ab`) via `deploy-app-tables.yml` + `medallion/sql/app_registry_tables.sql`. Verified: all 8 tables present.
 - [ ] `nb_util_paths`, `nb_smoke_foundation` notebooks → via Fabric Items API; run smoke to validate cross-lakehouse path resolution + Delta I/O.
-- [ ] Verify Fabric Warehouse accepts `IDENTITY` on the `app.*` tables (the one compatibility risk).
+
+## Deploy mechanism that works (reusable)
+
+`deploy-app-tables.yml` (push on `medallion/**`) → `deploy_app_tables.sh`: SPN `az login` → Fabric REST resolves the warehouse by displayName → gets `.properties.connectionString` → acquires a `https://database.windows.net/` token → `medallion/sql/run_sql.py` (pyodbc, ODBC Driver 18, `SQL_COPT_SS_ACCESS_TOKEN`) executes the SQL split on `GO`. This is the template for any future direct-to-warehouse SQL.
+
+## Findings (Fabric Warehouse T-SQL — verified empirically 2026-06-23)
+
+- **F1:** Fabric Warehouse **rejects `IDENTITY`** in CREATE TABLE. Surrogate ids must be loader-populated.
+- **F2:** Fabric Warehouse **rejects the `PRIMARY KEY`/constraint keyword in CREATE TABLE** (error 24584). No inline PK/UNIQUE/CHECK. (PK NOT ENFORCED, if ever needed, must go via `ALTER TABLE` and may still be unsupported in this edition.)
+- **F3:** `sqlcmd -G` (ODBC) **cannot authenticate as a service principal** (defaults to ActiveDirectoryIntegrated → "authenticate the user ''"). Use **pyodbc + access-token** instead. The repo's `initialize/warehouse_init.sh` uses bare `-G` and would fail for SP — and its `Initialize Warehouse` workflow has never run.
+- **F4:** Therefore the committed `*.Warehouse/app/Tables/*.sql` files (which use `bigint IDENTITY`) and `initialize/warehouse_init.sql` (IDENTITY/DEFAULT/CHECK/computed/PK) are **NOT deployable to this Fabric Warehouse as-is**. `medallion/sql/app_registry_tables.sql` is the deployable, Fabric-safe truth.
+- **F5:** Our `app.*` tables were deployed into the **shared dev warehouse** `mines-data-platform-fabwh1` (alongside the team's existing `app` objects), per the direct-to-workspace working model.
 
 ## Open issues / findings
 

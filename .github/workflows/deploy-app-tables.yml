@@ -13,6 +13,7 @@ on:
     branches: ['medallion/**']
     paths:
       - 'medallion/sql/app_registry_tables.sql'
+      - 'medallion/sql/run_sql.py'
       - '.github/workflows/scripts/deploy_app_tables.sh'
       - '.github/workflows/deploy-app-tables.yml'
 
@@ -22,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies (sqlcmd + tools)
+      - name: Install dependencies (ODBC Driver 18 + pyodbc + tools)
         run: |
           sudo apt-get update -q
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev jq curl
-          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev jq curl
+          python3 -m pip install --quiet pyodbc
       - name: Make script executable
         run: chmod +x .github/workflows/scripts/deploy_app_tables.sh
       - name: Deploy

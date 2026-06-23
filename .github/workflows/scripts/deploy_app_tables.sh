@@ -34,7 +34,12 @@ CONN="$(curl -s -H "Authorization: Bearer $TOKEN" \
 if [[ -z "$CONN" ]]; then log "Could not resolve connection string."; exit 1; fi
 log "Connection string: $CONN"
 
-log "Running $SQL_FILE against $WAREHOUSE_NAME ..."
-# -G AAD auth (from az login SP), -C trust cert, -b exit on error, -d database = warehouse name
-sqlcmd -S "$CONN" -d "$WAREHOUSE_NAME" -G -C -b -i "$SQL_FILE"
+log "Acquiring SQL access token (resource: database.windows.net) for the SP..."
+SQL_TOKEN="$(az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv)"
+if [[ -z "$SQL_TOKEN" ]]; then log "Could not obtain SQL access token."; exit 1; fi
+
+log "Running $SQL_FILE against $WAREHOUSE_NAME via pyodbc (SP access-token auth)..."
+# sqlcmd -G cannot do service-principal auth; use pyodbc + ODBC access-token attribute.
+export SQL_SERVER="$CONN" SQL_DATABASE="$WAREHOUSE_NAME" SQL_FILE="$SQL_FILE" SQL_ACCESS_TOKEN="$SQL_TOKEN"
+python3 "${SQL_RUNNER:-medallion/sql/run_sql.py}"
 log "SQL executed successfully."

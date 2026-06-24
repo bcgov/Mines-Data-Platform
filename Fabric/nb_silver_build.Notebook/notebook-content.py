@@ -61,6 +61,7 @@ def log_error(layer, run_id, entity, error_message, stack_trace=None, target_tab
     """Write one row to the centralized warehouse app.error_log via the synapsesql connector.
     log_id/pipeline_name are null on direct runs; set them when a pipeline invokes this notebook."""
     try:
+        from com.microsoft.spark.fabric import Constants  # noqa: F401 — registers the .synapsesql writer
         from pyspark.sql.types import StructType, StructField, StringType, LongType
         sch = StructType([
             StructField("error_id", StringType()), StructField("layer", StringType()),

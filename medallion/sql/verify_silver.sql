@@ -1,14 +1,10 @@
--- Verify Silver build via the Silver lakehouse SQL analytics endpoint.
-SELECT TABLE_SCHEMA, TABLE_NAME
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA IN ('silver', 'quarantine')
-ORDER BY TABLE_SCHEMA, TABLE_NAME;
-GO
-
+-- Verify Silver build by reading the run log written to the Bronze lakehouse
+-- (Bronze SQL endpoint syncs fast; Silver endpoint lags for fresh tables).
 SELECT entity, status,
        CAST(bronze_rows AS bigint)      AS bronze_rows,
        CAST(silver_rows AS bigint)      AS silver_rows,
-       CAST(quarantined_rows AS bigint) AS quarantined_rows
-FROM silver.load_summary
+       CAST(quarantined_rows AS bigint) AS quarantined_rows,
+       LEFT(CAST(error AS varchar(4000)), 300) AS error
+FROM bronze.silver_run_log
 ORDER BY entity;
 GO

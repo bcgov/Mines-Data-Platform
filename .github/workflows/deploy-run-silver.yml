@@ -38,5 +38,7 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           WORKSPACE_ID: ${{ github.event.inputs.workspace_id || '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0' }}
-          SILVER_LH_ID: 'a0190e0e-c2f5-4740-ab90-a2f29b6e6991'
-          SILVER_LH_NAME: 'lh_silver'
+          # Verify by reading the run log the notebook writes to the Bronze lakehouse
+          # (its SQL endpoint syncs fast, unlike the fresh Silver one).
+          VERIFY_LH_ID: '8cd34a44-500a-47d9-aa2d-5ad0c2149858'
+          VERIFY_LH_NAME: 'mines_data_platform_lh1'

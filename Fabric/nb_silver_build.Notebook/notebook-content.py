@@ -154,14 +154,23 @@ summary_schema = StructType([
     StructField("status", StringType()),
     StructField("error", StringType()),
 ])
+summary_df = (spark.createDataFrame(results, summary_schema)
+              .withColumn("run_id", F.lit(RUN_ID))
+              .withColumn("run_ts", F.current_timestamp()))
+
+# Reliable readback: write the run log to the BRONZE lakehouse (writes proven + its SQL
+# endpoint syncs fast), so per-entity status/errors are queryable from CI via pyodbc.
 try:
-    summary_df = (spark.createDataFrame(results, summary_schema)
-                  .withColumn("run_id", F.lit(RUN_ID))
-                  .withColumn("run_ts", F.current_timestamp()))
-    if spark.catalog.tableExists(SUMMARY_TABLE):
-        summary_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(SUMMARY_TABLE)
-    else:
-        summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(SUMMARY_TABLE)
+    bronze_log_path = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/silver_run_log/"
+    summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(bronze_log_path)
+    print("wrote run log to bronze.silver_run_log")
+except Exception as e:
+    print(f"bronze readback write failed: {e}")
+    traceback.print_exc()
+
+# Best-effort silver-local summary too.
+try:
+    summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(SUMMARY_TABLE)
 except Exception as e:
     print(f"Error writing {SUMMARY_TABLE}: {e}")
     traceback.print_exc()

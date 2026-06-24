@@ -1,0 +1,32 @@
+# Ops: list a lakehouse's Delta tables via OneLake DFS (no SQL-endpoint dependency).
+# Defaults to the Silver lakehouse. Change LAKEHOUSE_ID and push to re-target, or dispatch.
+name: Fabric Ops - List Lakehouse Tables
+
+on:
+  workflow_dispatch:
+    inputs:
+      lakehouse_id:
+        description: 'Lakehouse ID to list'
+        required: true
+        default: 'a0190e0e-c2f5-4740-ab90-a2f29b6e6991'
+  push:
+    branches: ['medallion/**']
+    paths:
+      - '.github/workflows/scripts/list_lakehouse_tables.sh'
+      - '.github/workflows/fabric-ops-list-tables.yml'
+
+jobs:
+  list:
+    name: List lakehouse tables
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -q && sudo apt-get install -y jq curl
+      - run: chmod +x .github/workflows/scripts/list_lakehouse_tables.sh
+      - run: .github/workflows/scripts/list_lakehouse_tables.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+          LAKEHOUSE_ID: ${{ github.event.inputs.lakehouse_id || 'a0190e0e-c2f5-4740-ab90-a2f29b6e6991' }}

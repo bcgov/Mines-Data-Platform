@@ -10,6 +10,10 @@
 # META       "default_lakehouse_name": "lh_silver",
 # META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
 # META       "known_lakehouses": [ { "id": "a0190e0e-c2f5-4740-ab90-a2f29b6e6991" } ]
+# META     },
+# META     "warehouse": {
+# META       "default_warehouse": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
+# META       "known_warehouses": [ { "id": "dad1e7ab-adc2-bd51-408b-33e59ed9a608", "type": "Datawarehouse" } ]
 # META     }
 # META   }
 # META }
@@ -37,14 +41,42 @@ SUMMARY_TABLE = "silver.load_summary"
 # v1 entities (registry-aligned; object_registry seeded separately). PK drives dedup;
 # not_null drives the DQ quarantine split.
 V1 = [
-    # NOTE: the conformed 'mine' hub is absent from bronze (public.mine did not land in
-    # Files/raw — a raw-landing gap to resolve before dim_mine can be built). Re-add when present.
+    # 'mine' hub is currently ABSENT from bronze (public.mine did not land in Files/raw).
+    # Kept here intentionally as a known-failing entity — it logs a clear row to
+    # app.error_log every run, a self-documenting signal that the gap persists. Remove
+    # this comment once public.mine lands.
+    {"entity": "mine",             "pk": "mine_guid",           "not_null": ["mine_guid", "mine_no"]},
     {"entity": "mine_incident",    "pk": "mine_incident_id",    "not_null": ["mine_incident_id"]},
     {"entity": "permit",           "pk": "permit_id",           "not_null": ["permit_id"]},
     {"entity": "permit_amendment", "pk": "permit_amendment_id", "not_null": ["permit_amendment_id"]},
 ]
 
+WAREHOUSE = "mines-data-platform-fabwh1"
+
 spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
+
+
+def log_error(layer, run_id, entity, error_message, stack_trace=None, target_table=None,
+              error_code=None, error_context=None, log_id=None, pipeline_name=None):
+    """Write one row to the centralized warehouse app.error_log via the synapsesql connector.
+    log_id/pipeline_name are null on direct runs; set them when a pipeline invokes this notebook."""
+    try:
+        from pyspark.sql.types import StructType, StructField, StringType, LongType
+        sch = StructType([
+            StructField("error_id", StringType()), StructField("layer", StringType()),
+            StructField("log_id", LongType()), StructField("pipeline_name", StringType()),
+            StructField("run_id", StringType()), StructField("entity", StringType()),
+            StructField("target_table", StringType()), StructField("error_message", StringType()),
+            StructField("error_code", StringType()), StructField("error_context", StringType()),
+            StructField("stack_trace", StringType()),
+        ])
+        row = (str(uuid.uuid4()), layer, log_id, pipeline_name, run_id, entity, target_table,
+               (error_message or "(no message)")[:8000], error_code, error_context,
+               (stack_trace[:8000] if stack_trace else None))
+        edf = spark.createDataFrame([row], sch).withColumn("created_date", F.current_timestamp())
+        edf.write.mode("append").synapsesql(f"{WAREHOUSE}.app.error_log")
+    except Exception as e:
+        print(f"log_error failed (non-fatal): {e}")
 
 
 def bronze_path(table):
@@ -148,6 +180,7 @@ for cfg in V1:
         err = str(e)[:1000]
         print(f"FAILED {entity}: {err}")
         traceback.print_exc()
+        log_error("silver", RUN_ID, entity, err, traceback.format_exc(), target_table=f"silver.{entity}")
         results.append((entity, None, None, None, "FAILED", err))
 
 # summary (explicit schema avoids void inference)

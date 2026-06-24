@@ -1,16 +1,9 @@
--- Verify Silver via the run log written to the Bronze lakehouse (Bronze SQL endpoint
--- syncs fast). First query discovers the real bronze table name(s) for 'mine'.
-SELECT TABLE_NAME
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = 'bronze' AND TABLE_NAME LIKE '%mine%'
-ORDER BY TABLE_NAME;
-GO
-
-SELECT entity, status,
-       CAST(bronze_rows AS bigint)      AS bronze_rows,
-       CAST(silver_rows AS bigint)      AS silver_rows,
-       CAST(quarantined_rows AS bigint) AS quarantined_rows,
-       LEFT(CAST(error AS varchar(4000)), 200) AS error
-FROM bronze.silver_run_log
-ORDER BY entity;
+-- Verify the centralized error log (warehouse) received the silver notebook's failures.
+-- Warehouse SQL endpoint has no sync lag, so this reads back immediately after the run.
+SELECT layer, entity, target_table, error_code,
+       LEFT(CAST(error_message AS varchar(4000)), 150) AS error_message,
+       run_id, created_date
+FROM app.error_log
+WHERE layer = 'silver'
+ORDER BY created_date DESC;
 GO

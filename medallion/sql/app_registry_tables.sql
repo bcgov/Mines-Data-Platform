@@ -117,41 +117,35 @@ BEGIN
 END;
 GO
 
--- ── per-phase error logs (bronze / silver / gold) ────────────────────────────
-IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log_bronze')
+-- ── unified error log (all layers via the [layer] column) ────────────────────
+-- Supersedes the per-phase error_log_* tables. pipeline_log owns run/pipeline
+-- logging; app.error_log owns errors for bronze | silver | gold | ingest.
+DROP TABLE IF EXISTS [app].[error_log_bronze];
+GO
+DROP TABLE IF EXISTS [app].[error_log_silver];
+GO
+DROP TABLE IF EXISTS [app].[error_log_gold];
+GO
+
+-- Reshape app.error_log ONLY if the legacy ADF-shaped version is present
+-- (detected by its T-SQL TRY/CATCH column error_number). Idempotent: once the
+-- unified table exists, neither block fires again.
+IF EXISTS (
+    SELECT 1 FROM sys.columns c
+    JOIN sys.tables t  ON c.object_id = t.object_id
+    JOIN sys.schemas s ON t.schema_id = s.schema_id
+    WHERE s.name = 'app' AND t.name = 'error_log' AND c.name = 'error_number'
+)
 BEGIN
-    CREATE TABLE [app].[error_log_bronze] (
-        [error_id]      bigint        NOT NULL,
-        [run_id]        varchar(100)  NULL,
-        [entity]        varchar(200)  NULL,
-        [target_table]  varchar(200)  NULL,
-        [error_message] varchar(max)  NOT NULL,
-        [error_context] varchar(max)  NULL,
-        [stack_trace]   varchar(max)  NULL,
-        [created_date]  datetime2(6)  NOT NULL
-    );
+    DROP TABLE [app].[error_log];
 END;
 GO
 
-IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log_silver')
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log')
 BEGIN
-    CREATE TABLE [app].[error_log_silver] (
+    CREATE TABLE [app].[error_log] (
         [error_id]      bigint        NOT NULL,
-        [run_id]        varchar(100)  NULL,
-        [entity]        varchar(200)  NULL,
-        [target_table]  varchar(200)  NULL,
-        [error_message] varchar(max)  NOT NULL,
-        [error_context] varchar(max)  NULL,
-        [stack_trace]   varchar(max)  NULL,
-        [created_date]  datetime2(6)  NOT NULL
-    );
-END;
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log_gold')
-BEGIN
-    CREATE TABLE [app].[error_log_gold] (
-        [error_id]      bigint        NOT NULL,
+        [layer]         varchar(20)   NOT NULL,   -- bronze | silver | gold | ingest
         [run_id]        varchar(100)  NULL,
         [entity]        varchar(200)  NULL,
         [target_table]  varchar(200)  NULL,
@@ -167,7 +161,6 @@ GO
 SELECT t.name AS table_name
 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id
 WHERE s.name='app' AND t.name IN
-    ('object_registry','field_registry','transform_registry','dq_rule','dq_result',
-     'error_log_bronze','error_log_silver','error_log_gold')
+    ('object_registry','field_registry','transform_registry','dq_rule','dq_result','error_log')
 ORDER BY t.name;
 GO

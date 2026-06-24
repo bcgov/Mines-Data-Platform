@@ -1,16 +1,15 @@
+-- Unified error log for all processing layers (bronze | silver | gold | ingest).
+-- [layer] discriminates the source; pipeline_log owns run/pipeline logging.
+-- Fabric Warehouse-safe (no IDENTITY / constraints); error_id populated by the writer.
 CREATE TABLE [app].[error_log] (
 
-	[error_id] bigint IDENTITY NOT NULL, 
-	[log_id] bigint NULL, 
-	[run_id] varchar(100) NULL, 
-	[pipeline_name] varchar(200) NULL, 
-	[error_number] int NULL, 
-	[error_severity] int NULL, 
-	[error_state] int NULL, 
-	[error_procedure] varchar(200) NULL, 
-	[error_line] int NULL, 
-	[error_message] varchar(max) NOT NULL, 
-	[error_context] varchar(max) NULL, 
-	[stack_trace] varchar(max) NULL, 
+	[error_id] bigint NOT NULL,
+	[layer] varchar(20) NOT NULL,
+	[run_id] varchar(100) NULL,
+	[entity] varchar(200) NULL,
+	[target_table] varchar(200) NULL,
+	[error_message] varchar(max) NOT NULL,
+	[error_context] varchar(max) NULL,
+	[stack_trace] varchar(max) NULL,
 	[created_date] datetime2(6) NOT NULL
 );

@@ -37,7 +37,8 @@ SUMMARY_TABLE = "silver.load_summary"
 # v1 entities (registry-aligned; object_registry seeded separately). PK drives dedup;
 # not_null drives the DQ quarantine split.
 V1 = [
-    {"entity": "mine",             "pk": "mine_guid",           "not_null": ["mine_guid", "mine_no"]},
+    # NOTE: the conformed 'mine' hub is absent from bronze (public.mine did not land in
+    # Files/raw — a raw-landing gap to resolve before dim_mine can be built). Re-add when present.
     {"entity": "mine_incident",    "pk": "mine_incident_id",    "not_null": ["mine_incident_id"]},
     {"entity": "permit",           "pk": "permit_id",           "not_null": ["permit_id"]},
     {"entity": "permit_amendment", "pk": "permit_amendment_id", "not_null": ["permit_amendment_id"]},

@@ -127,16 +127,17 @@ GO
 DROP TABLE IF EXISTS [app].[error_log_gold];
 GO
 
--- Reshape app.error_log to the latest unified shape if it does NOT already have the
--- pipeline_name column. Catches both the legacy ADF shape and the earlier unified shape
--- (which lacked log_id/pipeline_name). Idempotent: once the latest shape exists, no-op.
--- Table is empty/unused, so drop+recreate is safe.
+-- Centralized error log for BOTH pipeline and notebook errors. Reshape to the latest
+-- shape if it does NOT already have the error_code column (catches every earlier shape).
+-- Idempotent; table is empty/unused so drop+recreate is safe.
+-- error_id is a GUID (varchar) so ADF (newid()) and notebooks (uuid4) can each mint it
+-- without IDENTITY (unsupported by Fabric Warehouse).
 IF EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log')
    AND NOT EXISTS (
        SELECT 1 FROM sys.columns c
        JOIN sys.tables t  ON c.object_id = t.object_id
        JOIN sys.schemas s ON t.schema_id = s.schema_id
-       WHERE s.name='app' AND t.name='error_log' AND c.name='pipeline_name'
+       WHERE s.name='app' AND t.name='error_log' AND c.name='error_code'
    )
 BEGIN
     DROP TABLE [app].[error_log];
@@ -146,14 +147,15 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log')
 BEGIN
     CREATE TABLE [app].[error_log] (
-        [error_id]      bigint        NOT NULL,
+        [error_id]      varchar(36)   NOT NULL,   -- GUID (writer-minted)
         [layer]         varchar(20)   NOT NULL,   -- bronze | silver | gold | ingest
         [log_id]        bigint        NULL,       -- pipeline_log.log_id when triggered by a pipeline (else null)
         [pipeline_name] varchar(200)  NULL,       -- triggering pipeline name (else null for direct runs)
-        [run_id]        varchar(100)  NULL,
+        [run_id]        varchar(100)  NULL,       -- notebook run id / pipeline RunId
         [entity]        varchar(200)  NULL,
         [target_table]  varchar(200)  NULL,
         [error_message] varchar(max)  NOT NULL,
+        [error_code]    varchar(100)  NULL,       -- ADF error code (null for notebook errors)
         [error_context] varchar(max)  NULL,
         [stack_trace]   varchar(max)  NULL,
         [created_date]  datetime2(6)  NOT NULL

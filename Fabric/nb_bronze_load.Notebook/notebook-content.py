@@ -185,10 +185,24 @@ for entity in get_entities():
                             "rows": None, "error": err})
 
 # Write a queryable run summary into the bronze lakehouse (read later via SQL endpoint).
+# Explicit schema avoids void-type inference when a column (e.g. error) is entirely null.
 if results:
     try:
+        from pyspark.sql.types import StructType, StructField, StringType, LongType
+        summary_schema = StructType([
+            StructField("entity", StringType()),
+            StructField("file_name", StringType()),
+            StructField("status", StringType()),
+            StructField("rows", LongType()),
+            StructField("error", StringType()),
+        ])
+        summary_rows = [
+            (r["entity"], r["file_name"], r["status"],
+             (int(r["rows"]) if r["rows"] is not None else None), r["error"])
+            for r in results
+        ]
         summary_df = (
-            spark.createDataFrame(results)
+            spark.createDataFrame(summary_rows, summary_schema)
             .withColumn("run_id", lit(RUN_ID))
             .withColumn("run_ts", current_timestamp())
         )

@@ -36,6 +36,10 @@
 - 🔎 **Positive gap finding:** several gap-analysis tables flagged "not in raw" (G2–G5: `compliance_article`, `article_act_code`, status/code tables, etc.) ARE present in raw and now in bronze. Re-scope the gap doc: the main remaining hard gap is **G1 inspection targets** (NRIS-side; not in the `public` parquet). Confirm NRIS (`nris.*`) coverage separately — the bronze tables seen are all `public.*`.
 - **F7:** The **lakehouse SQL analytics endpoint lags** newly-written Delta tables — a just-created table (`bronze.load_summary`) was not queryable within a 3-min retry window even though the 228 older tables were. Verify steps that read freshly-written lakehouse tables need a longer/again-later poll, or should query each table independently (don't fail the whole verify if one table hasn't synced). The Bronze load is confirmed by the table list regardless.
 
+## Error logging — unified (decision 2026-06-24)
+
+Reshaped `app.error_log` into ONE Spark-shaped table for all phases, discriminated by a **`layer`** column (`bronze | silver | gold | ingest`): `error_id, layer, run_id, entity, target_table, error_message, error_context, stack_trace, created_date`. Dropped the per-phase `app.error_log_bronze/_silver/_gold`. Rationale (team feedback): `pipeline_log` already owns pipeline/run logging, so a single `error_log` + `layer` is cleaner than three tables, and the legacy ADF-shaped error_log (error_number/severity/procedure/line) didn't fit Spark errors. Reshape is idempotent (drops the legacy table only if its `error_number` column is present). Deployed via `deploy-app-tables.yml`; verified `app.error_log` present, per-phase tables gone.
+
 ## Findings (Fabric Warehouse T-SQL — verified empirically 2026-06-23)
 
 - **F1:** Fabric Warehouse **rejects `IDENTITY`** in CREATE TABLE. Surrogate ids must be loader-populated.

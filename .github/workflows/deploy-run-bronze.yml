@@ -1,0 +1,42 @@
+# Deploy + run nb_bronze_load directly in the workspace (SPN), then verify via the
+# Bronze lakehouse SQL endpoint. Triggers on medallion/** pushes or manual dispatch.
+name: Deploy and Run Bronze
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        description: 'Fabric workspace ID'
+        required: true
+        default: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+  push:
+    branches: ['medallion/**']
+    paths:
+      - 'Fabric/nb_bronze_load.Notebook/**'
+      - 'medallion/deploy/deploy_notebook.py'
+      - 'medallion/sql/verify_bronze.sql'
+      - '.github/workflows/scripts/run_bronze.sh'
+      - '.github/workflows/deploy-run-bronze.yml'
+
+jobs:
+  bronze:
+    name: Deploy + run + verify Bronze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps (ODBC + python libs)
+        run: |
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev jq curl
+          python3 -m pip install --quiet requests pyodbc
+      - name: Make script executable
+        run: chmod +x .github/workflows/scripts/run_bronze.sh
+      - name: Deploy + run + verify
+        run: .github/workflows/scripts/run_bronze.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: ${{ github.event.inputs.workspace_id || '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0' }}
+          BRONZE_LH_ID: '8cd34a44-500a-47d9-aa2d-5ad0c2149858'
+          BRONZE_LH_NAME: 'mines_data_platform_lh1'

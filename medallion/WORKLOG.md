@@ -23,7 +23,7 @@
 ## To deploy (direct-to-workspace, via SPN)
 
 - [x] `app.*` warehouse tables (object/field/transform registry, dq_rule, dq_result, error_log_bronze/silver/gold) → **DEPLOYED 2026-06-23** into warehouse `mines-data-platform-fabwh1` (id `9ed9a608-33e5-408b-bd51-adc2dad1e7ab`) via `deploy-app-tables.yml` + `medallion/sql/app_registry_tables.sql`. Verified: all 8 tables present.
-- [ ] `nb_util_paths`, `nb_smoke_foundation` notebooks → via Fabric Items API; run smoke to validate cross-lakehouse path resolution + Delta I/O.
+- [x] `nb_util_paths`, `nb_smoke_foundation` notebooks → **DEPLOYED + SMOKE PASSED 2026-06-23** via Fabric Items API (`deploy-notebooks.yml`). nb_util_paths=`dda18b0c…`, nb_smoke_foundation=`52270d1d…`. Smoke job status=Completed → cross-lakehouse OneLake Delta write/read validated as the SPN.
 
 ## Deploy mechanism that works (reusable)
 
@@ -36,6 +36,7 @@
 - **F3:** `sqlcmd -G` (ODBC) **cannot authenticate as a service principal** (defaults to ActiveDirectoryIntegrated → "authenticate the user ''"). Use **pyodbc + access-token** instead. The repo's `initialize/warehouse_init.sh` uses bare `-G` and would fail for SP — and its `Initialize Warehouse` workflow has never run.
 - **F4:** Therefore the committed `*.Warehouse/app/Tables/*.sql` files (which use `bigint IDENTITY`) and `initialize/warehouse_init.sql` (IDENTITY/DEFAULT/CHECK/computed/PK) are **NOT deployable to this Fabric Warehouse as-is**. `medallion/sql/app_registry_tables.sql` is the deployable, Fabric-safe truth.
 - **F5:** Our `app.*` tables were deployed into the **shared dev warehouse** `mines-data-platform-fabwh1` (alongside the team's existing `app` objects), per the direct-to-workspace working model.
+- **F6:** Notebook deploy = Fabric Items API `POST /workspaces/{ws}/notebooks` (create) / `…/{id}/updateDefinition` (update), parts = `.platform` + `notebook-content.py` (InlineBase64, no `format` field) — works. Run = `POST /items/{id}/jobs/instances?jobType=RunNotebook` → poll `Location`. **A notebook run job needs a default lakehouse attached in its metadata** (`dependencies.lakehouse`) to run reliably; the first smoke (no lakehouse, `%run`, Tables-path write) failed with a generic `System_Cancelled_Session_Statements_Failed`. Robust pattern: attach a default lakehouse, write to an absolute `Files` OneLake path, avoid relying on `%run` for the critical assert. GUIDs are injected into the notebook source at deploy time.
 
 ## Open issues / findings
 

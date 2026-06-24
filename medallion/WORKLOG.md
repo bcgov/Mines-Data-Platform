@@ -29,6 +29,13 @@
 
 `deploy-app-tables.yml` (push on `medallion/**`) → `deploy_app_tables.sh`: SPN `az login` → Fabric REST resolves the warehouse by displayName → gets `.properties.connectionString` → acquires a `https://database.windows.net/` token → `medallion/sql/run_sql.py` (pyodbc, ODBC Driver 18, `SQL_COPT_SS_ACCESS_TOKEN`) executes the SQL split on `GO`. This is the template for any future direct-to-warehouse SQL.
 
+## Phase 2 — Bronze (2026-06-24)
+
+- ✅ **`nb_bronze_load`** (append-only, idempotent-per-file, control columns `dl_load_id/bronze_file_name/bronze_file_timestamp/bronze_load_date/dl_load_ts/dl_rowhash`, partition by `bronze_load_date`) deployed + run via `deploy-run-bronze.yml` (notebook id `b7092009…`).
+- ✅ **228 `bronze.*` tables populated from raw** — verified via the Bronze lakehouse SQL endpoint (`INFORMATION_SCHEMA.TABLES`). The raw landing in `Files/raw` is the **full MDS `public` schema** (incl. `etl_*`/`celery_*`/`tmp*` noise — filtered later in silver).
+- 🔎 **Positive gap finding:** several gap-analysis tables flagged "not in raw" (G2–G5: `compliance_article`, `article_act_code`, status/code tables, etc.) ARE present in raw and now in bronze. Re-scope the gap doc: the main remaining hard gap is **G1 inspection targets** (NRIS-side; not in the `public` parquet). Confirm NRIS (`nris.*`) coverage separately — the bronze tables seen are all `public.*`.
+- **F7:** The **lakehouse SQL analytics endpoint lags** newly-written Delta tables — a just-created table (`bronze.load_summary`) was not queryable within a 3-min retry window even though the 228 older tables were. Verify steps that read freshly-written lakehouse tables need a longer/again-later poll, or should query each table independently (don't fail the whole verify if one table hasn't synced). The Bronze load is confirmed by the table list regardless.
+
 ## Findings (Fabric Warehouse T-SQL — verified empirically 2026-06-23)
 
 - **F1:** Fabric Warehouse **rejects `IDENTITY`** in CREATE TABLE. Surrogate ids must be loader-populated.

@@ -28,7 +28,7 @@ log "SQL endpoint: $SQL_EP (db: $VERIFY_LH_NAME)"
 SQL_TOKEN="$(az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv)"
 export SQL_SERVER="$SQL_EP" SQL_DATABASE="$VERIFY_LH_NAME" SQL_FILE="medallion/sql/verify_silver.sql" SQL_ACCESS_TOKEN="$SQL_TOKEN"
 
-for attempt in 1 2 3 4 5 6; do
+for attempt in $(seq 1 12); do
     log "verify attempt $attempt..."
     if python3 medallion/sql/run_sql.py; then log "Verify succeeded."; exit 0; fi
     sleep 30

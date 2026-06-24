@@ -133,6 +133,10 @@ RUN_ID = str(uuid.uuid4())
 START = datetime.now()
 results = []
 
+# Fabric schema-enabled lakehouses do NOT auto-create schemas on saveAsTable.
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {SILVER_SCHEMA}")
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {QUARANTINE_SCHEMA}")
+
 for cfg in V1:
     entity = cfg["entity"]
     try:

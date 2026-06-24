@@ -8,7 +8,7 @@ on:
       lakehouse_id:
         description: 'Lakehouse ID to list'
         required: true
-        default: 'a0190e0e-c2f5-4740-ab90-a2f29b6e6991'
+        default: '8cd34a44-500a-47d9-aa2d-5ad0c2149858'
   push:
     branches: ['medallion/**']
     paths:

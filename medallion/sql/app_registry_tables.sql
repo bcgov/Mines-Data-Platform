@@ -209,16 +209,26 @@ GO
 DROP TABLE IF EXISTS [app].[gold_build_dag];
 GO
 
--- gold_build: metadata for each gold table. table_type replaces the old scd_type/fact_type
--- pair with a single enum the builder dispatches on:
---   type1_incremental_dimension : SCD1, partial source — no delete detection
---   type1_full_dimension        : SCD1, complete snapshot — source-absent keys soft-deleted (dl_isdeleted=true)
---   type2_incremental_dimension : SCD2 (history), partial source — no delete detection
---   type2_full_dimension        : SCD2 (history), complete snapshot — source-absent keys soft-expired (dl_isdeleted=true)
---   append_only_fact : insert source rows whose business_keys are new (never update/delete)
---   upsert_fact      : merge on business_keys (update matched + insert new)
---   reload_fact      : full drop+rebuild from source each run (rows absent from source vanish)
--- Only the *_full dimensions check deletes — an incremental source is never complete.
+-- gold_build: metadata for each gold table. Two orthogonal columns drive the builder:
+--   table_type    : type1_dimension | type2_dimension | append_fact | upsert_fact | reload_fact
+--   load_strategy : incremental | full
+-- Behavior matrix (only dimensions + upsert_fact use load_strategy):
+--   type1_dimension : SCD1 dimension; full = soft-delete source-absent keys (dl_isdeleted=true)
+--   type2_dimension : SCD2 dimension (history); full = soft-expire source-absent keys (dl_isdeleted=true)
+--   append_fact     : insert new business_keys only (load_strategy ignored)
+--   upsert_fact     : merge on business_keys; incremental = update+insert; full = also soft-delete absent (full sync)
+--   reload_fact     : full drop+rebuild from source each run (load_strategy ignored)
+-- 'full' means the source is a COMPLETE snapshot, so absence = deletion. 'incremental' never deletes.
+--
+-- Drop+recreate only when the table predates the load_strategy column (old combined-enum shape);
+-- otherwise leave it. (gold_build_dag was already dropped above.)
+IF EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='gold_build')
+   AND NOT EXISTS (
+       SELECT 1 FROM sys.columns c JOIN sys.tables t ON c.object_id=t.object_id
+       JOIN sys.schemas s ON t.schema_id=s.schema_id
+       WHERE s.name='app' AND t.name='gold_build' AND c.name='load_strategy')
+    DROP TABLE [app].[gold_build];
+GO
 IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='gold_build')
 BEGIN
     CREATE TABLE [app].[gold_build] (
@@ -227,11 +237,12 @@ BEGIN
         [object_type]             varchar(10)   NOT NULL,   -- DIM | FACT (coarse; reporting)
         [transform_notebook]      varchar(200)  NOT NULL,   -- notebook that materializes the stg table
         [source_table]            varchar(200)  NOT NULL,   -- materialized stg table it produces, e.g. 'stg.dim_permit'
-        [table_type]              varchar(30)   NOT NULL,   -- type1_dimension|type2_dimension|append_only_fact|upsert_fact|reload_fact
+        [table_type]              varchar(30)   NOT NULL,   -- type1_dimension|type2_dimension|append_fact|upsert_fact|reload_fact
+        [load_strategy]           varchar(20)   NOT NULL,   -- incremental | full  (full = source is a complete snapshot -> handle deletes)
         [surrogate_key]           varchar(100)  NULL,       -- DIM surrogate, e.g. 'Permit_SK'
         [business_keys]           varchar(400)  NULL,       -- natural/business keys (comma-separated column names)
         [non_historized_columns]  varchar(max)  NULL,       -- DIM SCD2: excluded from change detection (comma list)
-        [watermark_column]        varchar(200)  NULL,       -- FACT: optional source-window column for append/upsert
+        [watermark_column]        varchar(200)  NULL,       -- FACT: optional source-window column for upsert
         [last_n_days]             int           NULL,       -- FACT: optional source-window size (days)
         [is_active]               bit           NOT NULL,   -- only active nodes are built
         [created_date]            datetime2(6)  NOT NULL,
@@ -257,23 +268,24 @@ BEGIN
 END;
 GO
 
--- seed v1: dim_permit (SCD2) -> fact_permit_amendment (reload; depends on dim_permit)
+-- seed v1: dim_permit (type2/full) -> fact_permit_amendment (upsert/full; depends on dim_permit).
+-- Both sources are full snapshots (stg transform overwrites fully from silver), so load_strategy='full'.
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='dim_permit')
     INSERT INTO [app].[gold_build]
-        (node_name, gold_object, object_type, transform_notebook, source_table, table_type,
+        (node_name, gold_object, object_type, transform_notebook, source_table, table_type, load_strategy,
          surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days,
          is_active, created_date, created_by, modified_date, modified_by)
     VALUES
-        ('dim_permit','gold.dim_permit','DIM','nb_gold_tf_dim_permit','stg.dim_permit','type2_full_dimension',
+        ('dim_permit','gold.dim_permit','DIM','nb_gold_tf_dim_permit','stg.dim_permit','type2_dimension','full',
          'Permit_SK','permit_id',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
 GO
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='fact_permit_amendment')
     INSERT INTO [app].[gold_build]
-        (node_name, gold_object, object_type, transform_notebook, source_table, table_type,
+        (node_name, gold_object, object_type, transform_notebook, source_table, table_type, load_strategy,
          surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days,
          is_active, created_date, created_by, modified_date, modified_by)
     VALUES
-        ('fact_permit_amendment','gold.fact_permit_amendment','FACT','nb_gold_tf_fact_permit_amendment','stg.fact_permit_amendment','reload_fact',
+        ('fact_permit_amendment','gold.fact_permit_amendment','FACT','nb_gold_tf_fact_permit_amendment','stg.fact_permit_amendment','upsert_fact','full',
          NULL,'permit_amendment_id',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
 GO
 
@@ -284,16 +296,6 @@ GO
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='fact_permit_amendment')
     INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
     VALUES ('fact_permit_amendment', 'dim_permit', SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
-GO
-
--- Migrate the pre-split table_type values to the 4-way dimension enum. dim_permit's stg source
--- is a full snapshot (transform overwrites fully from silver), so type2_full is correct + lets
--- delete handling apply. Idempotent: only touches rows still on an old value.
-UPDATE [app].[gold_build] SET table_type='type2_full_dimension', modified_date=SYSUTCDATETIME(), modified_by='system'
- WHERE table_type='type2_dimension';
-GO
-UPDATE [app].[gold_build] SET table_type='type1_full_dimension', modified_date=SYSUTCDATETIME(), modified_by='system'
- WHERE table_type='type1_dimension';
 GO
 
 -- ── verify ───────────────────────────────────────────────────────────────────

@@ -20,7 +20,6 @@
 
 # CELL ********************
 
-# Load the gold build engine (build_dimension / build_fact).
 %run nb_util_gold
 
 # METADATA ********************

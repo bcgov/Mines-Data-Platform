@@ -1,0 +1,31 @@
+# Ops: run medallion/sql/adhoc.sql against the warehouse as the SPN. Edit adhoc.sql and
+# push (or dispatch) to run any diagnostic query. medallion/** push (path-filtered).
+name: Fabric Ops - Adhoc SQL
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ['medallion/**']
+    paths:
+      - 'medallion/sql/adhoc.sql'
+      - '.github/workflows/scripts/run_adhoc_sql.sh'
+      - '.github/workflows/fabric-ops-adhoc-sql.yml'
+
+jobs:
+  adhoc:
+    name: Adhoc SQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev jq curl
+          python3 -m pip install --quiet pyodbc
+      - run: chmod +x .github/workflows/scripts/run_adhoc_sql.sh
+      - run: .github/workflows/scripts/run_adhoc_sql.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+          WAREHOUSE_NAME: 'mines-data-platform-fabwh1'

@@ -163,10 +163,57 @@ BEGIN
 END;
 GO
 
+-- ── gold_build_dag (gold orchestration DAG: nodes + parent/child deps) ────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='gold_build_dag')
+BEGIN
+    CREATE TABLE [app].[gold_build_dag] (
+        [node_name]               varchar(100)  NOT NULL,   -- unique node id, e.g. 'dim_permit'
+        [gold_object]             varchar(200)  NOT NULL,   -- target, e.g. 'gold.dim_permit'
+        [object_type]             varchar(10)   NOT NULL,   -- DIM | FACT
+        [transform_notebook]      varchar(200)  NOT NULL,   -- notebook that builds the stg view
+        [source_view]             varchar(200)  NOT NULL,   -- stg view it produces, e.g. 'stg.v_dim_permit'
+        [scd_type]                int           NULL,       -- DIM: 1|2
+        [fact_type]               int           NULL,       -- FACT: 1|2
+        [surrogate_key]           varchar(100)  NULL,       -- DIM surrogate, e.g. 'Permit_SK'
+        [business_keys]           varchar(400)  NULL,       -- natural/business keys (comma list)
+        [non_historized_columns]  varchar(max)  NULL,       -- DIM SCD2: excluded from change detection
+        [watermark_column]        varchar(200)  NULL,       -- FACT type 2 rolling window
+        [last_n_days]             int           NULL,       -- FACT type 2 window size
+        [depends_on]              varchar(400)  NULL,       -- parent node_names (comma list); null = root
+        [is_active]               bit           NOT NULL,
+        [load_order]              int           NOT NULL,
+        [created_date]            datetime2(6)  NOT NULL,
+        [created_by]              varchar(200)  NOT NULL,
+        [modified_date]           datetime2(6)  NOT NULL,
+        [modified_by]             varchar(200)  NOT NULL
+    );
+END;
+GO
+
+-- seed v1 DAG: dim_permit (SCD2) -> fact_permit_amendment (depends on dim_permit)
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_build_dag] WHERE node_name='dim_permit')
+    INSERT INTO [app].[gold_build_dag]
+        (node_name, gold_object, object_type, transform_notebook, source_view, scd_type, fact_type,
+         surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days, depends_on,
+         is_active, load_order, created_date, created_by, modified_date, modified_by)
+    VALUES
+        ('dim_permit','gold.dim_permit','DIM','nb_gold_tf_dim_permit','stg.v_dim_permit',2,NULL,
+         'Permit_SK','permit_id',NULL,NULL,NULL,NULL,1,10,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_build_dag] WHERE node_name='fact_permit_amendment')
+    INSERT INTO [app].[gold_build_dag]
+        (node_name, gold_object, object_type, transform_notebook, source_view, scd_type, fact_type,
+         surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days, depends_on,
+         is_active, load_order, created_date, created_by, modified_date, modified_by)
+    VALUES
+        ('fact_permit_amendment','gold.fact_permit_amendment','FACT','nb_gold_tf_fact_permit_amendment','stg.v_fact_permit_amendment',NULL,1,
+         NULL,'permit_amendment_id',NULL,NULL,NULL,'dim_permit',1,20,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+
 -- ── verify ───────────────────────────────────────────────────────────────────
 SELECT t.name AS table_name
 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id
 WHERE s.name='app' AND t.name IN
-    ('object_registry','field_registry','transform_registry','dq_rule','dq_result','error_log')
+    ('object_registry','field_registry','transform_registry','dq_rule','dq_result','error_log','gold_build_dag')
 ORDER BY t.name;
 GO

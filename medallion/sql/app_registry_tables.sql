@@ -127,11 +127,21 @@ GO
 DROP TABLE IF EXISTS [app].[error_log_gold];
 GO
 
--- Centralized error log for BOTH pipeline and notebook errors. Reshape to the latest
--- shape if it does NOT already have the error_code column (catches every earlier shape).
--- Idempotent; table is empty/unused so drop+recreate is safe.
+-- Centralized error log for BOTH pipeline and notebook errors.
 -- error_id is a GUID (varchar) so ADF (newid()) and notebooks (uuid4) can each mint it
 -- without IDENTITY (unsupported by Fabric Warehouse).
+-- The error_number/severity/state/procedure/line columns are the SQL Server TRY/CATCH
+-- error fields (ERROR_NUMBER() etc.); unused by the medallion notebooks but retained for
+-- other (stored-proc / SQL-based) processes that write into this shared table.
+--
+-- Migration is layered so existing error rows are preserved where possible:
+--  1) DROP only the truly-incompatible pre-unification shape (no [error_code] / had IDENTITY).
+--  2) For the current unified shape (has [error_code], missing the SQL TRY/CATCH cols), ADD
+--     them in place via ALTER — non-destructive.
+--  3) CREATE the full latest shape if the table is absent (fresh deploy or post-drop).
+-- All three are idempotent.
+
+-- 1) drop the pre-unification shape (no error_code → had IDENTITY/ADF-only columns, incompatible)
 IF EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log')
    AND NOT EXISTS (
        SELECT 1 FROM sys.columns c
@@ -144,21 +154,49 @@ BEGIN
 END;
 GO
 
+-- 2) additive: bring the current unified shape up to date without losing rows
+IF EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log')
+   AND EXISTS (
+       SELECT 1 FROM sys.columns c JOIN sys.tables t ON c.object_id=t.object_id
+       JOIN sys.schemas s ON t.schema_id=s.schema_id
+       WHERE s.name='app' AND t.name='error_log' AND c.name='error_code'
+   )
+   AND NOT EXISTS (
+       SELECT 1 FROM sys.columns c JOIN sys.tables t ON c.object_id=t.object_id
+       JOIN sys.schemas s ON t.schema_id=s.schema_id
+       WHERE s.name='app' AND t.name='error_log' AND c.name='error_line'
+   )
+BEGIN
+    ALTER TABLE [app].[error_log] ADD
+        [error_number]    int          NULL,
+        [error_severity]  int          NULL,
+        [error_state]     int          NULL,
+        [error_procedure] varchar(200) NULL,
+        [error_line]      int          NULL;
+END;
+GO
+
+-- 3) fresh deploy / post-drop: create the full latest shape
 IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='error_log')
 BEGIN
     CREATE TABLE [app].[error_log] (
-        [error_id]      varchar(36)   NOT NULL,   -- GUID (writer-minted)
-        [layer]         varchar(20)   NOT NULL,   -- bronze | silver | gold | ingest
-        [log_id]        bigint        NULL,       -- pipeline_log.log_id when triggered by a pipeline (else null)
-        [pipeline_name] varchar(200)  NULL,       -- triggering pipeline name (else null for direct runs)
-        [run_id]        varchar(100)  NULL,       -- notebook run id / pipeline RunId
-        [entity]        varchar(200)  NULL,
-        [target_table]  varchar(200)  NULL,
-        [error_message] varchar(max)  NOT NULL,
-        [error_code]    varchar(100)  NULL,       -- ADF error code (null for notebook errors)
-        [error_context] varchar(max)  NULL,
-        [stack_trace]   varchar(max)  NULL,
-        [created_date]  datetime2(6)  NOT NULL
+        [error_id]         varchar(36)   NOT NULL,   -- GUID (writer-minted)
+        [layer]            varchar(20)   NOT NULL,   -- bronze | silver | gold | ingest
+        [log_id]           bigint        NULL,       -- pipeline_log.log_id when triggered by a pipeline (else null)
+        [pipeline_name]    varchar(200)  NULL,       -- triggering pipeline name (else null for direct runs)
+        [run_id]           varchar(100)  NULL,       -- notebook run id / pipeline RunId
+        [entity]           varchar(200)  NULL,
+        [target_table]     varchar(200)  NULL,
+        [error_message]    varchar(max)  NOT NULL,
+        [error_code]       varchar(100)  NULL,       -- ADF error code (null for notebook errors)
+        [error_number]     int           NULL,       -- SQL TRY/CATCH ERROR_NUMBER()   (other processes)
+        [error_severity]   int           NULL,       -- SQL TRY/CATCH ERROR_SEVERITY() (other processes)
+        [error_state]      int           NULL,       -- SQL TRY/CATCH ERROR_STATE()    (other processes)
+        [error_procedure]  varchar(200)  NULL,       -- SQL TRY/CATCH ERROR_PROCEDURE()(other processes)
+        [error_line]       int           NULL,       -- SQL TRY/CATCH ERROR_LINE()     (other processes)
+        [error_context]    varchar(max)  NULL,
+        [stack_trace]      varchar(max)  NULL,
+        [created_date]     datetime2(6)  NOT NULL
     );
 END;
 GO

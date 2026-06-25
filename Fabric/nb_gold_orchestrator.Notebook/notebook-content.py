@@ -47,17 +47,24 @@ spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
 def log_error(entity, error_message, stack_trace=None, target_table=None):
     try:
         from com.microsoft.spark.fabric import Constants  # noqa: F401
+        from pyspark.sql.types import IntegerType
+        # error_number/severity/state/procedure/line are the SQL TRY/CATCH fields used by
+        # other (SQL-based) writers; notebooks leave them null but must still match the table shape.
         sch = StructType([
             StructField("error_id", StringType()), StructField("layer", StringType()),
             StructField("log_id", LongType()), StructField("pipeline_name", StringType()),
             StructField("run_id", StringType()), StructField("entity", StringType()),
             StructField("target_table", StringType()), StructField("error_message", StringType()),
-            StructField("error_code", StringType()), StructField("error_context", StringType()),
-            StructField("stack_trace", StringType()),
+            StructField("error_code", StringType()),
+            StructField("error_number", IntegerType()), StructField("error_severity", IntegerType()),
+            StructField("error_state", IntegerType()), StructField("error_procedure", StringType()),
+            StructField("error_line", IntegerType()),
+            StructField("error_context", StringType()), StructField("stack_trace", StringType()),
         ])
         row = (str(uuid.uuid4()), "gold", None, None, RUN_ID, entity, target_table,
-               (error_message or "(no message)")[:8000], None, None,
-               (stack_trace[:8000] if stack_trace else None))
+               (error_message or "(no message)")[:8000], None,
+               None, None, None, None, None,
+               None, (stack_trace[:8000] if stack_trace else None))
         (spark.createDataFrame([row], sch).withColumn("created_date", F.current_timestamp())
             .write.mode("append").synapsesql(f"{WAREHOUSE}.app.error_log"))
     except Exception as e:

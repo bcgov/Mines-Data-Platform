@@ -64,24 +64,27 @@ def log_error(layer, run_id, entity, error_message, stack_trace=None, target_tab
     try:
         from com.microsoft.spark.fabric import Constants  # noqa: F401 — registers the .synapsesql writer
         from pyspark.sql.types import StructType, StructField, StringType, LongType, IntegerType
-        # error_number/severity/state/procedure/line are the SQL TRY/CATCH fields used by
-        # other (SQL-based) writers; notebooks leave them null but must still match the table shape.
         sch = StructType([
             StructField("error_id", StringType()), StructField("layer", StringType()),
             StructField("log_id", LongType()), StructField("pipeline_name", StringType()),
             StructField("run_id", StringType()), StructField("entity", StringType()),
             StructField("target_table", StringType()), StructField("error_message", StringType()),
-            StructField("error_code", StringType()),
-            StructField("error_number", IntegerType()), StructField("error_severity", IntegerType()),
-            StructField("error_state", IntegerType()), StructField("error_procedure", StringType()),
-            StructField("error_line", IntegerType()),
-            StructField("error_context", StringType()), StructField("stack_trace", StringType()),
+            StructField("error_code", StringType()), StructField("error_context", StringType()),
+            StructField("stack_trace", StringType()),
         ])
         row = (str(uuid.uuid4()), layer, log_id, pipeline_name, run_id, entity, target_table,
-               (error_message or "(no message)")[:8000], error_code,
-               None, None, None, None, None,
-               error_context, (stack_trace[:8000] if stack_trace else None))
-        edf = spark.createDataFrame([row], sch).withColumn("created_date", F.current_timestamp())
+               (error_message or "(no message)")[:8000], error_code, error_context,
+               (stack_trace[:8000] if stack_trace else None))
+        # error_number/severity/state/procedure/line are the SQL TRY/CATCH fields used by
+        # other (SQL-based) writers; notebooks leave them null. Appended (with created_date) in
+        # the table's physical order so the synapsesql append aligns by name AND position.
+        edf = (spark.createDataFrame([row], sch)
+               .withColumn("created_date", F.current_timestamp())
+               .withColumn("error_number", F.lit(None).cast(IntegerType()))
+               .withColumn("error_severity", F.lit(None).cast(IntegerType()))
+               .withColumn("error_state", F.lit(None).cast(IntegerType()))
+               .withColumn("error_procedure", F.lit(None).cast(StringType()))
+               .withColumn("error_line", F.lit(None).cast(IntegerType())))
         edf.write.mode("append").synapsesql(f"{WAREHOUSE}.app.error_log")
     except Exception as e:
         print(f"log_error failed (non-fatal): {e}")

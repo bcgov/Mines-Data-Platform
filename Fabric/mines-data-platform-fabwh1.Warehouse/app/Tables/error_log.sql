@@ -16,12 +16,12 @@ CREATE TABLE [app].[error_log] (
 	[target_table] varchar(200) NULL,
 	[error_message] varchar(max) NOT NULL,
 	[error_code] varchar(100) NULL,
+	[error_context] varchar(max) NULL,
+	[stack_trace] varchar(max) NULL,
+	[created_date] datetime2(6) NOT NULL,
 	[error_number] int NULL,
 	[error_severity] int NULL,
 	[error_state] int NULL,
 	[error_procedure] varchar(200) NULL,
-	[error_line] int NULL,
-	[error_context] varchar(max) NULL,
-	[stack_trace] varchar(max) NULL,
-	[created_date] datetime2(6) NOT NULL
+	[error_line] int NULL
 );

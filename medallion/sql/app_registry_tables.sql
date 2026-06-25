@@ -189,14 +189,16 @@ BEGIN
         [target_table]     varchar(200)  NULL,
         [error_message]    varchar(max)  NOT NULL,
         [error_code]       varchar(100)  NULL,       -- ADF error code (null for notebook errors)
-        [error_number]     int           NULL,       -- SQL TRY/CATCH ERROR_NUMBER()   (other processes)
-        [error_severity]   int           NULL,       -- SQL TRY/CATCH ERROR_SEVERITY() (other processes)
-        [error_state]      int           NULL,       -- SQL TRY/CATCH ERROR_STATE()    (other processes)
-        [error_procedure]  varchar(200)  NULL,       -- SQL TRY/CATCH ERROR_PROCEDURE()(other processes)
-        [error_line]       int           NULL,       -- SQL TRY/CATCH ERROR_LINE()     (other processes)
         [error_context]    varchar(max)  NULL,
         [stack_trace]      varchar(max)  NULL,
-        [created_date]     datetime2(6)  NOT NULL
+        [created_date]     datetime2(6)  NOT NULL,
+        -- SQL Server TRY/CATCH fields for other (stored-proc / SQL-based) writers; trailing
+        -- so a fresh CREATE matches the additive-ALTER physical order above.
+        [error_number]     int           NULL,       -- ERROR_NUMBER()
+        [error_severity]   int           NULL,       -- ERROR_SEVERITY()
+        [error_state]      int           NULL,       -- ERROR_STATE()
+        [error_procedure]  varchar(200)  NULL,       -- ERROR_PROCEDURE()
+        [error_line]       int           NULL        -- ERROR_LINE()
     );
 END;
 GO

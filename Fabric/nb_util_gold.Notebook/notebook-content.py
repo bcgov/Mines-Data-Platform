@@ -116,54 +116,78 @@ def build_dimension(gold_object, source_table, scd_type, surrogate_key, business
             "deleted": n_deleted, "scd": scd_type, "mode": load_mode}
 
 
-def build_fact(gold_object, source_table, mode, business_keys=None,
+def build_fact(gold_object, source_table, mode, load_strategy="incremental", business_keys=None,
                watermark_column=None, last_n_days=None, transform_id=None):
-    """Build a gold fact from a materialized stg table. mode (derived from table_type):
-        'reload'  : full drop+rebuild from source each run (rows absent from source vanish).
-        'upsert'  : MERGE on business_keys — update matched, insert new.
-        'append'  : insert only source rows whose business_keys are new (never update/delete).
-    watermark_column + last_n_days optionally window the SOURCE for upsert/append (limits the
-    comparison set). Dimension surrogate-key resolution is expected to be done IN the source.
+    """Build a gold fact from a materialized stg table.
+        mode 'reload' : full drop+rebuild from source each run (load_strategy ignored).
+        mode 'append' : insert source rows whose business_keys are new (load_strategy ignored).
+        mode 'upsert' : MERGE on business_keys (update matched + insert new). When
+                        load_strategy='full' the source is a COMPLETE snapshot, so fact rows
+                        whose business_keys are absent from source are SOFT-DELETED
+                        (dl_isdeleted=true); 'incremental' never deletes.
+    watermark_column + last_n_days optionally window the SOURCE for an incremental upsert.
+    Dimension surrogate-key resolution is expected to be done IN the source.
     """
     schema, _ = _split(gold_object)
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+    full = (load_strategy == "full")
     tid = "NULL" if transform_id is None else str(int(transform_id))
 
-    # first-ever load OR a full reload → (re)create from source
+    # first-ever load OR a full reload → (re)create from source (+ control columns)
     if mode == "reload" or not spark.catalog.tableExists(gold_object):
         spark.sql(f"""
             CREATE OR REPLACE TABLE {gold_object} AS
-            SELECT *, current_timestamp() AS dl_insertdateutc, CAST({tid} AS INT) AS dl_transform_id
+            SELECT *, current_timestamp() AS dl_insertdateutc, CAST({tid} AS INT) AS dl_transform_id,
+                   CAST(false AS boolean) AS dl_isdeleted
             FROM {source_table}
         """)
-        action = "reloaded" if mode == "reload" else "created"
-    else:
-        nks = [k.strip() for k in (business_keys or "").split(",") if k.strip()]
-        if not nks:
-            raise Exception(f"fact mode '{mode}' on {gold_object} requires business_keys")
-        staged = spark.table(source_table)
-        if watermark_column and last_n_days:
-            staged = staged.filter(
-                F.col(watermark_column) >= F.expr(f"dateadd(day, -{int(last_n_days)}, current_timestamp())"))
-        staged = (staged.withColumn("dl_insertdateutc", F.current_timestamp())
-                        .withColumn("dl_transform_id", F.lit(transform_id).cast("int")))
-        cond = " AND ".join([f"t.{k} <=> s.{k}" for k in nks])
-        mrg = DeltaTable.forName(spark, gold_object).alias("t").merge(staged.alias("s"), cond)
-        if mode == "upsert":
-            mrg.whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
-            action = "upserted"
-        elif mode == "append":
-            mrg.whenNotMatchedInsertAll().execute()  # insert new business keys only
-            action = "appended"
-        else:
-            raise Exception(f"unknown fact mode '{mode}' for {gold_object}")
+        return {"object": gold_object, "action": "reloaded" if mode == "reload" else "created",
+                "rows": spark.table(gold_object).count(), "deleted": 0, "mode": mode}
 
-    # grain check on the source (business_keys should be unique per build)
-    dupes = 0
-    if business_keys:
-        nks = [k.strip() for k in business_keys.split(",") if k.strip()]
-        dupes = spark.table(source_table).groupBy(*nks).count().filter("count > 1").count()
-    return {"object": gold_object, "action": action, "rows": spark.table(gold_object).count(), "grain_dupes": dupes}
+    nks = [k.strip() for k in (business_keys or "").split(",") if k.strip()]
+    if not nks:
+        raise Exception(f"fact mode '{mode}' on {gold_object} requires business_keys")
+
+    # older fact tables predate dl_isdeleted — add it before any merge references it
+    if "dl_isdeleted" not in spark.table(gold_object).columns:
+        spark.sql(f"ALTER TABLE {gold_object} ADD COLUMNS (dl_isdeleted boolean)")
+        spark.sql(f"UPDATE {gold_object} SET dl_isdeleted = false WHERE dl_isdeleted IS NULL")
+
+    # window the source only for an incremental upsert; a full snapshot is taken whole
+    staged = spark.table(source_table)
+    if watermark_column and last_n_days and not full:
+        staged = staged.filter(
+            F.col(watermark_column) >= F.expr(f"dateadd(day, -{int(last_n_days)}, current_timestamp())"))
+    staged = (staged.withColumn("dl_insertdateutc", F.current_timestamp())
+                    .withColumn("dl_transform_id", F.lit(transform_id).cast("int"))
+                    .withColumn("dl_isdeleted", F.lit(False)))
+    tgt = DeltaTable.forName(spark, gold_object)
+    cond = " AND ".join([f"t.{k} <=> s.{k}" for k in nks])
+    mrg = tgt.alias("t").merge(staged.alias("s"), cond)
+    if mode == "upsert":
+        mrg.whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()  # reappeared keys get dl_isdeleted=false
+        action = "upserted"
+    elif mode == "append":
+        mrg.whenNotMatchedInsertAll().execute()  # insert new business keys only
+        action = "appended"
+    else:
+        raise Exception(f"unknown fact mode '{mode}' for {gold_object}")
+
+    # full upsert: soft-delete fact rows whose business_keys vanished from the complete source
+    n_deleted = 0
+    if mode == "upsert" and full:
+        src_keys = staged.select(*nks).distinct()
+        live = tgt.toDF().filter("dl_isdeleted = false").select(*nks)
+        gone = live.join(src_keys, on=nks, how="left_anti")
+        n_deleted = gone.count()
+        if n_deleted > 0:
+            (tgt.alias("t").merge(gone.alias("s"), cond + " AND t.dl_isdeleted = false")
+                .whenMatchedUpdate(set={"dl_isdeleted": "true"})
+                .execute())
+
+    dupes = spark.table(source_table).groupBy(*nks).count().filter("count > 1").count()
+    return {"object": gold_object, "action": action, "rows": spark.table(gold_object).count(),
+            "deleted": n_deleted, "grain_dupes": dupes, "mode": mode}
 
 # METADATA ********************
 

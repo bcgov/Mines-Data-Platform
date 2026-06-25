@@ -106,14 +106,10 @@ print("execution levels:", levels)
 
 # CELL ********************
 
-# dimension table_type -> (scd_type, load_mode). *_full handles source deletes; *_incremental does not.
-DIM_MAP = {
-    "type1_incremental_dimension": (1, "incremental"),
-    "type1_full_dimension":        (1, "full"),
-    "type2_incremental_dimension": (2, "incremental"),
-    "type2_full_dimension":        (2, "full"),
-}
-FACT_MAP = {"append_only_fact": "append", "upsert_fact": "upsert", "reload_fact": "reload"}
+# table_type -> builder; load_strategy (incremental|full) is a separate column. For dimensions and
+# upsert facts, 'full' means a complete-snapshot source so absent business keys are (soft) deleted.
+DIM_SCD = {"type1_dimension": 1, "type2_dimension": 2}
+FACT_MODE = {"append_fact": "append", "upsert_fact": "upsert", "reload_fact": "reload"}
 
 results = []
 for li, level in enumerate(levels):
@@ -139,13 +135,13 @@ for li, level in enumerate(levels):
         c = nodes[n]
         try:
             tt = (c.get("table_type") or "").strip()
-            if tt in DIM_MAP:
-                scd, lm = DIM_MAP[tt]
-                res = build_dimension(c["gold_object"], c["source_table"], scd,
+            ls = (c.get("load_strategy") or "incremental").strip()
+            if tt in DIM_SCD:
+                res = build_dimension(c["gold_object"], c["source_table"], DIM_SCD[tt],
                                       c["surrogate_key"], c["business_keys"],
-                                      c.get("non_historized_columns"), load_mode=lm)
-            elif tt in FACT_MAP:
-                res = build_fact(c["gold_object"], c["source_table"], FACT_MAP[tt],
+                                      c.get("non_historized_columns"), load_mode=ls)
+            elif tt in FACT_MODE:
+                res = build_fact(c["gold_object"], c["source_table"], FACT_MODE[tt], ls,
                                  c.get("business_keys"), c.get("watermark_column"), c.get("last_n_days"))
             else:
                 raise Exception(f"unknown table_type '{tt}' for node {n}")

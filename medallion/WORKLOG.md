@@ -44,6 +44,17 @@
 - **F8:** Fabric schema-enabled lakehouses do **NOT auto-create schemas** on `saveAsTable` (`SCHEMA_NOT_FOUND`) — must `CREATE SCHEMA IF NOT EXISTS` first. (Bronze worked only because its `bronze` schema pre-existed.)
 - **F9 (verification):** notebook-job stdout is NOT retrievable via API, and lakehouse SQL endpoints **lag fresh tables** (even reads of a just-overwritten table can return a stale snapshot). Reliable readback = **OneLake DFS file listing** (`fabric-ops-list-tables`, exists-only) or the **warehouse** via synapsesql (no lag). Portal cell-output is the fastest way to see a notebook error.
 
+## Phase 4 — Gold (DAG-driven dim/fact builder) (2026-06-25)
+
+- ✅ **End-to-end validated.** DAG-driven gold builder runs the full medallion tail: silver→stg transform→merge→gold.
+- **Config-driven DAG:** `app.gold_build_dag` (one row per gold object: `object_type DIM/FACT`, `scd_type`, `fact_type`, `surrogate_key`, `business_keys`, `non_historized_columns`, `watermark_column`, `last_n_days`, `transform_notebook`, `source_view`, `depends_on`, `load_order`, `is_active`). Seeded: `dim_permit` (SCD2, NK `permit_id`) → `fact_permit_amendment` (`fact_type 1`, `depends_on dim_permit`).
+- **Orchestrator** `nb_gold_orchestrator`: reads the DAG via synapsesql, computes **Kahn topological levels** (independent nodes share a level → run in parallel), per level runs the transform notebooks via `mssparkutils.notebook.runMultiple` (creates `stg.v_*` views from silver), then the orchestrator **does the merge** by calling the builder utility. Writes per-node results to `app.gold_run_log` and failures to `app.error_log` (layer=`gold`).
+- **Builder utility** `nb_util_gold` (`%run` into orchestrator): `build_dimension(...)` (SCD1/2, surrogate keys via `row_number()+max_sk` — no IDENTITY) and `build_fact(...)` (type-1 full rebuild / type-2 rolling-`last_n_days`, grain test). Wheel path kept open.
+- **Transform notebooks** `nb_gold_tf_dim_permit`, `nb_gold_tf_fact_permit_amendment` (gold LH default): build `stg.v_*` from silver via abfss; fact joins `gold.dim_permit` for `Permit_SK`.
+- **Validation run (RUN 2026-06-25 03:50):** L0 `dim_permit` → `gold.dim_permit` OK `no-change` (SCD2 idempotent, 8610 rows from prior); L1 `fact_permit_amendment` → `gold.fact_permit_amendment` OK **24,750 rows** `rebuilt`. Both `runMultiple` transforms returned `exception: None`; correct DAG ordering; no gold errors.
+- **F11:** Fabric `%run` magic **cannot share a cell with any other code or comment** (`MagicUsageError`). The `%run nb_util_gold` cell must be alone — even a leading comment breaks it (also retroactively explains the first gold smoke failure).
+- **F12:** Source has **pre-1900 timestamps** (e.g. `permit_amendment`) → Spark Parquet write fails `INCONSISTENT_BEHAVIOR_CROSS_VERSION.WRITE_ANCIENT_DATETIME`. Fix: set `spark.sql.parquet.{datetime,int96}RebaseModeInWrite/Read = LEGACY` in **both** `nb_silver_build` and `nb_gold_orchestrator`. Diagnosed via the ad-hoc warehouse SQL runner (`fabric-ops-adhoc-sql.yml`) reading the full stack trace from `app.error_log`.
+
 ## Centralized error logging framework (2026-06-24)
 
 Goal (client): ONE queryable error table for pipeline AND notebook errors. Delivered:

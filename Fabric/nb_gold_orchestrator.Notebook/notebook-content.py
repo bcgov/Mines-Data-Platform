@@ -73,15 +73,19 @@ def log_error(entity, error_message, stack_trace=None, target_table=None):
         print(f"log_error failed (non-fatal): {e}")
 
 
-# Read the DAG from the warehouse
+# Read build config + DAG from the warehouse (split tables: metadata + dependencies).
 from com.microsoft.spark.fabric import Constants  # noqa: F401
-dag = spark.read.synapsesql(f"{WAREHOUSE}.app.gold_build_dag").filter("is_active = true")
-nodes = {r["node_name"]: r.asDict() for r in dag.collect()}
-print("DAG nodes:", list(nodes))
+build = spark.read.synapsesql(f"{WAREHOUSE}.app.gold_build").filter("is_active = true")
+nodes = {r["node_name"]: r.asDict() for r in build.collect()}
+deps = {r["node_name"]: (r["depends_on"] or "")
+        for r in spark.read.synapsesql(f"{WAREHOUSE}.app.gold_dependency").collect()}
+print("gold_build nodes:", list(nodes))
 
 
 def deps_of(n):
-    return [d.strip() for d in (nodes[n].get("depends_on") or "").split(",") if d.strip()]
+    # parents from gold_dependency (comma list). Ignore parents that aren't active build
+    # nodes so an inactive/absent parent can't deadlock level computation.
+    return [d.strip() for d in deps.get(n, "").split(",") if d.strip() and d.strip() in nodes]
 
 
 # Topological levels (Kahn): independent nodes share a level (run in parallel).
@@ -90,7 +94,7 @@ while remaining:
     level = [n for n in remaining if all(d in done for d in deps_of(n))]
     if not level:
         raise Exception(f"DAG cycle or missing dependency among: {sorted(remaining)}")
-    level.sort(key=lambda n: nodes[n].get("load_order") or 0)
+    level.sort()
     levels.append(level)
     done |= set(level)
     remaining -= set(level)
@@ -125,12 +129,17 @@ for li, level in enumerate(levels):
     for n in level:
         c = nodes[n]
         try:
-            if c["object_type"] == "DIM":
-                res = build_dimension(c["gold_object"], c["source_view"], c["scd_type"],
+            tt = (c.get("table_type") or "").strip()
+            if tt in ("type1_dimension", "type2_dimension"):
+                scd = 1 if tt == "type1_dimension" else 2
+                res = build_dimension(c["gold_object"], c["source_table"], scd,
                                       c["surrogate_key"], c["business_keys"], c.get("non_historized_columns"))
-            else:
-                res = build_fact(c["gold_object"], c["source_view"], c["fact_type"],
+            elif tt in ("append_only_fact", "upsert_fact", "reload_fact"):
+                mode = {"append_only_fact": "append", "upsert_fact": "upsert", "reload_fact": "reload"}[tt]
+                res = build_fact(c["gold_object"], c["source_table"], mode,
                                  c.get("business_keys"), c.get("watermark_column"), c.get("last_n_days"))
+            else:
+                raise Exception(f"unknown table_type '{tt}' for node {n}")
             print(n, "->", res)
             results.append((n, c["gold_object"], "OK", int(res.get("rows") or 0), str(res.get("action"))))
         except Exception as e:

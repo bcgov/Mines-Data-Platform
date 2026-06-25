@@ -28,9 +28,9 @@ def _rowhash(df, cols):
     return F.sha2(F.concat_ws("||", *[F.coalesce(F.col(c).cast("string"), F.lit("")) for c in cols]), 256)
 
 
-def build_dimension(gold_object, source_view, scd_type, surrogate_key, business_keys,
+def build_dimension(gold_object, source_table, scd_type, surrogate_key, business_keys,
                     non_historized_columns=None, transform_id=None):
-    """Build/merge a gold dimension from a transformed view. SCD type 1 or 2.
+    """Build/merge a gold dimension from a materialized stg table. SCD type 1 or 2.
     surrogate_key is generated here; business_keys (natural keys) drive change detection."""
     schema, _ = _split(gold_object)
     scd_type = int(scd_type)
@@ -38,7 +38,7 @@ def build_dimension(gold_object, source_view, scd_type, surrogate_key, business_
     nonhist = {c.strip() for c in (non_historized_columns or "").split(",") if c.strip()}
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
 
-    src = spark.table(source_view)
+    src = spark.table(source_table)
     attr_cols = [c for c in src.columns if c != surrogate_key and c not in CTRL]
     hash_cols = sorted([c for c in attr_cols if c not in nonhist], key=str.lower)
     new = (src.select(*attr_cols)
@@ -85,37 +85,53 @@ def build_dimension(gold_object, source_view, scd_type, surrogate_key, business_
     return {"object": gold_object, "action": "merged", "rows": n_changed, "scd": scd_type}
 
 
-def build_fact(gold_object, source_view, fact_type, business_keys=None,
+def build_fact(gold_object, source_table, mode, business_keys=None,
                watermark_column=None, last_n_days=None, transform_id=None):
-    """Build a gold fact from a transformed view. Type 1 = full rebuild; Type 2 = rolling window.
-    Dimension surrogate-key resolution is expected to be done IN the source view."""
+    """Build a gold fact from a materialized stg table. mode (derived from table_type):
+        'reload'  : full drop+rebuild from source each run (rows absent from source vanish).
+        'upsert'  : MERGE on business_keys — update matched, insert new.
+        'append'  : insert only source rows whose business_keys are new (never update/delete).
+    watermark_column + last_n_days optionally window the SOURCE for upsert/append (limits the
+    comparison set). Dimension surrogate-key resolution is expected to be done IN the source.
+    """
     schema, _ = _split(gold_object)
-    fact_type = int(fact_type)
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
     tid = "NULL" if transform_id is None else str(int(transform_id))
 
-    if fact_type == 1 or not spark.catalog.tableExists(gold_object):
+    # first-ever load OR a full reload → (re)create from source
+    if mode == "reload" or not spark.catalog.tableExists(gold_object):
         spark.sql(f"""
             CREATE OR REPLACE TABLE {gold_object} AS
             SELECT *, current_timestamp() AS dl_insertdateutc, CAST({tid} AS INT) AS dl_transform_id
-            FROM {source_view}
+            FROM {source_table}
         """)
-        action = "rebuilt"
+        action = "reloaded" if mode == "reload" else "created"
     else:
-        win = int(last_n_days)
-        spark.sql(f"""
-            INSERT INTO {gold_object}
-              REPLACE WHERE {watermark_column} >= dateadd(day, -{win}, current_timestamp())
-            SELECT *, current_timestamp() AS dl_insertdateutc, CAST({tid} AS INT) AS dl_transform_id
-            FROM {source_view}
-            WHERE {watermark_column} >= dateadd(day, -{win}, current_timestamp())
-        """)
-        action = "rolling"
+        nks = [k.strip() for k in (business_keys or "").split(",") if k.strip()]
+        if not nks:
+            raise Exception(f"fact mode '{mode}' on {gold_object} requires business_keys")
+        staged = spark.table(source_table)
+        if watermark_column and last_n_days:
+            staged = staged.filter(
+                F.col(watermark_column) >= F.expr(f"dateadd(day, -{int(last_n_days)}, current_timestamp())"))
+        staged = (staged.withColumn("dl_insertdateutc", F.current_timestamp())
+                        .withColumn("dl_transform_id", F.lit(transform_id).cast("int")))
+        cond = " AND ".join([f"t.{k} <=> s.{k}" for k in nks])
+        mrg = DeltaTable.forName(spark, gold_object).alias("t").merge(staged.alias("s"), cond)
+        if mode == "upsert":
+            mrg.whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+            action = "upserted"
+        elif mode == "append":
+            mrg.whenNotMatchedInsertAll().execute()  # insert new business keys only
+            action = "appended"
+        else:
+            raise Exception(f"unknown fact mode '{mode}' for {gold_object}")
 
+    # grain check on the source (business_keys should be unique per build)
     dupes = 0
     if business_keys:
         nks = [k.strip() for k in business_keys.split(",") if k.strip()]
-        dupes = spark.table(source_view).groupBy(*nks).count().filter("count > 1").count()
+        dupes = spark.table(source_table).groupBy(*nks).count().filter("count > 1").count()
     return {"object": gold_object, "action": action, "rows": spark.table(gold_object).count(), "grain_dupes": dupes}
 
 # METADATA ********************

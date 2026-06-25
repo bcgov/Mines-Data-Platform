@@ -50,6 +50,11 @@ V1 = [
 WAREHOUSE = "mines-data-platform-fabwh1"
 
 spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
+# Source data contains pre-1900 timestamps (e.g. permit_amendment) — rebase on write/read.
+spark.conf.set("spark.sql.parquet.datetimeRebaseModeInWrite", "LEGACY")
+spark.conf.set("spark.sql.parquet.datetimeRebaseModeInRead", "LEGACY")
+spark.conf.set("spark.sql.parquet.int96RebaseModeInWrite", "LEGACY")
+spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
 
 
 def log_error(layer, run_id, entity, error_message, stack_trace=None, target_table=None,

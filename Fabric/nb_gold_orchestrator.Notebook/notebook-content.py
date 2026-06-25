@@ -1,0 +1,144 @@
+# Fabric notebook source
+
+# METADATA ********************
+
+# META {
+# META   "kernel_info": { "name": "synapse_pyspark" },
+# META   "dependencies": {
+# META     "lakehouse": {
+# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
+# META       "default_lakehouse_name": "lh_gold",
+# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "known_lakehouses": [ { "id": "5e43f78b-2156-4469-980e-bffda0295fac" } ]
+# META     },
+# META     "warehouse": {
+# META       "default_warehouse": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
+# META       "known_warehouses": [ { "id": "dad1e7ab-adc2-bd51-408b-33e59ed9a608", "type": "Datawarehouse" } ]
+# META     }
+# META   }
+# META }
+
+# CELL ********************
+
+# Load the gold build engine (build_dimension / build_fact).
+%run nb_util_gold
+
+# METADATA ********************
+
+# META { "language": "python", "language_group": "synapse_pyspark" }
+
+# CELL ********************
+
+from pyspark.sql import functions as F
+from pyspark.sql.types import StructType, StructField, StringType, LongType
+from notebookutils import mssparkutils
+import uuid
+import traceback
+
+WAREHOUSE = "mines-data-platform-fabwh1"
+RUN_ID = str(uuid.uuid4())
+
+
+def log_error(entity, error_message, stack_trace=None, target_table=None):
+    try:
+        from com.microsoft.spark.fabric import Constants  # noqa: F401
+        sch = StructType([
+            StructField("error_id", StringType()), StructField("layer", StringType()),
+            StructField("log_id", LongType()), StructField("pipeline_name", StringType()),
+            StructField("run_id", StringType()), StructField("entity", StringType()),
+            StructField("target_table", StringType()), StructField("error_message", StringType()),
+            StructField("error_code", StringType()), StructField("error_context", StringType()),
+            StructField("stack_trace", StringType()),
+        ])
+        row = (str(uuid.uuid4()), "gold", None, None, RUN_ID, entity, target_table,
+               (error_message or "(no message)")[:8000], None, None,
+               (stack_trace[:8000] if stack_trace else None))
+        (spark.createDataFrame([row], sch).withColumn("created_date", F.current_timestamp())
+            .write.mode("append").synapsesql(f"{WAREHOUSE}.app.error_log"))
+    except Exception as e:
+        print(f"log_error failed (non-fatal): {e}")
+
+
+# Read the DAG from the warehouse
+from com.microsoft.spark.fabric import Constants  # noqa: F401
+dag = spark.read.synapsesql(f"{WAREHOUSE}.app.gold_build_dag").filter("is_active = true")
+nodes = {r["node_name"]: r.asDict() for r in dag.collect()}
+print("DAG nodes:", list(nodes))
+
+
+def deps_of(n):
+    return [d.strip() for d in (nodes[n].get("depends_on") or "").split(",") if d.strip()]
+
+
+# Topological levels (Kahn): independent nodes share a level (run in parallel).
+levels, done, remaining = [], set(), set(nodes)
+while remaining:
+    level = [n for n in remaining if all(d in done for d in deps_of(n))]
+    if not level:
+        raise Exception(f"DAG cycle or missing dependency among: {sorted(remaining)}")
+    level.sort(key=lambda n: nodes[n].get("load_order") or 0)
+    levels.append(level)
+    done |= set(level)
+    remaining -= set(level)
+print("execution levels:", levels)
+
+# METADATA ********************
+
+# META { "language": "python", "language_group": "synapse_pyspark" }
+
+# CELL ********************
+
+results = []
+for li, level in enumerate(levels):
+    print(f"\n===== LEVEL {li}: {level} =====")
+
+    # 1) run this level's transform notebooks in parallel (they create the stg.v_* views)
+    activities = [{
+        "name": nodes[n]["transform_notebook"],
+        "path": nodes[n]["transform_notebook"],
+        "args": {},
+        "dependencies": [],
+    } for n in level]
+    try:
+        mssparkutils.notebook.runMultiple({"activities": activities, "timeoutInSeconds": 3600, "concurrency": 0})
+    except Exception as e:
+        print(f"runMultiple failed for level {li}: {e}")
+
+    # 2) merge each node in this level into gold (orchestrator does the merge)
+    for n in level:
+        c = nodes[n]
+        try:
+            if c["object_type"] == "DIM":
+                res = build_dimension(c["gold_object"], c["source_view"], c["scd_type"],
+                                      c["surrogate_key"], c["business_keys"], c.get("non_historized_columns"))
+            else:
+                res = build_fact(c["gold_object"], c["source_view"], c["fact_type"],
+                                 c.get("business_keys"), c.get("watermark_column"), c.get("last_n_days"))
+            print(n, "->", res)
+            results.append((n, c["gold_object"], "OK", int(res.get("rows") or 0), str(res.get("action"))))
+        except Exception as e:
+            err = str(e)[:1000]
+            print(f"MERGE FAILED {n}: {err}")
+            traceback.print_exc()
+            log_error(n, err, traceback.format_exc(), target_table=c["gold_object"])
+            results.append((n, c["gold_object"], "FAILED", 0, err[:200]))
+
+# Write a build log to the warehouse for reliable verification.
+try:
+    sch = StructType([
+        StructField("node_name", StringType()), StructField("gold_object", StringType()),
+        StructField("status", StringType()), StructField("rows", LongType()), StructField("detail", StringType()),
+    ])
+    (spark.createDataFrame(results, sch)
+        .withColumn("run_id", F.lit(RUN_ID)).withColumn("run_ts", F.current_timestamp())
+        .write.mode("overwrite").option("overwriteSchema", "true").synapsesql(f"{WAREHOUSE}.app.gold_run_log"))
+    print("wrote app.gold_run_log")
+except Exception as e:
+    print(f"gold_run_log write failed: {e}")
+
+ok = sum(1 for r in results if r[2] == "OK")
+print(f"\nGOLD BUILD DONE | ok={ok} failed={len(results)-ok} RUN_ID={RUN_ID}")
+
+# METADATA ********************
+
+# META { "language": "python", "language_group": "synapse_pyspark" }

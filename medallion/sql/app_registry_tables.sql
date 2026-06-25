@@ -211,7 +211,7 @@ BEGIN
         [gold_object]             varchar(200)  NOT NULL,   -- target, e.g. 'gold.dim_permit'
         [object_type]             varchar(10)   NOT NULL,   -- DIM | FACT
         [transform_notebook]      varchar(200)  NOT NULL,   -- notebook that builds the stg view
-        [source_view]             varchar(200)  NOT NULL,   -- stg view it produces, e.g. 'stg.v_dim_permit'
+        [source_view]             varchar(200)  NOT NULL,   -- materialized stg table the transform produces, e.g. 'stg.dim_permit'
         [scd_type]                int           NULL,       -- DIM: 1|2
         [fact_type]               int           NULL,       -- FACT: 1|2
         [surrogate_key]           varchar(100)  NULL,       -- DIM surrogate, e.g. 'Permit_SK'
@@ -237,7 +237,7 @@ IF NOT EXISTS (SELECT 1 FROM [app].[gold_build_dag] WHERE node_name='dim_permit'
          surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days, depends_on,
          is_active, load_order, created_date, created_by, modified_date, modified_by)
     VALUES
-        ('dim_permit','gold.dim_permit','DIM','nb_gold_tf_dim_permit','stg.v_dim_permit',2,NULL,
+        ('dim_permit','gold.dim_permit','DIM','nb_gold_tf_dim_permit','stg.dim_permit',2,NULL,
          'Permit_SK','permit_id',NULL,NULL,NULL,NULL,1,10,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
 GO
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_build_dag] WHERE node_name='fact_permit_amendment')
@@ -246,8 +246,19 @@ IF NOT EXISTS (SELECT 1 FROM [app].[gold_build_dag] WHERE node_name='fact_permit
          surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days, depends_on,
          is_active, load_order, created_date, created_by, modified_date, modified_by)
     VALUES
-        ('fact_permit_amendment','gold.fact_permit_amendment','FACT','nb_gold_tf_fact_permit_amendment','stg.v_fact_permit_amendment',NULL,1,
+        ('fact_permit_amendment','gold.fact_permit_amendment','FACT','nb_gold_tf_fact_permit_amendment','stg.fact_permit_amendment',NULL,1,
          NULL,'permit_amendment_id',NULL,NULL,NULL,'dim_permit',1,20,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+
+-- Migrate existing DAG rows from the old stg VIEW names (stg.v_*) to the materialized stg
+-- TABLE names (stg.*). Idempotent: only touches rows still on the old value.
+UPDATE [app].[gold_build_dag]
+   SET source_view='stg.dim_permit', modified_date=SYSUTCDATETIME(), modified_by='system'
+ WHERE node_name='dim_permit' AND source_view <> 'stg.dim_permit';
+GO
+UPDATE [app].[gold_build_dag]
+   SET source_view='stg.fact_permit_amendment', modified_date=SYSUTCDATETIME(), modified_by='system'
+ WHERE node_name='fact_permit_amendment' AND source_view <> 'stg.fact_permit_amendment';
 GO
 
 -- ── verify ───────────────────────────────────────────────────────────────────

@@ -1,12 +1,17 @@
--- gold_build_dag gone? gold_build + gold_dependency present and seeded?
-SELECT t.name AS table_name
-FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id
-WHERE s.name='app' AND t.name IN ('gold_build_dag','gold_build','gold_dependency')
-ORDER BY t.name;
+-- Split-table gold build result (newest run): dim via type2_dimension, fact via reload_fact.
+SELECT node_name, gold_object, status, rows, LEFT(detail,120) AS detail, run_ts
+FROM app.gold_run_log ORDER BY run_ts DESC, node_name;
 GO
-SELECT node_name, gold_object, object_type, transform_notebook, source_table, table_type,
-       surrogate_key, business_keys, is_active
-FROM app.gold_build ORDER BY node_name;
+-- Confirm levels/transforms ran this round (exception should be None).
+SELECT TOP 2 entity, LEFT(error_message,160) AS transform_result, created_date
+FROM app.error_log
+WHERE layer='gold' AND entity LIKE 'runMultiple%'
+ORDER BY created_date DESC;
 GO
-SELECT node_name, depends_on FROM app.gold_dependency ORDER BY node_name;
+-- Any real gold errors in the last 15 min?
+SELECT entity, target_table, LEFT(error_message,200) AS err, created_date
+FROM app.error_log
+WHERE layer='gold' AND entity NOT LIKE 'runMultiple%'
+  AND created_date >= DATEADD(minute,-15,SYSUTCDATETIME())
+ORDER BY created_date DESC;
 GO

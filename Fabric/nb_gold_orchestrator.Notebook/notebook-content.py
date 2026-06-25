@@ -37,6 +37,12 @@ import traceback
 WAREHOUSE = "mines-data-platform-fabwh1"
 RUN_ID = str(uuid.uuid4())
 
+# Source data contains pre-1900 timestamps (e.g. permit_amendment) — rebase on write/read.
+spark.conf.set("spark.sql.parquet.datetimeRebaseModeInWrite", "LEGACY")
+spark.conf.set("spark.sql.parquet.datetimeRebaseModeInRead", "LEGACY")
+spark.conf.set("spark.sql.parquet.int96RebaseModeInWrite", "LEGACY")
+spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
+
 
 def log_error(entity, error_message, stack_trace=None, target_table=None):
     try:

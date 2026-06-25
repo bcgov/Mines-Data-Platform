@@ -211,11 +211,14 @@ GO
 
 -- gold_build: metadata for each gold table. table_type replaces the old scd_type/fact_type
 -- pair with a single enum the builder dispatches on:
---   type1_dimension  : SCD1 dimension (overwrite changed rows, no history)
---   type2_dimension  : SCD2 dimension (retain history)
+--   type1_incremental_dimension : SCD1, partial source — no delete detection
+--   type1_full_dimension        : SCD1, complete snapshot — source-absent keys soft-deleted (dl_isdeleted=true)
+--   type2_incremental_dimension : SCD2 (history), partial source — no delete detection
+--   type2_full_dimension        : SCD2 (history), complete snapshot — source-absent keys soft-expired (dl_isdeleted=true)
 --   append_only_fact : insert source rows whose business_keys are new (never update/delete)
 --   upsert_fact      : merge on business_keys (update matched + insert new)
 --   reload_fact      : full drop+rebuild from source each run (rows absent from source vanish)
+-- Only the *_full dimensions check deletes — an incremental source is never complete.
 IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='gold_build')
 BEGIN
     CREATE TABLE [app].[gold_build] (
@@ -261,7 +264,7 @@ IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='dim_permit')
          surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days,
          is_active, created_date, created_by, modified_date, modified_by)
     VALUES
-        ('dim_permit','gold.dim_permit','DIM','nb_gold_tf_dim_permit','stg.dim_permit','type2_dimension',
+        ('dim_permit','gold.dim_permit','DIM','nb_gold_tf_dim_permit','stg.dim_permit','type2_full_dimension',
          'Permit_SK','permit_id',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
 GO
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='fact_permit_amendment')
@@ -281,6 +284,16 @@ GO
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='fact_permit_amendment')
     INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
     VALUES ('fact_permit_amendment', 'dim_permit', SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+
+-- Migrate the pre-split table_type values to the 4-way dimension enum. dim_permit's stg source
+-- is a full snapshot (transform overwrites fully from silver), so type2_full is correct + lets
+-- delete handling apply. Idempotent: only touches rows still on an old value.
+UPDATE [app].[gold_build] SET table_type='type2_full_dimension', modified_date=SYSUTCDATETIME(), modified_by='system'
+ WHERE table_type='type2_dimension';
+GO
+UPDATE [app].[gold_build] SET table_type='type1_full_dimension', modified_date=SYSUTCDATETIME(), modified_by='system'
+ WHERE table_type='type1_dimension';
 GO
 
 -- ── verify ───────────────────────────────────────────────────────────────────

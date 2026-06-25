@@ -1,8 +1,8 @@
--- Ad-hoc query (edit + push to re-run). Currently: full permit_amendment silver error.
-SELECT TOP 1 entity,
-       LEFT(CAST(error_message AS varchar(4000)), 400) AS error_message,
-       LEFT(CAST(stack_trace AS varchar(8000)), 4000)  AS stack_trace
-FROM app.error_log
-WHERE layer = 'silver' AND entity = 'permit_amendment'
-ORDER BY created_date DESC;
+-- Did permit_amendment fail recently? Compare now to its last silver error.
+SELECT SYSUTCDATETIME() AS now_utc,
+       (SELECT MAX(created_date) FROM app.error_log
+        WHERE layer='silver' AND entity='permit_amendment') AS last_pa_silver_error,
+       (SELECT COUNT(*) FROM app.error_log
+        WHERE layer='silver' AND entity='permit_amendment'
+          AND created_date >= DATEADD(minute, -10, SYSUTCDATETIME())) AS pa_errors_last_10min;
 GO

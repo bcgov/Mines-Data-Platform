@@ -1,0 +1,40 @@
+# Run nb_gold_test: purposely exercises update + soft-delete for dimension and fact by mutating
+# the stg tables, asserts the gold outcome, restores gold, and reports via app.gold_test_log.
+name: Fabric Ops - Gold Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        description: 'Fabric workspace ID'
+        required: true
+        default: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+  push:
+    branches: ['medallion/**']
+    paths:
+      - 'Fabric/nb_gold_test.Notebook/**'
+      - 'medallion/sql/verify_gold_test.sql'
+      - '.github/workflows/scripts/run_gold_test.sh'
+      - '.github/workflows/fabric-ops-gold-test.yml'
+
+jobs:
+  gold-test:
+    name: Deploy + run + verify Gold Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps (ODBC + python libs)
+        run: |
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev jq curl
+          python3 -m pip install --quiet requests pyodbc
+      - name: Make script executable
+        run: chmod +x .github/workflows/scripts/run_gold_test.sh
+      - name: Deploy + run + verify
+        run: .github/workflows/scripts/run_gold_test.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: ${{ github.event.inputs.workspace_id || '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0' }}
+          WAREHOUSE_NAME: 'mines-data-platform-fabwh1'

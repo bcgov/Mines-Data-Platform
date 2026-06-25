@@ -99,9 +99,12 @@ for li, level in enumerate(levels):
         "dependencies": [],
     } for n in level]
     try:
-        mssparkutils.notebook.runMultiple({"activities": activities, "timeoutInSeconds": 3600, "concurrency": 0})
+        rm = mssparkutils.notebook.runMultiple({"activities": activities, "timeoutInSeconds": 3600, "concurrency": 0})
+        print(f"runMultiple L{li} result: {rm}")
+        log_error(f"runMultiple_L{li}", f"transform result: {str(rm)[:6000]}", target_table=str(level))
     except Exception as e:
         print(f"runMultiple failed for level {li}: {e}")
+        log_error(f"runMultiple_L{li}", f"runMultiple raised: {e}", traceback.format_exc())
 
     # 2) merge each node in this level into gold (orchestrator does the merge)
     for n in level:

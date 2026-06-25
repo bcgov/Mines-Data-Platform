@@ -106,11 +106,20 @@ print("execution levels:", levels)
 
 # CELL ********************
 
+# dimension table_type -> (scd_type, load_mode). *_full handles source deletes; *_incremental does not.
+DIM_MAP = {
+    "type1_incremental_dimension": (1, "incremental"),
+    "type1_full_dimension":        (1, "full"),
+    "type2_incremental_dimension": (2, "incremental"),
+    "type2_full_dimension":        (2, "full"),
+}
+FACT_MAP = {"append_only_fact": "append", "upsert_fact": "upsert", "reload_fact": "reload"}
+
 results = []
 for li, level in enumerate(levels):
     print(f"\n===== LEVEL {li}: {level} =====")
 
-    # 1) run this level's transform notebooks in parallel (they create the stg.v_* views)
+    # 1) run this level's transform notebooks in parallel (they materialize the stg.* tables)
     activities = [{
         "name": nodes[n]["transform_notebook"],
         "path": nodes[n]["transform_notebook"],
@@ -130,18 +139,21 @@ for li, level in enumerate(levels):
         c = nodes[n]
         try:
             tt = (c.get("table_type") or "").strip()
-            if tt in ("type1_dimension", "type2_dimension"):
-                scd = 1 if tt == "type1_dimension" else 2
+            if tt in DIM_MAP:
+                scd, lm = DIM_MAP[tt]
                 res = build_dimension(c["gold_object"], c["source_table"], scd,
-                                      c["surrogate_key"], c["business_keys"], c.get("non_historized_columns"))
-            elif tt in ("append_only_fact", "upsert_fact", "reload_fact"):
-                mode = {"append_only_fact": "append", "upsert_fact": "upsert", "reload_fact": "reload"}[tt]
-                res = build_fact(c["gold_object"], c["source_table"], mode,
+                                      c["surrogate_key"], c["business_keys"],
+                                      c.get("non_historized_columns"), load_mode=lm)
+            elif tt in FACT_MAP:
+                res = build_fact(c["gold_object"], c["source_table"], FACT_MAP[tt],
                                  c.get("business_keys"), c.get("watermark_column"), c.get("last_n_days"))
             else:
                 raise Exception(f"unknown table_type '{tt}' for node {n}")
             print(n, "->", res)
-            results.append((n, c["gold_object"], "OK", int(res.get("rows") or 0), str(res.get("action"))))
+            detail = str(res.get("action"))
+            if res.get("deleted"):
+                detail += f" del={res['deleted']}"
+            results.append((n, c["gold_object"], "OK", int(res.get("rows") or 0), detail))
         except Exception as e:
             err = str(e)[:1000]
             print(f"MERGE FAILED {n}: {err}")

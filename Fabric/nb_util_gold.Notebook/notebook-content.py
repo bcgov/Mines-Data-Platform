@@ -16,7 +16,8 @@ from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 from delta.tables import DeltaTable
 
-CTRL = {"dl_iscurrent", "dl_recordstartdateutc", "dl_recordenddateutc", "dl_rowhash", "dl_transform_id"}
+CTRL = {"dl_iscurrent", "dl_isdeleted", "dl_recordstartdateutc", "dl_recordenddateutc",
+        "dl_rowhash", "dl_transform_id"}
 
 
 def _split(obj):
@@ -29,11 +30,17 @@ def _rowhash(df, cols):
 
 
 def build_dimension(gold_object, source_table, scd_type, surrogate_key, business_keys,
-                    non_historized_columns=None, transform_id=None):
-    """Build/merge a gold dimension from a materialized stg table. SCD type 1 or 2.
-    surrogate_key is generated here; business_keys (natural keys) drive change detection."""
+                    non_historized_columns=None, load_mode="incremental", transform_id=None):
+    """Build/merge a gold dimension from a materialized stg table.
+    scd_type 1|2; load_mode 'incremental'|'full'. surrogate_key is generated here;
+    business_keys (natural keys) drive change detection.
+    In 'full' mode the source is a COMPLETE snapshot, so business keys present in the
+    dimension but absent from the source are treated as deletes — soft-expired
+    (dl_iscurrent=false, dl_isdeleted=true, dl_recordenddateutc set). 'incremental' mode
+    NEVER deletes (the source is partial)."""
     schema, _ = _split(gold_object)
     scd_type = int(scd_type)
+    full = (load_mode == "full")
     nks = [k.strip() for k in business_keys.split(",") if k.strip()]
     nonhist = {c.strip() for c in (non_historized_columns or "").split(",") if c.strip()}
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
@@ -45,15 +52,25 @@ def build_dimension(gold_object, source_table, scd_type, surrogate_key, business
               .withColumn("dl_rowhash", _rowhash(src, hash_cols))
               .withColumn("dl_transform_id", F.lit(transform_id).cast("int")))
 
+    def _stamp(df, sk_expr):
+        return (df.withColumn(surrogate_key, sk_expr)
+                  .withColumn("dl_iscurrent", F.lit(True))
+                  .withColumn("dl_isdeleted", F.lit(False))
+                  .withColumn("dl_recordstartdateutc", F.current_timestamp())
+                  .withColumn("dl_recordenddateutc", F.lit(None).cast("timestamp")))
+
     # initial create + load
     if not spark.catalog.tableExists(gold_object):
         w = Window.orderBy(*[F.col(k) for k in nks])
-        out = (new.withColumn(surrogate_key, F.row_number().over(w).cast("long"))
-                  .withColumn("dl_iscurrent", F.lit(True))
-                  .withColumn("dl_recordstartdateutc", F.current_timestamp())
-                  .withColumn("dl_recordenddateutc", F.lit(None).cast("timestamp")))
+        out = _stamp(new, F.row_number().over(w).cast("long"))
         out.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(gold_object)
-        return {"object": gold_object, "action": "created", "rows": out.count(), "scd": scd_type}
+        return {"object": gold_object, "action": "created", "rows": out.count(),
+                "deleted": 0, "scd": scd_type, "mode": load_mode}
+
+    # older dimensions predate dl_isdeleted — add it before any merge references it
+    if "dl_isdeleted" not in spark.table(gold_object).columns:
+        spark.sql(f"ALTER TABLE {gold_object} ADD COLUMNS (dl_isdeleted boolean)")
+        spark.sql(f"UPDATE {gold_object} SET dl_isdeleted = false WHERE dl_isdeleted IS NULL")
 
     tgt = DeltaTable.forName(spark, gold_object)
     cur = tgt.toDF().filter("dl_iscurrent = true").select(*nks, F.col("dl_rowhash").alias("_cur_hash"))
@@ -61,28 +78,42 @@ def build_dimension(gold_object, source_table, scd_type, surrogate_key, business
                             on=[F.col(f"n.{k}").eqNullSafe(F.col(f"c.{k}")) for k in nks], how="left")
     changed = j.filter(F.col("c._cur_hash").isNull() | (F.col("n.dl_rowhash") != F.col("c._cur_hash"))).select("n.*")
     n_changed = changed.count()
-    if n_changed == 0:
-        return {"object": gold_object, "action": "no-change", "rows": 0, "scd": scd_type}
 
-    chg_keys = changed.select(*nks).distinct()
-    match = " AND ".join([f"t.{k} <=> s.{k}" for k in nks]) + " AND t.dl_iscurrent = true"
-    if scd_type == 2:
-        # expire the current version of changed keys (history retained)
-        (tgt.alias("t").merge(chg_keys.alias("s"), match)
-            .whenMatchedUpdate(set={"dl_iscurrent": "false", "dl_recordenddateutc": "current_timestamp()"})
-            .execute())
-    else:
-        # SCD1: drop the old current version (no history) before inserting the new one
-        (tgt.alias("t").merge(chg_keys.alias("s"), match).whenMatchedDelete().execute())
+    if n_changed > 0:
+        chg_keys = changed.select(*nks).distinct()
+        match = " AND ".join([f"t.{k} <=> s.{k}" for k in nks]) + " AND t.dl_iscurrent = true"
+        if scd_type == 2:
+            # expire the current version of changed keys (history retained)
+            (tgt.alias("t").merge(chg_keys.alias("s"), match)
+                .whenMatchedUpdate(set={"dl_iscurrent": "false", "dl_recordenddateutc": "current_timestamp()"})
+                .execute())
+        else:
+            # SCD1: drop the old current version (no history) before inserting the new one
+            (tgt.alias("t").merge(chg_keys.alias("s"), match).whenMatchedDelete().execute())
+        max_sk = spark.table(gold_object).agg(F.max(surrogate_key)).collect()[0][0] or 0
+        w = Window.orderBy(*[F.col(k) for k in nks])
+        ins = _stamp(changed, (F.row_number().over(w) + F.lit(max_sk)).cast("long"))
+        ins.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(gold_object)
 
-    max_sk = spark.table(gold_object).agg(F.max(surrogate_key)).collect()[0][0] or 0
-    w = Window.orderBy(*[F.col(k) for k in nks])
-    ins = (changed.withColumn(surrogate_key, (F.row_number().over(w) + F.lit(max_sk)).cast("long"))
-                  .withColumn("dl_iscurrent", F.lit(True))
-                  .withColumn("dl_recordstartdateutc", F.current_timestamp())
-                  .withColumn("dl_recordenddateutc", F.lit(None).cast("timestamp")))
-    ins.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(gold_object)
-    return {"object": gold_object, "action": "merged", "rows": n_changed, "scd": scd_type}
+    # full-load delete handling: current keys absent from the (complete) source -> soft-expire.
+    # Same tombstone for SCD1 and SCD2; downstream already filters on dl_iscurrent.
+    n_deleted = 0
+    if full:
+        src_keys = new.select(*nks).distinct()
+        cur_keys = (DeltaTable.forName(spark, gold_object).toDF()
+                    .filter("dl_iscurrent = true").select(*nks))
+        deleted = cur_keys.join(src_keys, on=nks, how="left_anti")
+        n_deleted = deleted.count()
+        if n_deleted > 0:
+            match = " AND ".join([f"t.{k} <=> s.{k}" for k in nks]) + " AND t.dl_iscurrent = true"
+            (tgt.alias("t").merge(deleted.alias("s"), match)
+                .whenMatchedUpdate(set={"dl_iscurrent": "false", "dl_isdeleted": "true",
+                                        "dl_recordenddateutc": "current_timestamp()"})
+                .execute())
+
+    action = "merged" if (n_changed or n_deleted) else "no-change"
+    return {"object": gold_object, "action": action, "rows": n_changed,
+            "deleted": n_deleted, "scd": scd_type, "mode": load_mode}
 
 
 def build_fact(gold_object, source_table, mode, business_keys=None,

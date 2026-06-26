@@ -18,7 +18,7 @@ WS = os.environ["WORKSPACE_ID"]
 H = {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}
 
 LAYOUT = {
-    "_root":      ["nb_bronze_load", "nb_silver_build", "nb_gold_orchestrator"],
+    "_root":      ["nb_bronze_load", "nb_silver_registry", "nb_silver_build", "nb_gold_orchestrator"],
     "stageQuery": ["nb_gold_tf_dim_permit", "nb_gold_tf_fact_permit_amendment"],
     "utility":    ["nb_util_gold", "nb_util_paths"],
     "test":       ["nb_gold_test", "nb_smoke_foundation"],

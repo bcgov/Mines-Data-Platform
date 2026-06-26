@@ -91,7 +91,7 @@ def run_notebook(nid):
         sys.exit(1)
     loc = r.headers.get("Location")
     log(f"running {NAME}; polling {loc}")
-    for _ in range(180):  # up to ~30 min
+    for _ in range(420):  # up to ~70 min (registry-driven silver builds many tables)
         time.sleep(10)
         st = (requests.get(loc, headers=H).json() or {}).get("status", "")
         log("  status:", st)

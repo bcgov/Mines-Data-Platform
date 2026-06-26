@@ -13,6 +13,7 @@ on:
     branches: ['medallion/**']
     paths:
       - 'Fabric/Notebook/nb_silver_build.Notebook/**'
+      - 'Fabric/Notebook/nb_silver_registry.Notebook/**'
       - 'medallion/deploy/deploy_notebook.py'
       - 'medallion/sql/verify_silver.sql'
       - '.github/workflows/scripts/run_silver.sh'

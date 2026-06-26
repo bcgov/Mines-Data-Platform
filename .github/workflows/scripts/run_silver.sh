@@ -13,9 +13,13 @@ az login --service-principal --username "$CLIENT_ID" --password "$CLIENT_SECRET"
     --tenant "$TENANT_ID" --allow-no-subscriptions --output none
 export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
 
-log "=== Deploy + run nb_silver_build ==="
-NOTEBOOK_NAME="nb_silver_build" NOTEBOOK_DIR="Fabric/Notebook/nb_silver_build.Notebook" RUN="true" \
-    python3 medallion/deploy/deploy_notebook.py
+deploy_nb() { NOTEBOOK_NAME="$1" NOTEBOOK_DIR="$2" RUN="${3:-false}" python3 medallion/deploy/deploy_notebook.py; }
+
+log "=== Deploy + run nb_silver_registry (auto-populate object_registry + field_registry) ==="
+deploy_nb nb_silver_registry Fabric/Notebook/nb_silver_registry.Notebook true
+
+log "=== Deploy + run nb_silver_build (registry-driven, all active objects) ==="
+deploy_nb nb_silver_build Fabric/Notebook/nb_silver_build.Notebook true
 
 log "=== Verify centralized error log (warehouse app.error_log, layer='silver') ==="
 WH_JSON="$(curl -s -H "Authorization: Bearer $FABRIC_TOKEN" \

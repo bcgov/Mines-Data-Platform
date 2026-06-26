@@ -20,11 +20,11 @@
 
 # CELL ********************
 
-# nb_silver_build — Bronze -> Silver: standardize, cleanse, dedup-to-latest-per-PK,
-# not-null DQ with bad rows quarantined. Silver lakehouse is the default; Bronze is
-# read cross-lakehouse via absolute OneLake paths. Lakehouse-only logging this cut
-# (silver.load_summary); routing dq_result/error_log to the warehouse via synapsesql
-# is a noted follow-up.
+# nb_silver_build — REGISTRY-DRIVEN Bronze -> Silver across all active objects.
+# Drives off app.object_registry (built by nb_silver_registry from app.pipeline_control +
+# bronze schemas). Per object: standardize names, cleanse, load_type-aware dedup, not-null PK
+# DQ (bad rows quarantined), drop bronze lineage, write silver.<table> (current cleansed view)
+# + silver.v_<table>. Failures -> centralized app.error_log (layer='silver').
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 from pyspark.sql.types import StructType, StructField, StringType, LongType
@@ -34,20 +34,14 @@ import traceback
 
 WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
 BRONZE_LH_ID = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
+WAREHOUSE = "mines-data-platform-fabwh1"
 SILVER_SCHEMA = "silver"
 QUARANTINE_SCHEMA = "quarantine"
 SUMMARY_TABLE = "silver.load_summary"
 
-# v1 entities (registry-aligned; object_registry seeded separately). PK drives dedup;
-# not_null drives the DQ quarantine split.
-V1 = [
-    # NOTE: 'mine' hub is absent from bronze (public.mine did not land in Files/raw) — re-add when present.
-    {"entity": "mine_incident",    "pk": "mine_incident_id",    "not_null": ["mine_incident_id"]},
-    {"entity": "permit",           "pk": "permit_id",           "not_null": ["permit_id"]},
-    {"entity": "permit_amendment", "pk": "permit_amendment_id", "not_null": ["permit_amendment_id"]},
-]
-
-WAREHOUSE = "mines-data-platform-fabwh1"
+# bronze lineage/control columns — used for dedup, then dropped from silver
+CTRL_COLS = {"dl_load_id", "bronze_file_name", "bronze_file_timestamp", "bronze_load_date",
+             "dl_load_ts", "dl_rowhash"}
 
 spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
 # Source data contains pre-1900 timestamps (e.g. permit_amendment) — rebase on write/read.
@@ -59,8 +53,7 @@ spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
 
 def log_error(layer, run_id, entity, error_message, stack_trace=None, target_table=None,
               error_code=None, error_context=None, log_id=None, pipeline_name=None):
-    """Write one row to the centralized warehouse app.error_log via the synapsesql connector.
-    log_id/pipeline_name are null on direct runs; set them when a pipeline invokes this notebook."""
+    """Write one row to the centralized warehouse app.error_log via the synapsesql connector."""
     try:
         from com.microsoft.spark.fabric import Constants  # noqa: F401 — registers the .synapsesql writer
         from pyspark.sql.types import StructType, StructField, StringType, LongType, IntegerType
@@ -75,9 +68,6 @@ def log_error(layer, run_id, entity, error_message, stack_trace=None, target_tab
         row = (str(uuid.uuid4()), layer, log_id, pipeline_name, run_id, entity, target_table,
                (error_message or "(no message)")[:8000], error_code, error_context,
                (stack_trace[:8000] if stack_trace else None))
-        # error_number/severity/state/procedure/line are the SQL TRY/CATCH fields used by
-        # other (SQL-based) writers; notebooks leave them null. Appended (with created_date) in
-        # the table's physical order so the synapsesql append aligns by name AND position.
         edf = (spark.createDataFrame([row], sch)
                .withColumn("created_date", F.current_timestamp())
                .withColumn("error_number", F.lit(None).cast(IntegerType()))
@@ -98,9 +88,12 @@ def normalize(name):
     return name.lower().replace(" ", "_").replace("-", "_").replace(".", "_")
 
 
-def process(cfg):
-    entity = cfg["entity"]
-    df = spark.read.format("delta").load(bronze_path(entity))
+def process(obj):
+    t = obj["bronze_table"]
+    pk = obj.get("primary_key")
+    load_type = (obj.get("load_type") or "FULL").upper()
+
+    df = spark.read.format("delta").load(bronze_path(t))
     bronze_rows = df.count()
 
     # 1. standardize column names
@@ -116,47 +109,47 @@ def process(cfg):
     if string_cols:
         df = df.replace("", None, subset=string_cols)
 
-    # 3. dedup to latest per PK (by bronze load timestamp)
-    pk = cfg["pk"]
-    if pk in df.columns and "dl_load_ts" in df.columns:
+    # 3. dedup to the current view, load_type-aware:
+    #    INCREMENTAL + real PK -> latest row per PK by load ts; FULL -> latest full snapshot
+    #    (append-only bronze accumulates repeated copies); else -> exact-row distinct.
+    if load_type == "INCREMENTAL" and pk and pk in df.columns and "dl_load_ts" in df.columns:
         w = Window.partitionBy(pk).orderBy(F.col("dl_load_ts").desc())
         df = df.withColumn("_rn", F.row_number().over(w)).filter(F.col("_rn") == 1).drop("_rn")
-    elif pk in df.columns:
-        df = df.dropDuplicates([pk])
+    elif load_type == "FULL" and "bronze_file_timestamp" in df.columns:
+        latest = df.agg(F.max("bronze_file_timestamp")).collect()[0][0]
+        if latest is not None:
+            df = df.filter(F.col("bronze_file_timestamp") == F.lit(latest))
+        df = df.dropDuplicates()
     else:
         df = df.dropDuplicates()
 
-    # 4. DQ: not-null on key columns -> valid vs quarantine
-    nn_cols = [c for c in cfg["not_null"] if c in df.columns]
-    cond = None
-    for c in nn_cols:
-        cond = F.col(c).isNotNull() if cond is None else (cond & F.col(c).isNotNull())
-    if cond is not None:
-        valid_df = df.filter(cond)
-        invalid_df = df.filter(~cond)   # any required col is null
+    # 4. DQ: not-null on the PK -> valid vs quarantine (only when a PK is known)
+    if pk and pk in df.columns:
+        valid_df = df.filter(F.col(pk).isNotNull())
+        invalid_df = df.filter(F.col(pk).isNull())
         quarantined = invalid_df.count()
     else:
         valid_df, invalid_df, quarantined = df, None, 0
 
-    # 5. write silver
-    valid_df = valid_df.withColumn("silver_load_ts", F.current_timestamp())
+    # 5. drop bronze lineage, stamp silver_load_ts, write current cleansed silver table
+    drop_cols = [c for c in CTRL_COLS if c in valid_df.columns]
+    valid_df = valid_df.drop(*drop_cols).withColumn("silver_load_ts", F.current_timestamp())
     (valid_df.write.format("delta").mode("overwrite")
-        .option("overwriteSchema", "true").saveAsTable(f"{SILVER_SCHEMA}.{entity}"))
+        .option("overwriteSchema", "true").saveAsTable(f"{SILVER_SCHEMA}.{t}"))
     silver_rows = valid_df.count()
 
     # 6. quarantine failing rows
     if quarantined > 0:
-        reason = "null in one of: " + ", ".join(nn_cols)
         q_df = (invalid_df
                 .withColumn("dq_rule", F.lit("not_null"))
-                .withColumn("dq_reason", F.lit(reason))
+                .withColumn("dq_reason", F.lit(f"null primary_key: {pk}"))
                 .withColumn("run_id", F.lit(RUN_ID))
                 .withColumn("quarantine_ts", F.current_timestamp()))
         (q_df.write.format("delta").mode("append")
-            .option("mergeSchema", "true").saveAsTable(f"{QUARANTINE_SCHEMA}.{entity}"))
+            .option("mergeSchema", "true").saveAsTable(f"{QUARANTINE_SCHEMA}.{t}"))
 
     # 7. current-state view
-    spark.sql(f"CREATE OR REPLACE VIEW {SILVER_SCHEMA}.v_{entity} AS SELECT * FROM {SILVER_SCHEMA}.{entity}")
+    spark.sql(f"CREATE OR REPLACE VIEW {SILVER_SCHEMA}.v_{t} AS SELECT * FROM {SILVER_SCHEMA}.{t}")
 
     return bronze_rows, silver_rows, quarantined
 
@@ -170,7 +163,7 @@ def process(cfg):
 # CELL ********************
 
 print("=" * 80)
-print("SILVER BUILD START")
+print("SILVER BUILD START (registry-driven)")
 print("=" * 80)
 
 RUN_ID = str(uuid.uuid4())
@@ -181,18 +174,24 @@ results = []
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {SILVER_SCHEMA}")
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {QUARANTINE_SCHEMA}")
 
-for cfg in V1:
-    entity = cfg["entity"]
+# Drive off the registry: every active object.
+from com.microsoft.spark.fabric import Constants  # noqa: F401
+objs = [r.asDict() for r in
+        spark.read.synapsesql(f"{WAREHOUSE}.app.object_registry").filter("is_active = true").collect()]
+objs.sort(key=lambda o: (o.get("priority") or 100, o.get("bronze_table")))
+print(f"active objects to build: {len(objs)}")
+
+for obj in objs:
+    t = obj["bronze_table"]
     try:
-        bronze_rows, silver_rows, quarantined = process(cfg)
-        print(f"OK   {entity}: bronze={bronze_rows} silver={silver_rows} quarantined={quarantined}")
-        results.append((entity, int(bronze_rows), int(silver_rows), int(quarantined), "OK", None))
+        bronze_rows, silver_rows, quarantined = process(obj)
+        print(f"OK   {t}: bronze={bronze_rows} silver={silver_rows} quarantined={quarantined}")
+        results.append((t, int(bronze_rows), int(silver_rows), int(quarantined), "OK", None))
     except Exception as e:
         err = str(e)[:1000]
-        print(f"FAILED {entity}: {err}")
-        traceback.print_exc()
-        log_error("silver", RUN_ID, entity, err, traceback.format_exc(), target_table=f"silver.{entity}")
-        results.append((entity, None, None, None, "FAILED", err))
+        print(f"FAILED {t}: {err}")
+        log_error("silver", RUN_ID, t, err, traceback.format_exc(), target_table=f"silver.{t}")
+        results.append((t, None, None, None, "FAILED", err))
 
 # summary (explicit schema avoids void inference)
 summary_schema = StructType([
@@ -207,22 +206,25 @@ summary_df = (spark.createDataFrame(results, summary_schema)
               .withColumn("run_id", F.lit(RUN_ID))
               .withColumn("run_ts", F.current_timestamp()))
 
-# Reliable readback: write the run log to the BRONZE lakehouse (writes proven + its SQL
-# endpoint syncs fast), so per-entity status/errors are queryable from CI via pyodbc.
+# Reliable readback: write the run log to the BRONZE lakehouse (its SQL endpoint syncs fast).
 try:
     bronze_log_path = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/silver_run_log/"
     summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(bronze_log_path)
     print("wrote run log to bronze.silver_run_log")
 except Exception as e:
     print(f"bronze readback write failed: {e}")
-    traceback.print_exc()
+
+# Also persist the run summary to the warehouse for easy SQL verification.
+try:
+    summary_df.write.mode("overwrite").option("overwriteSchema", "true").synapsesql(f"{WAREHOUSE}.app.silver_run_log")
+except Exception as e:
+    print(f"warehouse silver_run_log write failed: {e}")
 
 # Best-effort silver-local summary too.
 try:
     summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(SUMMARY_TABLE)
 except Exception as e:
     print(f"Error writing {SUMMARY_TABLE}: {e}")
-    traceback.print_exc()
 
 ok = sum(1 for r in results if r[4] == "OK")
 failed = sum(1 for r in results if r[4] == "FAILED")

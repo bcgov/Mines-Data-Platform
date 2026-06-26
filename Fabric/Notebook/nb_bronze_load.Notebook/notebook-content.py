@@ -41,7 +41,7 @@ MANIFEST_TABLE = "bronze.load_manifest"
 # read the manifest by absolute path (spark.catalog can lag across sessions)
 MANIFEST_PATH = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/load_manifest"
 SUMMARY_TABLE = "bronze.load_summary"
-REBUILD = False         # one-time full rebuild done; routine runs are incremental (manifest-skip by path)
+REBUILD = True          # final clean rebuild (drop+overwrite = no dups); set False after
 MAX_WORKERS = 8
 
 spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
@@ -92,14 +92,18 @@ def file_ts(name):
     return datetime.strptime(m.group(1), "%Y%m%d_%H%M%S") if m else None
 
 
-def load_manifest():
-    """Set of (entity, bronze_file_name) already loaded — cheap idempotency, no table scans.
-    Read by path (spark.catalog.tableExists can lag across sessions)."""
+def bronze_tbl_path(table):
+    return f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/{table}/"
+
+
+def loaded_files_for(table):
+    """Files already present in the bronze table itself (by path — robust to catalog/metastore
+    lag, and the data is its own source of truth). Empty set if the table doesn't exist yet."""
     try:
-        return {(r["entity"], r["bronze_file_name"])
-                for r in spark.read.format("delta").load(MANIFEST_PATH).collect()}
-    except Exception as e:
-        print(f"manifest read (treating as empty): {e}")
+        return {r["bronze_file_name"] for r in
+                spark.read.format("delta").load(bronze_tbl_path(table))
+                .select("bronze_file_name").distinct().collect()}
+    except Exception:
         return set()
 
 # METADATA ********************
@@ -118,10 +122,6 @@ spark.sql(f"CREATE SCHEMA IF NOT EXISTS {TARGET_SCHEMA}")
 
 if REBUILD:
     spark.sql(f"DROP TABLE IF EXISTS {MANIFEST_TABLE}")
-    loaded = set()
-else:
-    loaded = load_manifest()
-print(f"already-loaded files in manifest: {len(loaded)}")
 
 results, manifest_rows = [], []
 _lock = threading.Lock()
@@ -133,8 +133,9 @@ def process_entity(entity):
     if REBUILD:
         spark.sql(f"DROP TABLE IF EXISTS {target}")
 
+    existing = set() if REBUILD else loaded_files_for(table)   # already-loaded files (by path)
     files = get_all_parquet_files(entity)
-    todo = [(n, p) for (n, p) in files if file_ts(n) is not None and (entity, n) not in loaded]
+    todo = [(n, p) for (n, p) in files if file_ts(n) is not None and n not in existing]
     if not todo:
         return (entity, "SKIPPED", 0, [])
 

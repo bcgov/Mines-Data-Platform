@@ -21,12 +21,13 @@ log "entity folders: $(echo "$ENT" | grep -c . )"
 echo "$ENT" | head -20 >&2
 
 log ""
-log "=== full recursive listing for 3 sample entities (file names + count) ==="
-for e in $(echo "$ENT" | grep -vE '\.' | head -3); do
-  FILES="$(curl -s -H "$H" "${BASE}?recursive=true&resource=filesystem&directory=${BRONZE_LH_ID}/Files/raw/${e}" \
-    | jq -r '.paths[]? | select(.isDirectory!="true") | .name' | sed "s#^${BRONZE_LH_ID}/Files/raw/${e}/##")"
-  N="$(echo "$FILES" | grep -c . || true)"
-  log "--- ${e}: ${N} files ---"
-  echo "$FILES" | sort | head -4 >&2
-  echo "$FILES" | sort | tail -2 >&2
+log "=== full recursive listing for known data entities (paths + count) ==="
+for e in permit mine_incident address_type_code bond; do
+  ALLP="$(curl -s -H "$H" "${BASE}?recursive=true&resource=filesystem&directory=${BRONZE_LH_ID}/Files/raw/${e}" \
+    | jq -r '.paths[]?.name' | sed "s#^${BRONZE_LH_ID}/Files/raw/${e}/##")"
+  PARQ="$(echo "$ALLP" | grep -iE '\.parquet$' || true)"
+  N="$(echo "$PARQ" | grep -c . || true)"
+  log "--- ${e}: ${N} parquet files ---"
+  echo "$PARQ" | sort | head -3 >&2
+  echo "$PARQ" | sort | tail -2 >&2
 done

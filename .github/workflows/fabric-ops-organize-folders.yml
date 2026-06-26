@@ -1,0 +1,33 @@
+# Organize our notebooks into Fabric WORKSPACE folders (Notebook + stageQuery/utility/test),
+# mirroring the repo layout. Workspace items deploy flat by display name, so this is what
+# actually moves them into folders in the Fabric UI. Idempotent. Dispatch or push.
+name: Fabric Ops - Organize Folders
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_id:
+        description: 'Fabric workspace ID'
+        required: true
+        default: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+  push:
+    branches: ['medallion/**']
+    paths:
+      - 'medallion/deploy/organize_folders.py'
+      - '.github/workflows/scripts/run_organize_folders.sh'
+      - '.github/workflows/fabric-ops-organize-folders.yml'
+
+jobs:
+  organize:
+    name: Organize workspace folders
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet requests
+      - run: chmod +x .github/workflows/scripts/run_organize_folders.sh
+      - run: .github/workflows/scripts/run_organize_folders.sh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: ${{ github.event.inputs.workspace_id || '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0' }}

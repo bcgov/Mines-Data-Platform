@@ -1,15 +1,13 @@
--- Config: table_type + new load_strategy column.
-SELECT node_name, object_type, table_type, load_strategy, business_keys, is_active
-FROM app.gold_build ORDER BY node_name;
+-- What app.* tables exist (incl. team's ADF ingestion control tables)?
+SELECT s.name AS sch, t.name AS tbl
+FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id
+WHERE s.name='app' ORDER BY t.name;
 GO
--- Build results: dim_permit (type2/full), fact_permit_amendment (upsert/full).
-SELECT node_name, gold_object, status, rows, LEFT(detail,120) AS detail, run_ts
-FROM app.gold_run_log ORDER BY run_ts DESC, node_name;
+-- Are the registries populated?
+SELECT 'object_registry' AS tbl, COUNT(*) AS rows FROM app.object_registry
+UNION ALL SELECT 'field_registry', COUNT(*) FROM app.field_registry;
 GO
--- Any real gold errors in the last 15 min?
-SELECT entity, target_table, LEFT(error_message,200) AS err, created_date
-FROM app.error_log
-WHERE layer='gold' AND entity NOT LIKE 'runMultiple%'
-  AND created_date >= DATEADD(minute,-15,SYSUTCDATETIME())
-ORDER BY created_date DESC;
+-- Sample object_registry (if any)
+SELECT TOP 10 object_id, source_entity, bronze_schema, bronze_table, silver_schema, silver_table,
+       load_type, primary_key, is_active FROM app.object_registry ORDER BY object_id;
 GO

@@ -25,6 +25,55 @@ It turns the **MDS** (Mines Digital Services, BC) operational Postgres database 
 | Source DB connection | `mcm-mdscore-postgresql-dev` = `21b383a1-c561-4540-980d-ce3683e89236` (PostgreSQL) |
 | Warehouse connection | `warehouse-mines-data-platform` = `586bcc06-4cf2-4a33-93c0-f1d1b4cd9420` (SQL) |
 
+### 2.1 Topology at a glance
+
+```mermaid
+flowchart TB
+  subgraph GH["GitHub - branch medallion/dev"]
+    REPO["notebooks + SQL + scripts + workflows"]
+  end
+  subgraph CI["GitHub Actions - runs as SPN 6cdbb0a3"]
+    WF["workflow -> SPN token -> Fabric REST / pyodbc"]
+  end
+  SRC[(MDS Postgres<br/>mcm-mdscore-postgresql-dev)]
+  subgraph WS["Fabric workspace 8f380f88"]
+    PIPE["Data pipelines<br/>pl_ingest_mds / Metadata_Extractor / pl_extract_source_catalog"]
+    BR["Bronze LH<br/>mines_data_platform_lh1"]
+    SV["Silver LH<br/>lh_silver"]
+    GD["Gold LH<br/>lh_gold"]
+    WH["Warehouse fabwh1<br/>app.* control plane"]
+  end
+  REPO --> WF
+  WF -->|deploy notebooks + run jobs| WS
+  WF -->|run SQL| WH
+  PIPE -->|connection 21b383a1| SRC
+  PIPE --> BR
+  BR --> SV --> GD
+  WH -. drives .-> SV
+  WH -. drives .-> GD
+```
+
+### 2.2 How a deploy/run actually happens
+
+```mermaid
+sequenceDiagram
+  participant Dev as You (push / dispatch)
+  participant GA as GitHub Actions
+  participant SPN as Entra SPN
+  participant API as Fabric REST API
+  participant NB as Notebook job
+  participant WH as Warehouse
+  Dev->>GA: push medallion/** (path-filtered) or gh workflow run
+  GA->>SPN: az login --service-principal (secret in CI only)
+  SPN-->>GA: access token
+  GA->>API: create/update notebook (Items API)
+  GA->>API: run job (jobs/instances?jobType=RunNotebook)
+  API->>NB: execute
+  NB->>WH: write outcome (synapsesql) + errors to app.error_log
+  GA->>WH: run verify SQL (pyodbc + token)
+  WH-->>GA: rows printed in the run log
+```
+
 **Why we deploy via GitHub Actions + a Service Principal (not the Fabric UI or local CLI):**
 - The gov.bc.ca tenant enforces **Conditional Access** that blocks interactive `az login` / device-code for our accounts. So **all** automated actions run as a **Service Principal (SPN, client `6cdbb0a3-…`)** whose secret lives **only** in GitHub Actions secrets (`AZURE_CLIENT_ID/SECRET/TENANT_ID`). We never hold the secret locally.
 - We **deploy directly to the workspace** via the Fabric REST **Items API** and **do not sync this branch into the team's Fabric Git integration** (github↔Fabric sync is painful and would fight the team's pipeline). Think of yourself as a Fabric developer working *in* the workspace; the git branch `medallion/dev` is our **source-of-truth + deploy vehicle**, not a Fabric-synced folder.
@@ -95,6 +144,46 @@ The Warehouse is the **metadata brain**. Tables we own are built by `medallion/s
 | `config`, `schema_registry` | team | operational config / layer descriptions. |
 | `transform_registry` | legacy | superseded by `gold_build`/`gold_dependency`; left in place, unused by us. |
 
+```mermaid
+erDiagram
+  pipeline_control ||--o{ object_registry : "enriches load_type/watermark"
+  object_registry ||--o{ field_registry : "1 table to N columns"
+  object_registry ||--o{ silver_run_log : "build outcome"
+  gold_build ||--o{ gold_dependency : "node to deps"
+  gold_build ||--o{ gold_run_log : "build outcome"
+  pipeline_log ||--o{ error_log : "run_id"
+  object_registry {
+    bigint object_id
+    string bronze_table
+    string primary_key "true PK, composite"
+    string load_type
+    bool is_active
+  }
+  field_registry {
+    bigint field_id
+    string entity
+    string column_name
+    string spark_type
+    bool is_pk
+  }
+  gold_build {
+    string node_name
+    string gold_object
+    string table_type
+    string load_strategy
+  }
+  gold_dependency {
+    string node_name
+    string depends_on
+  }
+  error_log {
+    string layer
+    string run_id
+    string entity
+    string error_message
+  }
+```
+
 **Fabric Warehouse T-SQL constraints (learned the hard way — see findings F1–F4):** no `IDENTITY`, no `PRIMARY KEY`/constraint keyword in `CREATE TABLE`, no `DEFAULT`/`CHECK`/computed columns. Surrogate ids are writer-minted (GUID or `row_number()+max`). `sqlcmd -G` cannot auth as SPN — use `run_sql.py` (pyodbc + access token).
 
 ---
@@ -124,6 +213,16 @@ flowchart LR
 ### 5.2 Bronze — `nb_bronze_load` (append-only, immutable)
 Per landed parquet file: read (with `LEGACY` datetime/int96 rebase for pre-1900 dates) → skip if `bronze_file_name` already loaded (idempotency) → add control columns `dl_load_id, bronze_file_name, bronze_file_timestamp, bronze_load_date, dl_load_ts, dl_rowhash` → append to `bronze.{table}` partitioned by `bronze_load_date`. **No updates/deletes** — bronze is the immutable log. 228 tables currently landed.
 
+```mermaid
+flowchart TB
+  F["raw parquet file"] --> CHK{"bronze_file_name<br/>already loaded?"}
+  CHK -->|yes| SKIP["skip - idempotent"]
+  CHK -->|no| READ["read with LEGACY rebase"]
+  READ --> CTRL["add control cols<br/>dl_load_id / bronze_file_* / dl_load_ts / dl_rowhash"]
+  CTRL --> APP["append to bronze.table<br/>partition by bronze_load_date"]
+  APP --> VAL["row-count validate"]
+```
+
 ### 5.3 Registry — `nb_silver_registry` (FROM SOURCE, zero manual entry)
 1. Reads `Files/raw/mds_source_catalog` (the pg_catalog dump) → **true PKs (composite where applicable)**, all columns, source types.
 2. Enriches from `pipeline_control` for `load_type`/`watermark`/`priority`/`dependency` (these are **ingestion** facts, not source metadata).
@@ -131,6 +230,16 @@ Per landed parquet file: read (with `LEGACY` datetime/int96 rebase for pre-1900 
 4. Writes `object_registry` (one row/table) + `field_registry` (one row/column). **`is_active` = landed AND not an operational prefix** (`celery_`, `etl_`, `django_`, `auth_`, `spatial_ref`).
 
 Current state: **354 source tables registered, 210 active; 3,362 fields.** Tables not landed (e.g. `mine`) are registered **inactive** with their correct source PK and auto-activate when they land — **no code change**. This is exactly the "park the unlanded ~29 business tables, build everything else" behaviour: it is automatic, driven by the landed check.
+
+```mermaid
+flowchart LR
+  CAT["Files/raw/mds_source_catalog<br/>pg_catalog dump"] --> REG["nb_silver_registry"]
+  PC["app.pipeline_control<br/>load_type / watermark / priority"] --> REG
+  LAND["bronze landed tables<br/>fs.ls"] --> REG
+  REG --> OR["object_registry<br/>true PK + is_active"]
+  REG --> FR["field_registry<br/>all columns + source types"]
+  OR -->|is_active = landed AND not operational| SILVER["drives nb_silver_build"]
+```
 
 ### 5.4 Silver — `nb_silver_build` (registry-driven)
 Loops every **active** object from `object_registry` and per table:
@@ -143,6 +252,20 @@ Loops every **active** object from `object_registry` and per table:
 4. **DQ** — not-null on every PK column → valid vs **quarantine** (`quarantine.{table}` with rule/reason/run_id).
 5. Drop bronze lineage cols, stamp `silver_load_ts`, write `silver.{table}` (full overwrite) + `silver.v_{table}` view.
 6. Outcome → `app.silver_run_log` + `bronze.silver_run_log` (fast readback) + failures → `app.error_log`.
+
+```mermaid
+flowchart TB
+  S["bronze.table"] --> ST["standardize names + cleanse<br/>(trim, empty to null)"]
+  ST --> Q{"load_type?"}
+  Q -->|INCREMENTAL + true PK| I["latest row per composite PK<br/>by dl_load_ts"]
+  Q -->|FULL| FU["keep latest snapshot<br/>max bronze_file_timestamp + distinct"]
+  Q -->|no PK| NP["dropDuplicates (exact row)"]
+  I --> DQ{"all PK cols<br/>not-null?"}
+  FU --> DQ
+  NP --> WR
+  DQ -->|pass| WR["silver.table + silver.v_table"]
+  DQ -->|fail| QU["quarantine.table"]
+```
 
 Current state: **210/210 active tables OK, ~1.71M rows, 0 failures.** Silver = the current cleansed view, ready to transform.
 
@@ -166,10 +289,72 @@ The gold layer is a **config-driven DAG**, the most sophisticated part of the fr
   | `upsert_fact` | full | merge **+ soft-delete** absent keys (full sync) |
   | `reload_fact` | (ignored) | full drop+rebuild |
 
+**Gold orchestration (DAG → levels → parallel transforms → merge):**
+
+```mermaid
+flowchart TB
+  GB["read gold_build (active)"] --> GD["read gold_dependency"]
+  GD --> K["compute Kahn topological levels"]
+  K --> L0["Level 0 roots e.g. dim_permit:<br/>run transforms in parallel (runMultiple)"]
+  L0 --> M0["merge each: build_dimension / build_fact"]
+  M0 --> L1["Level 1 dependents e.g. fact_permit_amendment:<br/>run transforms in parallel"]
+  L1 --> M1["merge each"]
+  M1 --> LOG["app.gold_run_log"]
+```
+
+**Standard transform notebook (5-cell template, name-derived target):**
+
+```mermaid
+flowchart LR
+  C1["1. imports +<br/>Spark props"] --> C2["2. derive stg.obj<br/>from notebook name<br/>+ register sources"]
+  C2 --> C3["3. drop stg table"]
+  C3 --> C4["4. SparkSQL<br/>business logic to df"]
+  C4 --> C5["5. write df to<br/>stg.obj table"]
+```
+
+**How `table_type` + `load_strategy` dispatch to the builder:**
+
+```mermaid
+flowchart TB
+  T{"table_type"} --> D1["type1_dimension"]
+  T --> D2["type2_dimension"]
+  T --> F1["append_fact"]
+  T --> F2["upsert_fact"]
+  T --> F3["reload_fact"]
+  D1 --> BD1["build_dimension scd=1"]
+  D2 --> BD2["build_dimension scd=2"]
+  F1 --> BF1["build_fact append"]
+  F2 --> BF2["build_fact upsert"]
+  F3 --> BF3["build_fact reload"]
+  BD1 -. load_strategy=full .-> SD["soft-delete absent keys"]
+  BD2 -. load_strategy=full .-> SD
+  BF2 -. load_strategy=full .-> SD
+```
+
+**Dimension row lifecycle (SCD2 + soft delete):**
+
+```mermaid
+stateDiagram-v2
+  [*] --> Current: insert, dl_iscurrent=true
+  Current --> Expired: attribute changed (SCD2), end-dated
+  Expired --> Current: new version inserted
+  Current --> Deleted: absent from full source, dl_isdeleted=true
+  Deleted --> Current: reappears in source, un-deleted
+```
+
 Current state: `dim_permit` (type2/full) and `fact_permit_amendment` (upsert/full) build green; update + soft-delete proven by `nb_gold_test`.
 
 ### 5.6 Error logging (centralized)
 All notebook failures and (via the `adf-error-log-change.md` handoff) pipeline failures go to **one** `app.error_log`, discriminated by `layer`. One queryable table for the whole platform. `pipeline_log` stays the run-history table; join on `run_id`.
+
+```mermaid
+flowchart LR
+  NB1["nb_bronze_load"] -->|layer=bronze| EL["app.error_log"]
+  NB2["nb_silver_build"] -->|layer=silver| EL
+  NB3["nb_gold_orchestrator"] -->|layer=gold| EL
+  PI["pl_ingest_mds (ADF handoff)"] -->|layer=ingest| EL
+  EL --> J["one queryable table<br/>join pipeline_log on run_id"]
+```
 
 ---
 
@@ -208,6 +393,16 @@ Most are **push-path-filtered** on `medallion/**` (editing the relevant file aut
 > All runs happen via GitHub Actions (you cannot `az login` interactively). Either **push** the relevant file on a `medallion/**` branch, or **dispatch** the workflow: `gh workflow run <name>.yml --ref <branch>`. Read results from the run log or by querying the warehouse (`fabric-ops-adhoc-sql`).
 
 ### 7.1 Full refresh, end to end
+
+```mermaid
+flowchart LR
+  CAT["1. fabric-ops-clone-catalog<br/>(source schema changed)"] --> REG
+  ING["pl_ingest_mds (team)"] --> BRZ["2. deploy-run-bronze"]
+  BRZ --> REG["3. deploy-run-silver<br/>(registry then build)"]
+  REG --> GLD["4. deploy-run-gold"]
+  GLD --> SERVE["Power BI Direct Lake / T-SQL"]
+```
+
 1. **Source catalog** (only when the source schema changed): dispatch `fabric-ops-clone-catalog` → lands `mds_source_catalog`.
 2. **Bronze**: `deploy-run-bronze` (loads new raw files; append-only/idempotent).
 3. **Registry + Silver**: `deploy-run-silver` (rebuilds registries from the catalog, then builds all active silver tables).
@@ -225,6 +420,16 @@ No action needed in our code. When the ingestion team lands the table in bronze,
 3. **Seed `gold_dependency`**: `node_name` + `depends_on` (e.g. a fact depends on its dims so SK lookups resolve).
 4. Add the notebook to `run_gold.sh`'s deploy list and the `deploy-run-gold` path filter; add it to `organize_folders.py` `LAYOUT["stageQuery"]`.
 5. Dispatch `deploy-run-gold`; verify via `gold_run_log`.
+
+```mermaid
+flowchart TB
+  A["copy nb_gold_tf_dim_permit<br/>-> nb_gold_tf_NEWOBJ (stageQuery)"] --> B["edit cell 4 SparkSQL +<br/>cell 2 source registration"]
+  B --> C["seed gold_build (1 row):<br/>table_type, load_strategy, keys"]
+  C --> D["seed gold_dependency:<br/>node + depends_on (parents)"]
+  D --> E["add to run_gold.sh + path filter<br/>+ organize_folders LAYOUT"]
+  E --> F["dispatch deploy-run-gold"]
+  F --> G["verify app.gold_run_log"]
+```
 
 ### 7.5 Verify / inspect
 - **Ad-hoc SQL:** edit `medallion/sql/adhoc.sql`, push (or dispatch `fabric-ops-adhoc-sql`); results print in the run log.

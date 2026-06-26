@@ -35,6 +35,23 @@ WHERE column_name LIKE '%_id' OR column_name LIKE '%_code' OR column_name LIKE '
 - **`mine_incident`**, **`now_application`**, **`mine_report_submission`** are clean event tables with measures and multiple milestone dates.
 - **Composite primary keys are real and now known** (from `pg_catalog`) — e.g. `bond_permit_xref`=(`bond_id,permit_id`), `mine_incident_category_xref`=(`mine_incident_id,mine_incident_category_code`), `activity_summary_building_detail_xref`=(`activity_summary_id,activity_detail_id`). Earlier guesses (single FK as "primary key" from `pipeline_control`) were **wrong**; the registry now drives correct dedup/joins.
 
+### 1.3 The source domain — `mine` is the hub
+
+```mermaid
+flowchart TB
+  MINE["mine (HUB)<br/>PK mine_guid - business key mine_no"]
+  MINE --- INC["mine_incident<br/>(incidents)"]
+  MINE --- MPX["mine_permit_xref<br/>(M:N, dated)"]
+  MPX --- PERM["permit -> permit_amendment<br/>(permitting)"]
+  MINE --- MPA["mine_party_appt<br/>(M:N role appts)"]
+  MPA --- PARTY["party<br/>(people / orgs)"]
+  MINE --- NOW["now_application<br/>(Notice of Work)"]
+  MINE --- RPT["mine_report_submission<br/>(compliance)"]
+  MINE --- MT["mine_type -> mine_type_detail_xref"]
+  MT --- COMM["commodity / tenure / disturbance<br/>(multi-valued)"]
+  PERM --- BOND["bond via bond_permit_xref<br/>(reclamation bonds)"]
+```
+
 ---
 
 ## 2. Proposed gold star schema
@@ -66,11 +83,57 @@ WHERE column_name LIKE '%_id' OR column_name LIKE '%_code' OR column_name LIKE '
 
 **Bridges (multi-valued):** `bridge_mine_commodity` / `bridge_mine_tenure` / `bridge_mine_disturbance` (resolve `mine → mine_type → mine_type_detail_xref → {commodity, tenure, disturbance}`), `bridge_incident_category` (`mine_incident_category_xref`, hierarchical `mine_incident_category`).
 
+**dim_mine sourcing (one entity, several decodes):**
+
+```mermaid
+flowchart LR
+  M["mine"] --> DM["dim_mine (SCD2)"]
+  MR["mine_region_code"] -->|decode region| DM
+  MS["mine_status + mine_status_xref<br/>+ mine_operation_status_code"] -->|current status| DM
+  AG["agency / exemption code tables"] -->|decode| DM
+```
+
+**Role-playing dimensions (one physical table, many roles):**
+
+```mermaid
+flowchart LR
+  DATE["dim_date (physical)"] --> R1["received date"]
+  DATE --> R2["issued date"]
+  DATE --> R3["decision date"]
+  PARTY["dim_party (physical)"] --> P1["reported-to inspector"]
+  PARTY --> P2["responsible inspector"]
+  PARTY --> P3["payer / applicant"]
+```
+
+**Multi-valued bridges (never flatten into the fact):**
+
+```mermaid
+flowchart LR
+  MINE["mine"] --> MT["mine_type"]
+  MT --> XREF["mine_type_detail_xref"]
+  XREF --> C["dim_commodity"]
+  XREF --> T["dim_tenure_type"]
+  XREF --> D["dim_disturbance"]
+  MINE --> BR["bridge_mine_commodity / tenure / disturbance<br/>(carry active_ind)"]
+  BR --> C
+  BR --> T
+  BR --> D
+```
+
 ### 2.3 Surrogate keys & SCD strategy
 - **Surrogate keys:** `{Entity}_SK BIGINT` via `row_number()+max_sk` (no IDENTITY in Fabric). Natural keys retained.
 - **SCD:** dim_mine / dim_party / dim_permit → **Type 2**; code/lookup → **Type 1**; dim_date → static. Type-2 carry `dl_iscurrent`, `dl_recordstartdateutc`, `dl_recordenddateutc`; facts join the version current at event date.
 - **Soft delete:** in the built framework, `full` load_strategy soft-deletes source-absent keys (`dl_isdeleted=true`).
 - **Role-playing:** dim_date / dim_party are single physical tables exposed as multiple role views.
+
+**SCD Type 2 over time (how a fact joins the version current at event date):**
+
+```mermaid
+flowchart LR
+  V1["dim_mine v1<br/>region=North<br/>start 2019, end 2022<br/>iscurrent=false"] --> V2["dim_mine v2<br/>region=South<br/>start 2022, end null<br/>iscurrent=true"]
+  FACT["fact event<br/>dated 2020"] -.joins.-> V1
+  FACT2["fact event<br/>dated 2024"] -.joins.-> V2
+```
 
 ---
 
@@ -92,11 +155,73 @@ WHERE column_name LIKE '%_id' OR column_name LIKE '%_code' OR column_name LIKE '
 | **fact_mine_party_appointment** | factless fact | `mine_party_appt` | `dim_mine`, `dim_party`, `dim_party_role` (`mine_party_appt_type_code`), `dim_date` (start/end), optional `dim_permit` | 1 row per appointment (mine×party×role×window). "Who held role R at mine M on date D". |
 | **fact_bond** | fact / transaction | `bond` | `bond_permit_xref` (composite PK `bond_id,permit_id`) → permit → mine; `dim_party` (payer), `dim_bond_*`, dates | 1 row per bond. Measure `amount`. |
 
+**Lineage of the one built fact (silver → stg → gold):**
+
+```mermaid
+flowchart LR
+  PE["silver.permit"] --> DP["gold.dim_permit (SCD2)"]
+  PA["silver.permit_amendment"] --> ST["stg.fact_permit_amendment<br/>(transform notebook)"]
+  DP -->|resolve Permit_SK| ST
+  ST -->|build_fact upsert/full| FT["gold.fact_permit_amendment"]
+```
+
+**fact_permit_amendment star (built):**
+
+```mermaid
+erDiagram
+  dim_mine ||--o{ fact_permit_amendment : ""
+  dim_permit ||--o{ fact_permit_amendment : ""
+  dim_date ||--o{ fact_permit_amendment : "received / issued"
+  dim_amendment_type ||--o{ fact_permit_amendment : ""
+  dim_amendment_status ||--o{ fact_permit_amendment : ""
+  dim_party ||--o{ fact_permit_amendment : "issuing inspector"
+  fact_permit_amendment {
+    bigint PermitAmendment_SK
+    bigint Mine_SK
+    bigint Permit_SK
+    bigint ReceivedDate_SK
+    bigint IssuedDate_SK
+    decimal liability_adjustment
+    string permit_amendment_guid
+    bool is_original_permit
+  }
+```
+
+**fact_mine_incident star (next, v1):**
+
+```mermaid
+erDiagram
+  dim_mine ||--o{ fact_mine_incident : ""
+  dim_date ||--o{ fact_mine_incident : "incident / reported"
+  dim_party ||--o{ fact_mine_incident : "3 inspector roles"
+  dim_incident_status ||--o{ fact_mine_incident : ""
+  dim_incident_determination_type ||--o{ fact_mine_incident : ""
+  fact_mine_incident ||--o{ bridge_incident_category : "categories (M:N)"
+  fact_mine_incident {
+    bigint Incident_SK
+    bigint Mine_SK
+    bigint IncidentDate_SK
+    int number_of_fatalities
+    int number_of_injuries
+    int incident_count
+    string mine_incident_no
+  }
+```
+
 **Why these source tables specifically:** each fact maps to exactly one **event/transaction table** that already carries its measures and milestone dates at the desired grain (`permit_amendment`, `mine_incident`, `now_application`, `mine_report_submission`, `mine_party_appt`, `bond`). Dimensions map to the **entity/reference** tables (`mine`, `party`, `permit`, `*_code`). Multi-valued relationships (commodity/tenure/disturbance, incident category, bond↔permit) are **xref tables with composite PKs** → modeled as bridges, never flattened into the fact (would multiply grain).
 
 ---
 
 ## 4. How to VALIDATE the design (do this before trusting any gold table)
+
+```mermaid
+flowchart TB
+  V1["PK uniqueness in silver<br/>(group by PK, duplicates must be zero)"] --> V2["FK coverage / orphan count<br/>(every fact FK resolves to a current dim)"]
+  V2 --> V3["row-count reconcile<br/>silver distinct PK vs source"]
+  V3 --> V4["measure totals reconcile<br/>gold vs source sample period"]
+  V4 --> V5["reconcile to legacy<br/>PBI / MDP-DWH definitions"]
+  V5 --> V6["SME spot-check known records"]
+```
 
 ### 4.1 Structural validation (from the registry — no source access)
 1. **PK uniqueness assumption:** for each dimension/fact source, confirm the registry PK is truly unique in silver:
@@ -118,6 +243,14 @@ WHERE column_name LIKE '%_id' OR column_name LIKE '%_code' OR column_name LIKE '
 ---
 
 ## 5. Phasing (provisional — confirm with the team)
+
+```mermaid
+flowchart LR
+  V1["v1: dim_date/party/permit/mine<br/>+ fact_permit_amendment (BUILT)<br/>+ fact_mine_incident"] --> V2["v2: fact_mine_report_submission<br/>+ fact_now_application"]
+  V2 --> V3["v3: fact_mine_party_appointment<br/>+ fact_bond"]
+  V3 --> V4["later: variance, project_summary,<br/>major_mine_application, dam, ..."]
+  BLOCK["BLOCKED: mine hub not landed"] -.blocks dim_mine.-> V1
+```
 
 - **v1 (tracer bullet):** conformed `dim_date`, `dim_party`, `dim_permit`, `dim_mine` + `fact_permit_amendment` (✅ built) + `fact_mine_incident`. Exercises SCD2, role-playing, mine↔permit bridge on the two cleanest high-value facts. **Blocked on `mine` landing for `dim_mine`.**
 - **v2:** `fact_mine_report_submission` + `fact_now_application`.

@@ -37,7 +37,7 @@ RAW_ROOT_PATH = "Files/raw"
 TARGET_SCHEMA = "bronze"
 MANIFEST_TABLE = "bronze.load_manifest"
 SUMMARY_TABLE = "bronze.load_summary"
-REBUILD = True          # one-time full rebuild; set False afterwards
+REBUILD = False         # one-time full rebuild done; routine runs are incremental (manifest-skip)
 MAX_WORKERS = 8
 
 spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")

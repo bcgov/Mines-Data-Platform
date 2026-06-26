@@ -12,6 +12,13 @@ az login --service-principal --username "$CLIENT_ID" --password "$CLIENT_SECRET"
     --tenant "$TENANT_ID" --allow-no-subscriptions --output none
 export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
 
+log "=== Files/raw contents (confirm the source catalog landed) ==="
+BRONZE_LH_ID="8cd34a44-500a-47d9-aa2d-5ad0c2149858"
+ST="$(az account get-access-token --resource https://storage.azure.com/ --query accessToken -o tsv)"
+curl -s -H "Authorization: Bearer $ST" \
+  "https://onelake.dfs.fabric.microsoft.com/${WORKSPACE_ID}?recursive=true&resource=filesystem&directory=${BRONZE_LH_ID}/Files/raw" \
+  | jq -r '.paths[]? | .name' | sed "s#^${BRONZE_LH_ID}/Files/raw/##" | grep -iE "catalog|core_meta" >&2 || log "(no catalog files matched)"
+
 log "=== Deploy + run nb_silver_registry ==="
 NOTEBOOK_NAME="nb_silver_registry" NOTEBOOK_DIR="Fabric/Notebook/nb_silver_registry.Notebook" RUN="true" \
     python3 medallion/deploy/deploy_notebook.py

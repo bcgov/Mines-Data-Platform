@@ -35,7 +35,7 @@ from collections import defaultdict
 WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
 BRONZE_LH_ID = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
 WAREHOUSE = "mines-data-platform-fabwh1"
-CATALOG = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Files/raw/mds_source_catalog.txt"
+RAW = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Files/raw/"
 BRONZE_TABLES = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/"
 INACTIVE_PREFIXES = ("celery_", "etl_", "django_", "auth_", "spatial_ref")
 
@@ -48,6 +48,15 @@ def norm(name):
 # META { "language": "python", "language_group": "synapse_pyspark" }
 
 # CELL ********************
+
+# Resolve the source catalog file/dir landed by pl_extract_source_catalog (name may lack .txt
+# or be a folder of part files). Fail loudly with a directory listing if absent.
+raw_entries = mssparkutils.fs.ls(RAW)
+matches = [e.path for e in raw_entries if "mds_source_catalog" in e.name.lower()]
+if not matches:
+    raise Exception("source catalog not found in Files/raw; present: " + str([e.name for e in raw_entries]))
+CATALOG = matches[0]
+print("catalog path:", CATALOG)
 
 # Source column catalog (CSV with header) — true PKs + every column.
 cat = (spark.read.option("header", "true").option("multiLine", "true")

@@ -22,7 +22,7 @@ echo "$ENT" | head -20 >&2
 
 log ""
 log "=== full recursive listing for known data entities (paths + count) ==="
-for e in permit mine_incident; do
+for e in public.permit public.mine_incident public.address_type_code; do
   ALLP="$(curl -s -H "$H" "${BASE}?recursive=true&resource=filesystem&directory=${BRONZE_LH_ID}/Files/raw/${e}" \
     | jq -r '.paths[]?.name' | sed "s#^${BRONZE_LH_ID}/Files/raw/${e}/##")"
   N="$(echo "$ALLP" | grep -c . || true)"

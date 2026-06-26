@@ -35,6 +35,8 @@ Our notebooks live under **`Fabric/Notebook/`** (folder structure is repo-only; 
 - Team-owned (left untouched at `Fabric/` root): `nb_bronze_master`, `Nb_Silver_Master`.
 Deploy scripts (`run_*.sh`, `deploy_notebooks.py`) and workflow push-path filters updated to the new paths. **Validated:** Silver/Gold/Gold-Test/Foundation deploy+run all green after the move (deploy-by-path works); orchestrator/test `%run` + `runMultiple` use workspace item NAMES so they're unaffected.
 
+**Fabric WORKSPACE folders (separate from repo folders):** the API deploy creates items flat at workspace root — the repo move alone does NOT fold them in the Fabric UI. `medallion/deploy/organize_folders.py` (run by `fabric-ops-organize-folders.yml`) creates the workspace folders (`Notebook` + `stageQuery`/`utility`/`test`) via the Fabric Folders API and relocates our 9 notebooks with `POST /items/{id}/move` `{targetFolderId}`. Idempotent + re-runnable. **Done 2026-06-25** — workspace now mirrors the repo; team masters left at root. Caveat: a *brand-new* notebook deployed later lands at root until the organizer is re-run (deploy_notebook.py doesn't set folderId); in-place updates preserve the folder.
+
 ## Deploy mechanism that works (reusable)
 
 `deploy-app-tables.yml` (push on `medallion/**`) → `deploy_app_tables.sh`: SPN `az login` → Fabric REST resolves the warehouse by displayName → gets `.properties.connectionString` → acquires a `https://database.windows.net/` token → `medallion/sql/run_sql.py` (pyodbc, ODBC Driver 18, `SQL_COPT_SS_ACCESS_TOKEN`) executes the SQL split on `GO`. This is the template for any future direct-to-warehouse SQL.

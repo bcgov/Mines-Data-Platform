@@ -41,7 +41,7 @@ MANIFEST_TABLE = "bronze.load_manifest"
 # read the manifest by absolute path (spark.catalog can lag across sessions)
 MANIFEST_PATH = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/load_manifest"
 SUMMARY_TABLE = "bronze.load_summary"
-REBUILD = True          # one-time full rebuild; set False afterwards for incremental (manifest-skip)
+REBUILD = False         # one-time full rebuild done; routine runs are incremental (manifest-skip by path)
 MAX_WORKERS = 8
 
 spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")

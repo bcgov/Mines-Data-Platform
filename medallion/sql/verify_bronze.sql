@@ -11,7 +11,7 @@ WHERE TABLE_SCHEMA='bronze' AND TABLE_NAME='permit'
   AND COLUMN_NAME IN ('dl_load_ts','bronze_load_ts','bronze_file_name','bronze_file_timestamp','dl_rowhash');
 GO
 -- Integrity: row count, distinct source files, and exact-duplicate rows (0 = clean, no concurrent double-load).
-SELECT COUNT(*) AS rows,
+SELECT COUNT(*) AS row_count,
        COUNT(DISTINCT bronze_file_name) AS source_files,
        COUNT(*) - COUNT(DISTINCT CONCAT(CAST(bronze_file_name AS varchar(200)),'|',CAST(dl_rowhash AS varchar(100)))) AS exact_dups
 FROM bronze.permit;

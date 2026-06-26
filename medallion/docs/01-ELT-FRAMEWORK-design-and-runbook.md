@@ -138,6 +138,8 @@ The Warehouse is the **metadata brain**. Tables we own are built by `medallion/s
 | `gold_dependency` | us | the gold **DAG**: `node_name` + `depends_on` (comma list of parent node_names). |
 | `dq_rule` / `dq_result` | us | data-quality rule definitions + run outcomes (framework present; rule engine is a **TODO**, see §9). |
 | `error_log` | us | **centralized** errors for pipeline AND notebook, discriminated by `layer` (`bronze|silver|gold|ingest`). Includes SQL `TRY/CATCH` columns for other SQL-based writers. |
+| `silver_load_state` | us | per-entity **incremental cursor**: `last_dl_load_ts` high-water mark. Silver reads only `dl_load_ts > cursor`. |
+| `silver_settings` | us | `force_full_all` flag — set to 1 to force a full silver rebuild (self-clears after the run). |
 | `gold_run_log`, `gold_test_log`, `silver_run_log` | us | per-run outcome tables (written by the notebooks for reliable SQL verification). |
 | `pipeline_control` | **team** | the ingestion config: 255 rows, one per ingested table, with `source_entity`, `target_table`, `load_type`, `watermark_column`, `priority`, `dependency_on`. We **read** it to enrich `object_registry`. |
 | `pipeline_log` | **team** | ingestion run history. Join `error_log.run_id = pipeline_log.run_id` for context. |
@@ -241,33 +243,38 @@ flowchart LR
   OR -->|is_active = landed AND not operational| SILVER["drives nb_silver_build"]
 ```
 
-### 5.4 Silver — `nb_silver_build` (registry-driven)
-Loops every **active** object from `object_registry` and per table:
-1. **Standardize** column names (lowercase, `[ .-]`→`_`).
-2. **Cleanse** — trim strings, `''`→`null`.
-3. **Dedup (load_type-aware):**
-   - `INCREMENTAL` + true PK → latest row per **(composite) PK** by `dl_load_ts`.
-   - `FULL` → latest full snapshot (rows at `max(bronze_file_timestamp)`; append-only bronze accumulates repeated copies).
-   - no PK → exact-row `dropDuplicates`.
-4. **DQ** — not-null on every PK column → valid vs **quarantine** (`quarantine.{table}` with rule/reason/run_id).
-5. Drop bronze lineage cols, stamp `silver_load_ts`, write `silver.{table}` (full overwrite) + `silver.v_{table}` view.
-6. Outcome → `app.silver_run_log` + `bronze.silver_run_log` (fast readback) + failures → `app.error_log`.
+### 5.4 Silver — `nb_silver_build` (registry-driven, **incremental**)
+Loops every **active** object from `object_registry`. Silver is **incremental**: a per-entity watermark `app.silver_load_state(entity, last_dl_load_ts)` records the high-water mark, and each run processes only the bronze **delta** (`dl_load_ts > cursor`). Per table:
+1. **Read delta** — bronze rows with `dl_load_ts > cursor` (or *all* rows on a full run). Empty delta → `no-change`, skip.
+2. **Standardize** names + **cleanse** (trim, `''`→`null`).
+3. **Dedup (load_type-aware):** `INCREMENTAL`+true PK → latest row per **(composite) PK** by `dl_load_ts`; `FULL` → latest snapshot (`max(bronze_file_timestamp)`); no PK → `dropDuplicates`.
+4. **DQ** — not-null on every PK column → valid vs **quarantine**.
+5. **Write:** `INCREMENTAL`+PK incremental run → **MERGE upsert** by PK into `silver.{table}` (soft-deletes carry via `deleted_ind`); otherwise **overwrite** (full run, FULL snapshot, or no-PK). Drop bronze lineage, stamp `silver_load_ts`, refresh `silver.v_{table}`.
+6. **Advance the cursor** (only on success) and write `app.silver_run_log`.
+
+**A full run** happens when `app.silver_settings.force_full_all = 1` (self-clearing escape hatch for hard-deletes / drift), when an entity has no cursor yet, or when its silver table is missing. The **first** run after the refactor is full (establishes the cursor); subsequent runs are incremental.
 
 ```mermaid
 flowchart TB
-  S["bronze.table"] --> ST["standardize names + cleanse<br/>(trim, empty to null)"]
-  ST --> Q{"load_type?"}
-  Q -->|INCREMENTAL + true PK| I["latest row per composite PK<br/>by dl_load_ts"]
-  Q -->|FULL| FU["keep latest snapshot<br/>max bronze_file_timestamp + distinct"]
-  Q -->|no PK| NP["dropDuplicates (exact row)"]
-  I --> DQ{"all PK cols<br/>not-null?"}
-  FU --> DQ
-  NP --> WR
-  DQ -->|pass| WR["silver.table + silver.v_table"]
+  C["read cursor<br/>app.silver_load_state[entity]"] --> D{"force_full OR<br/>no cursor / no table?"}
+  D -->|yes - full run| ALL["read ALL bronze"]
+  D -->|no| DELTA["read delta:<br/>dl_load_ts > cursor"]
+  DELTA --> E{"delta empty?"}
+  E -->|yes| NC["no-change (skip)"]
+  E -->|no| ST
+  ALL --> ST["standardize + cleanse + dedup (load_type-aware)"]
+  ST --> DQ{"PK not-null?"}
   DQ -->|fail| QU["quarantine.table"]
+  DQ -->|pass| W{"incremental<br/>+ INCREMENTAL + PK?"}
+  W -->|yes| MG["MERGE upsert by PK<br/>into silver.table"]
+  W -->|no| OW["overwrite silver.table"]
+  MG --> ADV["advance cursor =<br/>max(dl_load_ts)"]
+  OW --> ADV
 ```
 
-Current state: **210/210 active tables OK, ~1.71M rows, 0 failures.** Silver = the current cleansed view, ready to transform.
+**Delete handling:** soft deletes propagate live (source `deleted_ind` flows through the merge); hard deletes are caught by a periodic **full reconcile** (`force_full_all=1`). FULL-load tables are immune (each snapshot is complete).
+
+Current state: first incremental-capable run rebuilds all active tables and seeds the cursor; subsequent runs process only the delta. Silver = the current cleansed view, ready to transform.
 
 ### 5.5 Gold — DAG-driven dim/fact builder
 The gold layer is a **config-driven DAG**, the most sophisticated part of the framework.
@@ -410,6 +417,13 @@ flowchart LR
 
 ### 7.2 Add a new SOURCE table to silver — *nothing to code*
 It's automatic: once the table is in `pipeline_control` **and** has landed in bronze, the next `nb_silver_registry` run registers it `is_active=1` and `nb_silver_build` builds `silver.<table>`. To rebuild the registry quickly without the full silver build, dispatch **`fabric-ops-build-registry`**.
+
+### 7.2a Force a full silver reconcile (hard-deletes / drift)
+Silver is incremental. To rebuild **every** active table from all bronze history (catches source hard-deletes and corrects any drift), set the flag and run silver:
+```sql
+UPDATE app.silver_settings SET force_full_all = 1, updated_date = SYSUTCDATETIME();
+```
+(via `fabric-ops-adhoc-sql`), then dispatch `deploy-run-silver`. The notebook does a full rebuild and **self-resets** the flag to 0. Recommended cadence: weekly, or after a known source purge.
 
 ### 7.3 Activate the parked (unlanded) tables — e.g. `mine`
 No action needed in our code. When the ingestion team lands the table in bronze, re-run `fabric-ops-build-registry` (or `deploy-run-silver`). The registry's landed-check flips it `is_active=1` automatically, with the correct source PK already known. (To force a table on/off manually, you would override `object_registry.is_active`, but note the next registry rebuild re-derives it from the landed check.)

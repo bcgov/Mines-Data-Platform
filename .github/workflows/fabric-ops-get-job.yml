@@ -1,0 +1,25 @@
+name: Fabric Ops - Get Job
+on:
+  push:
+    branches: ['medallion/**']
+    paths:
+      - 'medallion/deploy/get_job.py'
+      - '.github/workflows/fabric-ops-get-job.yml'
+jobs:
+  getjob:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet requests
+      - run: |
+          az login --service-principal --username "$AZURE_CLIENT_ID" --password "$AZURE_CLIENT_SECRET" \
+              --tenant "$AZURE_TENANT_ID" --allow-no-subscriptions --output none
+          export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
+          python3 medallion/deploy/get_job.py
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+          ITEM_ID: '9bb2150b-83f0-4878-b7bc-08a1adcca3d2'
+          INSTANCE_ID: '2bc0ef17-48b5-4975-bcef-ad5dc3c1119e'

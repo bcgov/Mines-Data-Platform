@@ -126,7 +126,7 @@ def run_notebook(nid: str, name: str) -> None:
     sys.exit(1)
 
 
-deploy("nb_util_paths", "Fabric/nb_util_paths.Notebook")
-smoke_id = deploy("nb_smoke_foundation", "Fabric/nb_smoke_foundation.Notebook", inject=True)
+deploy("nb_util_paths", "Fabric/Notebook/utility/nb_util_paths.Notebook")
+smoke_id = deploy("nb_smoke_foundation", "Fabric/Notebook/test/nb_smoke_foundation.Notebook", inject=True)
 run_notebook(smoke_id, "nb_smoke_foundation")
 log("DONE")

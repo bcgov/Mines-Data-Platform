@@ -15,8 +15,8 @@ on:
       - 'medallion/deploy/deploy_notebooks.py'
       - '.github/workflows/scripts/deploy_notebooks.sh'
       - '.github/workflows/deploy-notebooks.yml'
-      - 'Fabric/nb_util_paths.Notebook/**'
-      - 'Fabric/nb_smoke_foundation.Notebook/**'
+      - 'Fabric/Notebook/utility/nb_util_paths.Notebook/**'
+      - 'Fabric/Notebook/test/nb_smoke_foundation.Notebook/**'
 
 jobs:
   deploy:

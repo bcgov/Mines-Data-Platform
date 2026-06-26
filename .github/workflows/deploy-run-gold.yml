@@ -12,10 +12,10 @@ on:
   push:
     branches: ['medallion/**']
     paths:
-      - 'Fabric/nb_util_gold.Notebook/**'
-      - 'Fabric/nb_gold_tf_dim_permit.Notebook/**'
-      - 'Fabric/nb_gold_tf_fact_permit_amendment.Notebook/**'
-      - 'Fabric/nb_gold_orchestrator.Notebook/**'
+      - 'Fabric/Notebook/utility/nb_util_gold.Notebook/**'
+      - 'Fabric/Notebook/stageQuery/nb_gold_tf_dim_permit.Notebook/**'
+      - 'Fabric/Notebook/stageQuery/nb_gold_tf_fact_permit_amendment.Notebook/**'
+      - 'Fabric/Notebook/nb_gold_orchestrator.Notebook/**'
       - 'medallion/deploy/deploy_notebook.py'
       - 'medallion/sql/verify_gold.sql'
       - '.github/workflows/scripts/run_gold.sh'

@@ -12,7 +12,7 @@ on:
   push:
     branches: ['medallion/**']
     paths:
-      - 'Fabric/nb_silver_build.Notebook/**'
+      - 'Fabric/Notebook/nb_silver_build.Notebook/**'
       - 'medallion/deploy/deploy_notebook.py'
       - 'medallion/sql/verify_silver.sql'
       - '.github/workflows/scripts/run_silver.sh'

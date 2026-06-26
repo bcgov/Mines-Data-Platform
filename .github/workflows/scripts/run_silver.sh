@@ -14,7 +14,7 @@ az login --service-principal --username "$CLIENT_ID" --password "$CLIENT_SECRET"
 export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
 
 log "=== Deploy + run nb_silver_build ==="
-NOTEBOOK_NAME="nb_silver_build" NOTEBOOK_DIR="Fabric/nb_silver_build.Notebook" RUN="true" \
+NOTEBOOK_NAME="nb_silver_build" NOTEBOOK_DIR="Fabric/Notebook/nb_silver_build.Notebook" RUN="true" \
     python3 medallion/deploy/deploy_notebook.py
 
 log "=== Verify centralized error log (warehouse app.error_log, layer='silver') ==="

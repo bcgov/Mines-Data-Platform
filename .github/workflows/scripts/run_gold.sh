@@ -13,14 +13,15 @@ az login --service-principal --username "$CLIENT_ID" --password "$CLIENT_SECRET"
     --tenant "$TENANT_ID" --allow-no-subscriptions --output none
 export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
 
+deploy_nb() { NOTEBOOK_NAME="$1" NOTEBOOK_DIR="$2" RUN="${3:-false}" python3 medallion/deploy/deploy_notebook.py; }
+
 log "=== Deploy gold notebooks (util + transforms, no run) ==="
-for nb in nb_util_gold nb_gold_tf_dim_permit nb_gold_tf_fact_permit_amendment; do
-    NOTEBOOK_NAME="$nb" NOTEBOOK_DIR="Fabric/$nb.Notebook" RUN="false" python3 medallion/deploy/deploy_notebook.py
-done
+deploy_nb nb_util_gold                     Fabric/Notebook/utility/nb_util_gold.Notebook
+deploy_nb nb_gold_tf_dim_permit            Fabric/Notebook/stageQuery/nb_gold_tf_dim_permit.Notebook
+deploy_nb nb_gold_tf_fact_permit_amendment Fabric/Notebook/stageQuery/nb_gold_tf_fact_permit_amendment.Notebook
 
 log "=== Deploy + RUN orchestrator ==="
-NOTEBOOK_NAME="nb_gold_orchestrator" NOTEBOOK_DIR="Fabric/nb_gold_orchestrator.Notebook" RUN="true" \
-    python3 medallion/deploy/deploy_notebook.py
+deploy_nb nb_gold_orchestrator Fabric/Notebook/nb_gold_orchestrator.Notebook true
 
 log "=== Verify via warehouse app.gold_run_log ==="
 WH_ID="$(curl -s -H "Authorization: Bearer $FABRIC_TOKEN" \

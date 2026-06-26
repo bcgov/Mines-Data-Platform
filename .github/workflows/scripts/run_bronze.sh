@@ -13,7 +13,7 @@ az login --service-principal --username "$CLIENT_ID" --password "$CLIENT_SECRET"
 export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
 
 log "=== Deploy + run nb_bronze_load ==="
-NOTEBOOK_NAME="nb_bronze_load" NOTEBOOK_DIR="Fabric/nb_bronze_load.Notebook" RUN="true" \
+NOTEBOOK_NAME="nb_bronze_load" NOTEBOOK_DIR="Fabric/Notebook/nb_bronze_load.Notebook" RUN="true" \
     python3 medallion/deploy/deploy_notebook.py
 
 log "=== Verify via Bronze lakehouse SQL endpoint ==="

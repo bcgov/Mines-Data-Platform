@@ -1,4 +1,6 @@
-# Delete a Fabric notebook workspace item by display name (SPN). Dispatch only.
+# Delete a Fabric notebook workspace item by display name (SPN). Dispatch-only (destructive).
+# Note: workflow_dispatch resolves from the default branch; to run from a feature branch, add a
+# temporary push trigger (path-filtered), push, then revert.
 name: Fabric Ops - Delete Notebook
 
 on:
@@ -7,11 +9,6 @@ on:
       item_name:
         description: 'Notebook display name to delete'
         required: true
-  push:
-    branches: ['medallion/**']
-    paths:
-      - 'medallion/deploy/delete_item.py'
-      - '.github/workflows/fabric-ops-delete-notebook.yml'
 
 jobs:
   delete:
@@ -29,4 +26,4 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           WORKSPACE_ID: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
-          ITEM_NAME: ${{ github.event.inputs.item_name || 'nb_bronze_master' }}
+          ITEM_NAME: ${{ github.event.inputs.item_name }}

@@ -212,8 +212,12 @@ flowchart LR
 - **`Metadata_Extractor`** (team): queries source `pg_catalog` for column metadata → `Files/raw/mds_core_meta.csv`, but **filtered to PK columns only**.
 - **`pl_extract_source_catalog`** (OURS, `clone_source_catalog.py`): a **clone** of `Metadata_Extractor` with the PK-only filter removed and the sink repointed to `Files/raw/mds_source_catalog`. It lands the **full** per-column catalog (table, column, position, type, nullability, **is_primary_key / unique / foreign_key**, FK targets, comments). It **reuses the existing source connection** (`21b383a1`) — so we never needed Key Vault or network access. Originals untouched.
 
-### 5.2 Bronze — `nb_bronze_load` (append-only, immutable)
-Per landed parquet file: read (with `LEGACY` datetime/int96 rebase for pre-1900 dates) → skip if `bronze_file_name` already loaded (idempotency) → add control columns `dl_load_id, bronze_file_name, bronze_file_timestamp, bronze_load_date, dl_load_ts, dl_rowhash` → append to `bronze.{table}` partitioned by `bronze_load_date`. **No updates/deletes** — bronze is the immutable log. 228 tables currently landed.
+### 5.2 Bronze — `nb_bronze_load` (append-only, immutable, optimized)
+Per entity (NOT per file — for speed): list new raw parquet files, **read them all in one `spark.read.parquet([...])`**, recover per-file lineage with `input_file_name()`, add control columns (`dl_load_id, bronze_file_name, bronze_file_timestamp, bronze_load_date, dl_load_ts, dl_rowhash`, `LEGACY` rebase for pre-1900 dates), and **write once** to `bronze.{table}` partitioned by `bronze_load_date`. Entities run in **parallel** (thread pool). **No updates/deletes** — bronze is the immutable append-only log.
+- **Idempotency** = read the bronze table itself by path for already-loaded `bronze_file_name` and skip those (no per-file COUNT scans; robust to catalog lag). `bronze.load_manifest` is an audit ledger.
+- **`REBUILD` flag:** `True` drops + reloads every table from raw (deterministic, no dups — used to make our audit columns the source of truth); `False` = routine incremental (append only new files).
+- **`run_bronze.sh` cancels any in-flight `nb_bronze_load` Fabric job first** — cancelling a GitHub workflow does NOT stop the Fabric job, and two loaders writing bronze concurrently corrupts/duplicates it.
+- Current: 234 bronze tables, our audit columns (no legacy `bronze_load_ts`); raw retains full history under `Files/raw/public.<table>/yyyy/mm/dd/*.parquet`.
 
 ```mermaid
 flowchart TB
@@ -274,7 +278,9 @@ flowchart TB
 
 **Delete handling:** soft deletes propagate live (source `deleted_ind` flows through the merge); hard deletes are caught by a periodic **full reconcile** (`force_full_all=1`). FULL-load tables are immune (each snapshot is complete).
 
-Current state: first incremental-capable run rebuilds all active tables and seeds the cursor; subsequent runs process only the delta. Silver = the current cleansed view, ready to transform.
+**Parallel:** tables are independent, so the per-table loop runs in a **thread pool** (`MAX_WORKERS=4` — 8 killed the Spark session, **F14**). Full pass on clean bronze: **214/214 OK, ~647K current-state rows, ~16 min** (≈2.7× faster than sequential); incremental no-change runs are far quicker. First run after a bronze schema change must be **full** (force_full or cleared cursor), since the load-ts column changed.
+
+Current state: silver = the current cleansed, deduplicated (latest-per-PK by source `update_timestamp`) view of all active source tables, ready to transform.
 
 ### 5.5 Gold — DAG-driven dim/fact builder
 The gold layer is a **config-driven DAG**, the most sophisticated part of the framework.
@@ -463,7 +469,10 @@ Dispatch `fabric-ops-gold-test`: it mutates `stg` (update + delete rows), runs t
 | `WRITE_ANCIENT_DATETIME` | **F12** — pre-1900 dates need `spark.sql.parquet.{datetime,int96}RebaseMode{InWrite,InRead}=LEGACY`. |
 | `SCHEMA_NOT_FOUND` on saveAsTable | **F8** — `CREATE SCHEMA IF NOT EXISTS` first (schema-enabled lakehouses don't auto-create). |
 | `CREATE TABLE` rejects IDENTITY/PK | **F1/F2** — Fabric Warehouse limitation; mint keys in the writer. |
-| Bronze column `dl_load_ts` not found | **F13** — landed bronze tables use **`bronze_load_ts`/`bronze_load_date`** (the team's loader), not the `dl_load_ts` our `nb_bronze_load` writes. Silver auto-detects the load-ts column. Don't assume bronze control-column names — check the actual schema. |
+| Bronze column `dl_load_ts` not found | **F13** — landed bronze tables use **`bronze_load_ts`/`bronze_load_date`** (the team's loader), not the `dl_load_ts` our `nb_bronze_load` writes. Silver auto-detects the load-ts column. Don't assume bronze control-column names — check the actual schema. (Resolved by the bronze rebuild — bronze now uses our columns.) |
+| `System_Cancelled_Session_Statements_Failed` | **F14** — too many concurrent Spark statements killed the session (hit at silver `MAX_WORKERS=8`). Use ≤4 workers for heavy parallel passes. Fetch the real reason from the job instance `failureReason` (notebook stdout is hidden). |
+| GH workflow cancelled but job keeps running | Cancelling the workflow does NOT cancel the Fabric job. Cancel the job instance via API and wait for it to leave InProgress before re-running (else concurrent Delta writes corrupt the table). `run_bronze.sh` does this. |
+| Idempotency/control table seen as empty across runs | `spark.catalog.tableExists`/`spark.table` lag across sessions. Read control tables by **abfss path**, not the catalog. |
 | SPN can't auth to warehouse with sqlcmd | **F3** — use `run_sql.py` (pyodbc + access token). |
 
 ---

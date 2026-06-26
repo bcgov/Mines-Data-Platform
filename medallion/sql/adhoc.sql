@@ -1,12 +1,12 @@
--- Inactive objects (registered but skipped by silver build): operational or not-landed.
-SELECT bronze_table, load_type, primary_key FROM app.object_registry WHERE is_active=0 ORDER BY bronze_table;
+-- What connection metadata do we have to even reach the source?
+SELECT config_key, LEFT(config_value,120) AS config_value, config_group, is_secret FROM app.config;
 GO
--- Did the key gold-feeding tables build this run? (from app.silver_run_log)
-SELECT entity, status, silver_rows, quarantined_rows
-FROM app.silver_run_log
-WHERE entity IN ('permit','permit_amendment','mine_incident','mine')
-ORDER BY entity;
-GO
--- Active objects by load_type.
-SELECT load_type, COUNT(*) AS n FROM app.object_registry WHERE is_active=1 GROUP BY load_type;
+-- Is the source connection string / KV populated in pipeline_control, or is it all via Key Vault?
+SELECT
+  COUNT(*) AS total,
+  SUM(CASE WHEN source_connection_string IS NOT NULL THEN 1 ELSE 0 END) AS has_conn_str,
+  SUM(CASE WHEN key_vault_url IS NOT NULL THEN 1 ELSE 0 END) AS has_kv,
+  MAX(key_vault_url) AS sample_kv,
+  MAX(source_system) AS sample_source_system
+FROM app.pipeline_control;
 GO

@@ -29,6 +29,12 @@ RAW_ROOT_PATH = "Files/raw"
 TARGET_SCHEMA = "bronze"
 SUMMARY_TABLE = "bronze.load_summary"
 
+# ONE-TIME: drop each bronze table before reloading from raw, so OUR audit columns
+# (dl_load_id/bronze_file_name/bronze_file_timestamp/bronze_load_date/dl_load_ts/dl_rowhash)
+# become the single source of truth (replaces the prior loader's bronze_load_ts schema).
+# Set back to False after the rebuild so routine runs stay append-only/idempotent.
+REBUILD = True
+
 spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
 spark.conf.set("spark.sql.parquet.int96RebaseModeInWrite", "LEGACY")
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInRead", "LEGACY")
@@ -165,6 +171,13 @@ loaded = skipped = failed = 0
 results = []
 
 for entity in get_entities():
+    if REBUILD:
+        tbl = f"{TARGET_SCHEMA}.{get_table_name(entity)}"
+        try:
+            spark.sql(f"DROP TABLE IF EXISTS {tbl}")
+            print(f"REBUILD: dropped {tbl}")
+        except Exception as e:
+            print(f"REBUILD drop {tbl} failed: {e}")
     files = get_all_parquet_files(entity)
     files = sorted(files, key=lambda x: get_file_timestamp(x[0]) or datetime.min)
     for file_name, file_path in files:

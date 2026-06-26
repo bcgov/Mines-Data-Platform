@@ -1,0 +1,27 @@
+# Delete a Fabric notebook workspace item by display name (SPN). Dispatch only.
+name: Fabric Ops - Delete Notebook
+
+on:
+  workflow_dispatch:
+    inputs:
+      item_name:
+        description: 'Notebook display name to delete'
+        required: true
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet requests
+      - run: |
+          az login --service-principal --username "$AZURE_CLIENT_ID" --password "$AZURE_CLIENT_SECRET" \
+              --tenant "$AZURE_TENANT_ID" --allow-no-subscriptions --output none
+          export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
+          python3 medallion/deploy/delete_item.py
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          WORKSPACE_ID: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
+          ITEM_NAME: ${{ github.event.inputs.item_name }}

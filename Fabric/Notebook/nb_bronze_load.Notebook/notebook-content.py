@@ -33,11 +33,15 @@ import re
 import uuid
 import traceback
 
+WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
+BRONZE_LH_ID = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
 RAW_ROOT_PATH = "Files/raw"
 TARGET_SCHEMA = "bronze"
 MANIFEST_TABLE = "bronze.load_manifest"
+# read the manifest by absolute path (spark.catalog can lag across sessions)
+MANIFEST_PATH = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/load_manifest"
 SUMMARY_TABLE = "bronze.load_summary"
-REBUILD = False         # one-time full rebuild done; routine runs are incremental (manifest-skip)
+REBUILD = True          # one-time full rebuild; set False afterwards for incremental (manifest-skip)
 MAX_WORKERS = 8
 
 spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
@@ -89,13 +93,14 @@ def file_ts(name):
 
 
 def load_manifest():
-    """Set of (entity, bronze_file_name) already loaded — cheap idempotency, no table scans."""
+    """Set of (entity, bronze_file_name) already loaded — cheap idempotency, no table scans.
+    Read by path (spark.catalog.tableExists can lag across sessions)."""
     try:
-        if spark.catalog.tableExists(MANIFEST_TABLE):
-            return {(r["entity"], r["bronze_file_name"]) for r in spark.table(MANIFEST_TABLE).collect()}
+        return {(r["entity"], r["bronze_file_name"])
+                for r in spark.read.format("delta").load(MANIFEST_PATH).collect()}
     except Exception as e:
-        print(f"manifest read: {e}")
-    return set()
+        print(f"manifest read (treating as empty): {e}")
+        return set()
 
 # METADATA ********************
 
@@ -146,7 +151,7 @@ def process_entity(entity):
           .withColumn("dl_rowhash",
                       sha2(concat_ws("||", *[coalesce(col(c).cast("string"), lit("")) for c in data_cols]), 256)))
 
-    mode = "overwrite" if (REBUILD or not spark.catalog.tableExists(target)) else "append"
+    mode = "overwrite" if REBUILD else "append"   # append creates the table if absent
     opt = "overwriteSchema" if mode == "overwrite" else "mergeSchema"
     (df.write.format("delta").partitionBy("bronze_load_date").mode(mode)
         .option(opt, "true").saveAsTable(target))

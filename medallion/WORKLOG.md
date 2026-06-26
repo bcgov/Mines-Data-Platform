@@ -25,6 +25,16 @@
 - [x] `app.*` warehouse tables (object/field/transform registry, dq_rule, dq_result, error_log_bronze/silver/gold) → **DEPLOYED 2026-06-23** into warehouse `mines-data-platform-fabwh1` (id `9ed9a608-33e5-408b-bd51-adc2dad1e7ab`) via `deploy-app-tables.yml` + `medallion/sql/app_registry_tables.sql`. Verified: all 8 tables present.
 - [x] `nb_util_paths`, `nb_smoke_foundation` notebooks → **DEPLOYED + SMOKE PASSED 2026-06-23** via Fabric Items API (`deploy-notebooks.yml`). nb_util_paths=`dda18b0c…`, nb_smoke_foundation=`52270d1d…`. Smoke job status=Completed → cross-lakehouse OneLake Delta write/read validated as the SPN.
 
+## Repo layout — notebooks (reorganized 2026-06-25)
+
+Our notebooks live under **`Fabric/Notebook/`** (folder structure is repo-only; Fabric workspace items are flat, deployed by displayName, so a move doesn't touch the workspace):
+- `Fabric/Notebook/` (root) — `nb_bronze_load`, `nb_silver_build`, `nb_gold_orchestrator`
+- `Fabric/Notebook/stageQuery/` — transform/stage notebooks `nb_gold_tf_dim_permit`, `nb_gold_tf_fact_permit_amendment`
+- `Fabric/Notebook/utility/` — `nb_util_gold`, `nb_util_paths`
+- `Fabric/Notebook/test/` — `nb_gold_test`, `nb_smoke_foundation`
+- Team-owned (left untouched at `Fabric/` root): `nb_bronze_master`, `Nb_Silver_Master`.
+Deploy scripts (`run_*.sh`, `deploy_notebooks.py`) and workflow push-path filters updated to the new paths. **Validated:** Silver/Gold/Gold-Test/Foundation deploy+run all green after the move (deploy-by-path works); orchestrator/test `%run` + `runMultiple` use workspace item NAMES so they're unaffected.
+
 ## Deploy mechanism that works (reusable)
 
 `deploy-app-tables.yml` (push on `medallion/**`) → `deploy_app_tables.sh`: SPN `az login` → Fabric REST resolves the warehouse by displayName → gets `.properties.connectionString` → acquires a `https://database.windows.net/` token → `medallion/sql/run_sql.py` (pyodbc, ODBC Driver 18, `SQL_COPT_SS_ACCESS_TOKEN`) executes the SQL split on `GO`. This is the template for any future direct-to-warehouse SQL.

@@ -243,19 +243,37 @@ objs = [r.asDict() for r in
 objs.sort(key=lambda o: (o.get("priority") or 100, o.get("bronze_table")))
 print(f"active objects: {len(objs)}")
 
-for obj in objs:
+# Silver tables are independent -> process them in PARALLEL (thread pool submitting Spark jobs;
+# FAIR scheduler overlaps the per-table driver overhead). state/results updated under a lock.
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+
+spark.conf.set("spark.scheduler.mode", "FAIR")
+MAX_WORKERS = 8
+_lock = threading.Lock()
+
+
+def run_one(obj):
     t = obj["bronze_table"]
     try:
         res = process(obj, cursor.get(t), force_full)
-        state[t] = res["new_ts"]            # advance cursor only on success
-        print(f"OK   {t}: {res['action']} mode={res['mode']} in={res['rows_in']} out={res['rows_out']} quar={res['quar']}")
-        results.append((t, res["rows_in"], res["rows_out"], res["quar"], "OK",
-                        f"{res['action']}/{res['mode']}"))
+        with _lock:
+            state[t] = res["new_ts"]        # advance cursor only on success
+            results.append((t, res["rows_in"], res["rows_out"], res["quar"], "OK",
+                            f"{res['action']}/{res['mode']}"))
+        print(f"OK   {t}: {res['action']}/{res['mode']} in={res['rows_in']} out={res['rows_out']} quar={res['quar']}")
     except Exception as e:
         err = str(e)[:1000]
         print(f"FAILED {t}: {err}")
         log_error("silver", RUN_ID, t, err, traceback.format_exc(), target_table=f"silver.{t}")
-        results.append((t, None, None, None, "FAILED", err))
+        with _lock:
+            results.append((t, None, None, None, "FAILED", err))
+
+
+with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
+    futs = [ex.submit(run_one, o) for o in objs]
+    for _ in as_completed(futs):
+        pass
 
 # Persist the per-entity cursor (overwrite the whole small state table).
 try:

@@ -101,7 +101,7 @@ Fabric/
     test/
       nb_gold_test.Notebook              # purposely tests update + soft-delete for dim & fact
       nb_smoke_foundation.Notebook       # foundation cross-lakehouse smoke test
-  nb_bronze_master.Notebook, Nb_Silver_Master.Notebook   # TEAM-owned (left untouched at root)
+  Nb_Silver_Master.Notebook   # TEAM-owned (left at root). nb_bronze_master (team's bronze loader) was DELETED — we own raw->bronze now.
   mines-data-platform-fabwh1.Warehouse/  # warehouse project (the team's committed DDL; not our deploy path)
 
 medallion/
@@ -208,7 +208,7 @@ flowchart LR
 ```
 
 ### 5.1 Source extraction (Fabric Data pipelines)
-- **`pl_ingest_mds`** (team): copies MDS tables → `Files/raw/...` parquet, driven by `pipeline_control`. **Not ours; do not modify.**
+- **`pl_ingest_mds`** (team): copies MDS tables → `Files/raw/...` parquet, driven by `pipeline_control`. **Not ours; do not modify.** (raw → bronze is then OUR `nb_bronze_load`, §5.2 — the team's bronze loader was deleted.)
 - **`Metadata_Extractor`** (team): queries source `pg_catalog` for column metadata → `Files/raw/mds_core_meta.csv`, but **filtered to PK columns only**.
 - **`pl_extract_source_catalog`** (OURS, `clone_source_catalog.py`): a **clone** of `Metadata_Extractor` with the PK-only filter removed and the sink repointed to `Files/raw/mds_source_catalog`. It lands the **full** per-column catalog (table, column, position, type, nullability, **is_primary_key / unique / foreign_key**, FK targets, comments). It **reuses the existing source connection** (`21b383a1`) — so we never needed Key Vault or network access. Originals untouched.
 
@@ -385,7 +385,7 @@ flowchart LR
 | `provision-medallion-lakehouses` | create the 3 schema-enabled lakehouses |
 | `deploy-app-tables` | run `app_registry_tables.sql` (control tables + seed) |
 | `deploy-notebooks` | deploy foundation (`nb_util_paths`, `nb_smoke_foundation`) + smoke |
-| `deploy-run-bronze` | deploy + run `nb_bronze_load`, verify bronze |
+| `deploy-run-bronze` | cancel any in-flight bronze job → deploy + run `nb_bronze_load` → verify bronze |
 | `fabric-ops-clone-catalog` | clone `Metadata_Extractor` → `pl_extract_source_catalog` and run it |
 | `fabric-ops-build-registry` | deploy + run `nb_silver_registry` only (fast registry rebuild) + verify |
 | `deploy-run-silver` | run `nb_silver_registry` **then** `nb_silver_build`, verify |
@@ -395,9 +395,10 @@ flowchart LR
 | `fabric-ops-list-tables` | list lakehouse tables via OneLake DFS (bypasses SQL-endpoint lag) |
 | `fabric-ops-organize-folders` | mirror repo folders into the workspace UI |
 | `fabric-ops-probe-pipeline` | read-only inspect Fabric pipelines/connections |
+| `fabric-ops-delete-notebook` | delete a notebook workspace item by name (dispatch-only) |
 | `fabric-ops-delete-workspace` | delete an orphan workspace |
 
-Most are **push-path-filtered** on `medallion/**` (editing the relevant file auto-runs it) and also `workflow_dispatch`.
+Most are **push-path-filtered** on `medallion/**` (editing the relevant file auto-runs it) and also `workflow_dispatch`. **Caveat:** `gh workflow run <name>` resolves the workflow from the **default branch** — a workflow that exists only on `medallion/dev` will 404. To run one not yet on default, push (path trigger) or temporarily add a `push:` trigger.
 
 ---
 
@@ -417,7 +418,7 @@ flowchart LR
 ```
 
 1. **Source catalog** (only when the source schema changed): dispatch `fabric-ops-clone-catalog` → lands `mds_source_catalog`.
-2. **Bronze**: `deploy-run-bronze` (loads new raw files; append-only/idempotent).
+2. **Bronze**: `deploy-run-bronze` (incremental — appends only raw files not already in each bronze table; runs in parallel; cancels any in-flight bronze job first).
 3. **Registry + Silver**: `deploy-run-silver` (rebuilds registries from the catalog, then builds all active silver tables).
 4. **Gold**: `deploy-run-gold` (builds the dim/fact DAG).
 
@@ -430,6 +431,9 @@ Silver is incremental. To rebuild **every** active table from all bronze history
 UPDATE app.silver_settings SET force_full_all = 1, updated_date = SYSUTCDATETIME();
 ```
 (via `fabric-ops-adhoc-sql`), then dispatch `deploy-run-silver`. The notebook does a full rebuild and **self-resets** the flag to 0. Recommended cadence: weekly, or after a known source purge.
+
+### 7.2b Force a full BRONZE rebuild (rare)
+Bronze is normally incremental. To drop every bronze table and reload from raw (e.g. to re-establish audit columns), set `REBUILD = True` in `nb_bronze_load`, run `deploy-run-bronze`, then set it back to `False`. Safe + deterministic (drop+overwrite ⇒ no dups) **as long as `Files/raw` still holds the history** — verify that first. After a bronze rebuild that changes the load-ts column, force a full silver pass (§7.2a) since the cursor resets.
 
 ### 7.3 Activate the parked (unlanded) tables — e.g. `mine`
 No action needed in our code. When the ingestion team lands the table in bronze, re-run `fabric-ops-build-registry` (or `deploy-run-silver`). The registry's landed-check flips it `is_active=1` automatically, with the correct source PK already known. (To force a table on/off manually, you would override `object_registry.is_active`, but note the next registry rebuild re-derives it from the landed check.)
@@ -490,17 +494,18 @@ Dispatch `fabric-ops-gold-test`: it mutates `stg` (update + delete rows), runs t
 1. **Data-quality engine** — `dq_rule`/`dq_result` tables exist but are unused. Implement a registry-driven DQ pass in silver (not_null, unique, range, regex, allowed_values, referential, freshness) writing `dq_result`. Today silver only does not-null-PK + quarantine.
 2. **Land `mine` and the ~29 parked business tables** — coordinate with the ingestion owner (they're in `pipeline_control` but not in `Files/raw`). `mine` is the hub blocking `dim_mine` and most facts. Already auto-activates once landed.
 3. **Source views** — the catalog query is base tables only (`relkind IN ('r','p')`). Add `'v'` in `clone_source_catalog.py` if view-backed entities (e.g. `*_view`) are needed in silver.
-4. **Incremental silver** — silver is currently full-overwrite per run. For large/slow tables, move to merge-on-PK using the watermark already in the registry.
+4. _(done 2026-06-26)_ **Incremental silver** — per-entity `dl_load_ts` cursor + load-type-aware MERGE; full-reconcile flag for hard deletes. _Remaining:_ the no-change floor is per-table job overhead — could push higher concurrency or a `runMultiple` fan-out.
 
 **Engineering hardening**
 5. **Unit tests** — extract the Spark logic into `src/mxfabric/*.py`, test with pytest + local Spark, keep notebooks `%run`-synced (drift-guard). Open the wheel path (build once, attach to the Spark environment) instead of `%run`.
-6. **Parallelism in silver** — 210 tables run sequentially (~34 min). Batch by `priority`/`load_group` and use `runMultiple`, or partition the loop.
-7. **Notebook-stdout observability** — standardize on per-run warehouse log tables (done for gold/silver) for everything; consider structured run summaries.
+6. _(done 2026-06-26)_ **Parallelism** — bronze (per-entity) and silver (per-table) run in a thread pool; **cap at ~4 workers** (8 killed the Spark session, F14). Heavy full passes are the limit; a `runMultiple` separate-notebook fan-out could go wider if needed.
+7. **Notebook-stdout observability** — standardize on per-run warehouse log tables (done for bronze/silver/gold) for everything; for a failed notebook, fetch the job-instance `failureReason` (stdout is hidden).
 8. **Secrets & connections** — our SPN can run pipelines using existing connections; document/confirm which connections it may use, and get the source/KV access formally granted if direct JDBC is ever wanted.
+9. **Bronze loader is now authoritative** — `nb_bronze_load` owns raw→bronze (team's `nb_bronze_master` deleted); confirm no team schedule re-runs a bronze load. Routine runs are incremental (`REBUILD=False`); use `REBUILD=True` only for a deliberate full rebuild.
 
 **Modeling (see companion doc)**
-9. Build out the gold star schema beyond `dim_permit`/`fact_permit_amendment` per the phasing in `02-SOURCE-DATA-and-GOLD-MODEL.md`.
-10. **Semantic model + serving** — Direct Lake model over gold; role-playing date/party; PII masking in serving views.
+10. Build out the gold star schema beyond `dim_permit`/`fact_permit_amendment` per the phasing in `02-SOURCE-DATA-and-GOLD-MODEL.md`.
+11. **Semantic model + serving** — Direct Lake model over gold; role-playing date/party; PII masking in serving views.
 
 ---
 

@@ -244,8 +244,8 @@ flowchart LR
 ```
 
 ### 5.4 Silver — `nb_silver_build` (registry-driven, **incremental**)
-Loops every **active** object from `object_registry`. Silver is **incremental**: a per-entity watermark `app.silver_load_state(entity, last_dl_load_ts)` records the high-water mark, and each run processes only the bronze **delta** (`dl_load_ts > cursor`). Per table:
-1. **Read delta** — bronze rows with `dl_load_ts > cursor` (or *all* rows on a full run). Empty delta → `no-change`, skip.
+Loops every **active** object from `object_registry`. Silver is **incremental**: a per-entity watermark `app.silver_load_state` records the high-water mark, and each run processes only the bronze **delta**. The bronze load-timestamp column is **auto-detected** per table (`bronze_load_ts` — the team's loader — or `dl_load_ts`), and dedup orders by the **source watermark** (`update_timestamp`) when present. Per table:
+1. **Read delta** — bronze rows with `load_ts > cursor` (partition-pruned on `bronze_load_date`), or *all* rows on a full run. Empty delta → `no-change`, skip.
 2. **Standardize** names + **cleanse** (trim, `''`→`null`).
 3. **Dedup (load_type-aware):** `INCREMENTAL`+true PK → latest row per **(composite) PK** by `dl_load_ts`; `FULL` → latest snapshot (`max(bronze_file_timestamp)`); no PK → `dropDuplicates`.
 4. **DQ** — not-null on every PK column → valid vs **quarantine**.
@@ -463,6 +463,7 @@ Dispatch `fabric-ops-gold-test`: it mutates `stg` (update + delete rows), runs t
 | `WRITE_ANCIENT_DATETIME` | **F12** — pre-1900 dates need `spark.sql.parquet.{datetime,int96}RebaseMode{InWrite,InRead}=LEGACY`. |
 | `SCHEMA_NOT_FOUND` on saveAsTable | **F8** — `CREATE SCHEMA IF NOT EXISTS` first (schema-enabled lakehouses don't auto-create). |
 | `CREATE TABLE` rejects IDENTITY/PK | **F1/F2** — Fabric Warehouse limitation; mint keys in the writer. |
+| Bronze column `dl_load_ts` not found | **F13** — landed bronze tables use **`bronze_load_ts`/`bronze_load_date`** (the team's loader), not the `dl_load_ts` our `nb_bronze_load` writes. Silver auto-detects the load-ts column. Don't assume bronze control-column names — check the actual schema. |
 | SPN can't auth to warehouse with sqlcmd | **F3** — use `run_sql.py` (pyodbc + access token). |
 
 ---

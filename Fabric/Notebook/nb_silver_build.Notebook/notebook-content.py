@@ -133,9 +133,16 @@ def process(obj, last_ts, force_full):
 
     if not full:
         df = df.filter(F.col(lts) > F.lit(last_ts))   # only the delta since last run
+        # partition prune: bronze is partitioned by bronze_load_date, so bound it too
+        if "bronze_load_date" in df.columns and hasattr(last_ts, "date"):
+            df = df.filter(F.col("bronze_load_date") >= F.lit(last_ts.date()))
 
-    new_ts = df.agg(F.max(lts).alias("mx")).collect()[0]["mx"] if lts else None
-    delta_rows = df.count()
+    # one pass for both the new high-water mark and the delta size
+    if lts:
+        a = df.agg(F.max(lts).alias("mx"), F.count(F.lit(1)).alias("cnt")).collect()[0]
+        new_ts, delta_rows = a["mx"], a["cnt"]
+    else:
+        new_ts, delta_rows = None, df.count()
     if not full and delta_rows == 0:
         return {"status": "OK", "mode": "incremental", "action": "no-change",
                 "rows_in": 0, "rows_out": None, "quar": 0, "new_ts": last_ts}

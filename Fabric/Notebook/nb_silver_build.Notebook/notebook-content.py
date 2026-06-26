@@ -248,8 +248,11 @@ print(f"active objects: {len(objs)}")
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
-spark.conf.set("spark.scheduler.mode", "FAIR")
-MAX_WORKERS = 8
+try:
+    spark.conf.set("spark.scheduler.mode", "FAIR")   # better overlap; static conf -> non-fatal if rejected
+except Exception as e:
+    print(f"scheduler.mode set skipped (non-fatal): {e}")
+MAX_WORKERS = 4   # 8 overwhelmed the Spark session (System_Cancelled_Session_Statements_Failed)
 _lock = threading.Lock()
 
 

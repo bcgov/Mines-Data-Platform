@@ -92,6 +92,7 @@ def process(obj):
     t = obj["bronze_table"]
     pk = obj.get("primary_key")
     load_type = (obj.get("load_type") or "FULL").upper()
+    pk_cols = [c.strip() for c in (pk or "").split(",") if c.strip()]  # true PK, possibly composite
 
     df = spark.read.format("delta").load(bronze_path(t))
     bronze_rows = df.count()
@@ -109,11 +110,13 @@ def process(obj):
     if string_cols:
         df = df.replace("", None, subset=string_cols)
 
+    pk_ok = bool(pk_cols) and all(c in df.columns for c in pk_cols)
+
     # 3. dedup to the current view, load_type-aware:
-    #    INCREMENTAL + real PK -> latest row per PK by load ts; FULL -> latest full snapshot
-    #    (append-only bronze accumulates repeated copies); else -> exact-row distinct.
-    if load_type == "INCREMENTAL" and pk and pk in df.columns and "dl_load_ts" in df.columns:
-        w = Window.partitionBy(pk).orderBy(F.col("dl_load_ts").desc())
+    #    INCREMENTAL + true PK -> latest row per (composite) PK by load ts; FULL -> latest full
+    #    snapshot (append-only bronze accumulates repeated copies); else -> exact-row distinct.
+    if load_type == "INCREMENTAL" and pk_ok and "dl_load_ts" in df.columns:
+        w = Window.partitionBy(*[F.col(c) for c in pk_cols]).orderBy(F.col("dl_load_ts").desc())
         df = df.withColumn("_rn", F.row_number().over(w)).filter(F.col("_rn") == 1).drop("_rn")
     elif load_type == "FULL" and "bronze_file_timestamp" in df.columns:
         latest = df.agg(F.max("bronze_file_timestamp")).collect()[0][0]
@@ -123,10 +126,13 @@ def process(obj):
     else:
         df = df.dropDuplicates()
 
-    # 4. DQ: not-null on the PK -> valid vs quarantine (only when a PK is known)
-    if pk and pk in df.columns:
-        valid_df = df.filter(F.col(pk).isNotNull())
-        invalid_df = df.filter(F.col(pk).isNull())
+    # 4. DQ: not-null on every PK column -> valid vs quarantine (only when a PK is known)
+    if pk_ok:
+        cond = None
+        for c in pk_cols:
+            cond = F.col(c).isNotNull() if cond is None else (cond & F.col(c).isNotNull())
+        valid_df = df.filter(cond)
+        invalid_df = df.filter(~cond)
         quarantined = invalid_df.count()
     else:
         valid_df, invalid_df, quarantined = df, None, 0

@@ -20,89 +20,92 @@
 
 # CELL ********************
 
-# nb_silver_registry — auto-populate app.object_registry + app.field_registry FROM SOURCE
-# (no manual entry). object_registry is driven by app.pipeline_control (the ingestion's own
-# table list, with primary_key / load_type / watermark / priority / dependency); field_registry
-# is introspected from each landed bronze Delta table's schema. is_active is set by rule:
-# operational/staging prefixes and not-yet-landed tables -> 0 (registered but skipped by silver).
+# nb_silver_registry — populate app.object_registry + app.field_registry FROM SOURCE metadata.
+# Source = bronze Files/raw/mds_source_catalog (a pg_catalog dump landed by pl_extract_source_catalog,
+# a clone of the team's Metadata_Extractor with the PK-only filter removed). This gives TRUE source
+# primary keys (composite where applicable), every column with type/nullability/FK flags, and ALL
+# public tables — including ones not yet landed in bronze. Enriched with load_type/watermark/priority
+# from app.pipeline_control (ingestion config, not source metadata). is_active = landed in bronze AND
+# not an operational/staging table.
 from pyspark.sql import functions as F
 from pyspark.sql.types import (StructType, StructField, StringType, LongType, IntegerType, BooleanType)
 from notebookutils import mssparkutils
+from collections import defaultdict
 
 WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
 BRONZE_LH_ID = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
 WAREHOUSE = "mines-data-platform-fabwh1"
+CATALOG = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Files/raw/mds_source_catalog.txt"
 BRONZE_TABLES = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/"
-
-# bronze lineage/control columns — registered but flagged include_in_load=0
-CTRL_COLS = {"dl_load_id", "bronze_file_name", "bronze_file_timestamp", "bronze_load_date",
-             "dl_load_ts", "dl_rowhash"}
-# operational/staging source tables — registered but is_active=0 (excluded from silver build)
 INACTIVE_PREFIXES = ("celery_", "etl_", "django_", "auth_", "spatial_ref")
 
-# METADATA ********************
-
-# META { "language": "python", "language_group": "synapse_pyspark" }
-
-# CELL ********************
-
-# Source list = app.pipeline_control (what the ingestion pipeline is configured to land).
-from com.microsoft.spark.fabric import Constants  # noqa: F401
-pc = spark.read.synapsesql(f"{WAREHOUSE}.app.pipeline_control")
-pc_rows = [r.asDict() for r in pc.collect()]
-print("pipeline_control entries:", len(pc_rows))
-
-# What actually landed in bronze (dir per table). Used to know which can be field-introspected.
-landed = {e.name.rstrip("/") for e in mssparkutils.fs.ls(BRONZE_TABLES) if e.isDir}
-print("bronze tables landed:", len(landed))
-
-# METADATA ********************
-
-# META { "language": "python", "language_group": "synapse_pyspark" }
-
-# CELL ********************
 
 def norm(name):
-    return name.lower().replace(" ", "_").replace("-", "_").replace(".", "_")
+    return (name or "").strip().lower().replace(" ", "_").replace("-", "_").replace(".", "_")
 
-landed_ci = {n.lower(): n for n in landed}  # case-insensitive lookup -> actual bronze dir name
+# METADATA ********************
+
+# META { "language": "python", "language_group": "synapse_pyspark" }
+
+# CELL ********************
+
+# Source column catalog (CSV with header) — true PKs + every column.
+cat = (spark.read.option("header", "true").option("multiLine", "true")
+       .option("quote", '"').option("escape", "\\").csv(CATALOG)
+       .filter(F.col("table_schema") == "public"))
+cat_rows = cat.collect()
+print("source catalog rows (public columns):", len(cat_rows))
+
+# Ingestion config (load_type / watermark / priority / dependency) — not part of source metadata.
+from com.microsoft.spark.fabric import Constants  # noqa: F401
+pcm = {}
+for r in spark.read.synapsesql(f"{WAREHOUSE}.app.pipeline_control").collect():
+    d = r.asDict()
+    if d.get("target_table"):
+        pcm[d["target_table"].lower()] = d
+print("pipeline_control entries:", len(pcm))
+
+# What actually landed in bronze (case-insensitive) -> real dir name.
+landed_ci = {e.name.rstrip("/").lower(): e.name.rstrip("/") for e in mssparkutils.fs.ls(BRONZE_TABLES) if e.isDir}
+print("bronze tables landed:", len(landed_ci))
+
+# METADATA ********************
+
+# META { "language": "python", "language_group": "synapse_pyspark" }
+
+# CELL ********************
+
+cols_by_table = defaultdict(list)
+for r in cat_rows:
+    cols_by_table[r["table_name"]].append(r)
 
 obj_rows, fld_rows = [], []
 fid = 0
-for oid, cfg in enumerate(sorted(pc_rows, key=lambda c: c.get("target_table") or ""), start=1):
-    name = cfg.get("target_table")
-    if not name:
-        continue
-    actual = landed_ci.get(name.lower())          # real bronze dir name if it landed
-    t = actual or name                            # register/resolve by the actual dir name
-    pk = norm(cfg["primary_key"]) if cfg.get("primary_key") else None
+for oid, tname in enumerate(sorted(cols_by_table), start=1):
+    cols = sorted(cols_by_table[tname], key=lambda r: int(r["column_position"] or 0))
+    pk_cols = [norm(c["column_name"]) for c in cols if c["is_primary_key"] == "YES"]
+    pk = ",".join(pk_cols) if pk_cols else None          # TRUE source PK (composite -> comma list)
+    cfg = pcm.get(tname.lower(), {})
     load_type = (cfg.get("load_type") or "FULL").upper()
     wm = cfg.get("watermark_column")
-    src = cfg.get("source_entity") or f"public.{name}"
     pri = int(cfg.get("priority") or 100)
     dep = cfg.get("dependency_on")
-    is_landed = actual is not None
-    is_active = bool(is_landed and not name.lower().startswith(INACTIVE_PREFIXES))
-    obj_rows.append((oid, src, "bronze", t, "silver", t, load_type, pk, wm,
+    actual = landed_ci.get(tname.lower())
+    t = actual or tname
+    is_active = bool(actual is not None and not tname.lower().startswith(INACTIVE_PREFIXES))
+    obj_rows.append((oid, f"public.{tname}", "bronze", t, "silver", t, load_type, pk, wm,
                      is_active, 1, pri, dep))
-
-    # fields — introspected from the landed bronze Delta schema (real source columns)
-    if is_landed:
-        try:
-            schema = spark.read.format("delta").load(BRONZE_TABLES + t).schema
-            for ordn, f in enumerate(schema.fields, start=1):
-                cn = norm(f.name)
-                fid += 1
-                fld_rows.append((fid, oid, t, cn, f.dataType.simpleString(),
-                                 bool(f.nullable), bool(pk and cn == pk),
-                                 bool(cn not in CTRL_COLS), None, ordn))
-        except Exception as e:
-            print(f"field introspect failed for {t}: {e}")
+    for c in cols:
+        fid += 1
+        fld_rows.append((fid, oid, t, norm(c["column_name"]), c["data_type"],
+                         c["is_nullable"] == "YES", c["is_primary_key"] == "YES",
+                         True, None, int(c["column_position"] or 0)))
 
 active = sum(1 for r in obj_rows if r[9])
-print(f"objects: {len(obj_rows)} (active={active}, inactive={len(obj_rows)-active}); fields: {len(fld_rows)}")
-print("inactive (not landed or operational):",
-      sorted(r[3] for r in obj_rows if not r[9])[:60])
+composite = sum(1 for r in obj_rows if r[7] and "," in r[7])
+nopk = sum(1 for r in obj_rows if not r[7])
+print(f"objects={len(obj_rows)} (active={active}); fields={len(fld_rows)}; composite_pk={composite}; no_pk={nopk}")
+print("sample composite PKs:", [(r[3], r[7]) for r in obj_rows if r[7] and "," in r[7]][:8])
 
 # METADATA ********************
 
@@ -110,7 +113,7 @@ print("inactive (not landed or operational):",
 
 # CELL ********************
 
-# Write both registries to the warehouse (overwrite — full rebuild from source each run).
+# Write both registries to the warehouse (full rebuild from source each run).
 AUDIT_BY = "nb_silver_registry"
 obj_schema = StructType([
     StructField("object_id", LongType()), StructField("source_entity", StringType()),
@@ -136,10 +139,8 @@ fld_df = (spark.createDataFrame(fld_rows, fld_schema)
           .withColumn("created_date", F.current_timestamp()).withColumn("created_by", F.lit(AUDIT_BY))
           .withColumn("modified_date", F.current_timestamp()).withColumn("modified_by", F.lit(AUDIT_BY)))
 
-(obj_df.write.mode("overwrite").option("overwriteSchema", "true")
-    .synapsesql(f"{WAREHOUSE}.app.object_registry"))
-(fld_df.write.mode("overwrite").option("overwriteSchema", "true")
-    .synapsesql(f"{WAREHOUSE}.app.field_registry"))
+(obj_df.write.mode("overwrite").option("overwriteSchema", "true").synapsesql(f"{WAREHOUSE}.app.object_registry"))
+(fld_df.write.mode("overwrite").option("overwriteSchema", "true").synapsesql(f"{WAREHOUSE}.app.field_registry"))
 print(f"WROTE object_registry={len(obj_rows)} field_registry={len(fld_rows)}")
 
 # METADATA ********************

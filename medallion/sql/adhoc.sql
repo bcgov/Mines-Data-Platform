@@ -1,12 +1,9 @@
--- What connection metadata do we have to even reach the source?
-SELECT config_key, LEFT(config_value,120) AS config_value, config_group, is_secret FROM app.config;
+-- Drop the stale-schema silver_run_log so the next incremental run recreates it fresh.
+DROP TABLE IF EXISTS app.silver_run_log;
 GO
--- Is the source connection string / KV populated in pipeline_control, or is it all via Key Vault?
-SELECT
-  COUNT(*) AS total,
-  SUM(CASE WHEN source_connection_string IS NOT NULL THEN 1 ELSE 0 END) AS has_conn_str,
-  SUM(CASE WHEN key_vault_url IS NOT NULL THEN 1 ELSE 0 END) AS has_kv,
-  MAX(key_vault_url) AS sample_kv,
-  MAX(source_system) AS sample_source_system
-FROM app.pipeline_control;
+-- Confirm run1 (full) populated the cursor (proves all entities processed + watermarked).
+SELECT COUNT(*) AS cursor_entities, MIN(last_dl_load_ts) AS min_ts, MAX(last_dl_load_ts) AS max_ts
+FROM app.silver_load_state;
+GO
+SELECT TOP 6 entity, last_dl_load_ts FROM app.silver_load_state ORDER BY entity;
 GO

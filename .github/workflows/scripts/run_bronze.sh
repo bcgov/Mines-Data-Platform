@@ -17,16 +17,16 @@ NB_ID="$(curl -s -H "Authorization: Bearer $FABRIC_TOKEN" \
    "https://api.fabric.microsoft.com/v1/workspaces/$WORKSPACE_ID/notebooks" \
    | jq -r '.value[]? | select(.displayName=="nb_bronze_load") | .id')"
 if [[ -n "$NB_ID" ]]; then
-  for attempt in $(seq 1 24); do
+  for attempt in $(seq 1 80); do   # wait up to ~20 min for any in-flight job to truly stop
     IDS="$(curl -s -H "Authorization: Bearer $FABRIC_TOKEN" \
        "https://api.fabric.microsoft.com/v1/workspaces/$WORKSPACE_ID/items/$NB_ID/jobs/instances" \
-       | jq -r '.value[]? | select(.status=="InProgress" or .status=="NotStarted" or .status=="Running") | .id')"
+       | jq -r '.value[]? | select(.status=="InProgress" or .status=="NotStarted" or .status=="Running" or .status=="Cancelling") | .id')"
     [[ -z "$IDS" ]] && { log "no in-progress jobs"; break; }
     for j in $IDS; do
-      log "cancelling job $j"
       curl -s -X POST -H "Authorization: Bearer $FABRIC_TOKEN" \
         "https://api.fabric.microsoft.com/v1/workspaces/$WORKSPACE_ID/items/$NB_ID/jobs/instances/$j/cancel" >/dev/null || true
     done
+    log "waiting for in-flight bronze job(s) to stop (attempt $attempt)"
     sleep 15
   done
 fi

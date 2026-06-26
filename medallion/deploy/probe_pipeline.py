@@ -20,65 +20,79 @@ def log(*a):
     print(*a, file=sys.stderr, flush=True)
 
 
-# 1) list data pipelines in the workspace
-r = requests.get(f"{BASE}/workspaces/{WS}/dataPipelines", headers=H)
-log("list dataPipelines:", r.status_code)
-items = r.json().get("value", []) if r.status_code == 200 else []
-for it in items:
-    log("  pipeline:", it.get("displayName"), "->", it.get("id"))
-
-target = next((it for it in items if it.get("displayName") == "pl_ingest_mds"), None)
-if not target:
-    log("NOTE: pl_ingest_mds is NOT a Fabric data pipeline item (likely external ADF).")
-    # also dump any connections we can see
-    rc = requests.get(f"{BASE}/connections", headers=H)
-    log("connections list:", rc.status_code)
-    if rc.status_code == 200:
-        for c in rc.json().get("value", [])[:40]:
-            log("  conn:", c.get("displayName"), "|", c.get("id"), "|",
-                (c.get("connectionDetails") or {}).get("type"))
-    sys.exit(0)
-
-pid = target["id"]
-log(f"\npl_ingest_mds id = {pid}; fetching definition...")
-r = requests.post(f"{BASE}/workspaces/{WS}/dataPipelines/{pid}/getDefinition", headers=H)
-log("getDefinition:", r.status_code)
-data = None
-if r.status_code == 200:
-    data = r.json()
-elif r.status_code == 202:
-    op = r.headers.get("Operation-Location") or r.headers.get("Location")
-    for _ in range(40):
-        time.sleep(3)
-        s = requests.get(op, headers=H)
-        st = (s.json() or {}).get("status", "") if s.status_code == 200 else ""
-        if st in ("Succeeded", "Completed"):
-            res = requests.get(op + "/result", headers=H)
-            data = res.json() if res.status_code == 200 else s.json()
-            break
-        if st in ("Failed", "Cancelled"):
-            log("LRO failed:", s.text[:400]); sys.exit(1)
+def get_def(pid):
+    r = requests.post(f"{BASE}/workspaces/{WS}/dataPipelines/{pid}/getDefinition", headers=H)
+    if r.status_code == 200:
+        data = r.json()
+    elif r.status_code == 202:
+        op = r.headers.get("Operation-Location") or r.headers.get("Location")
+        data = None
+        for _ in range(40):
+            time.sleep(3)
+            s = requests.get(op, headers=H)
+            st = (s.json() or {}).get("status", "") if s.status_code == 200 else ""
+            if st in ("Succeeded", "Completed"):
+                res = requests.get(op + "/result", headers=H)
+                data = res.json() if res.status_code == 200 else s.json()
+                break
+            if st in ("Failed", "Cancelled"):
+                log("LRO failed:", s.text[:400]); return None
     else:
-        log("LRO timeout"); sys.exit(1)
-else:
-    log("getDefinition failed:", r.text[:600]); sys.exit(1)
+        log("getDefinition failed:", r.status_code, r.text[:400]); return None
+    for p in (data or {}).get("definition", {}).get("parts", []):
+        if p["path"].endswith("pipeline-content.json"):
+            return json.loads(base64.b64decode(p["payload"]).decode("utf-8"))
+    return None
 
-parts = (data or {}).get("definition", {}).get("parts", [])
-log("definition parts:", [p.get("path") for p in parts])
-for p in parts:
-    if p["path"].endswith("pipeline-content.json"):
-        content = json.loads(base64.b64decode(p["payload"]).decode("utf-8"))
-        props = content.get("properties", content)
-        acts = props.get("activities", [])
-        log(f"\nactivities ({len(acts)}):")
-        for a in acts:
-            log("  -", a.get("name"), "|", a.get("type"))
-        # surface connection / external references anywhere in the JSON
-        raw = json.dumps(content)
-        log("\nmentions externalReferences:", raw.count("externalReferences"),
-            "| connection:", raw.count("connection"))
-        # print a trimmed view of the first copy activity to see source query + connection
-        copy = next((a for a in acts if a.get("type") == "Copy"), acts[0] if acts else None)
-        if copy:
-            log("\n--- first copy/activity (trimmed) ---")
-            log(json.dumps(copy, indent=1)[:5000])
+
+def walk_conns(node, out):
+    if isinstance(node, dict):
+        if "connection" in node and isinstance(node["connection"], str):
+            out.add(node["connection"])
+        for v in node.values():
+            walk_conns(v, out)
+    elif isinstance(node, list):
+        for v in node:
+            walk_conns(v, out)
+
+
+# connections map (GUID -> name/type)
+rc = requests.get(f"{BASE}/connections", headers=H)
+log("connections list:", rc.status_code)
+conns = {}
+if rc.status_code == 200:
+    for c in rc.json().get("value", []):
+        conns[c.get("id")] = (c.get("displayName"), (c.get("connectionDetails") or {}).get("type"))
+        log("  conn:", c.get("id"), "|", c.get("displayName"), "|",
+            (c.get("connectionDetails") or {}).get("type"))
+
+# pipelines
+r = requests.get(f"{BASE}/workspaces/{WS}/dataPipelines", headers=H)
+items = r.json().get("value", []) if r.status_code == 200 else []
+by_name = {it.get("displayName"): it.get("id") for it in items}
+log("\npipelines:", list(by_name))
+
+# 1) Metadata_Extractor — dump full content (likely small + exactly relevant)
+if "Metadata_Extractor" in by_name:
+    c = get_def(by_name["Metadata_Extractor"])
+    if c:
+        log("\n================ Metadata_Extractor (full) ================")
+        log(json.dumps(c)[:12000])
+
+# 2) pl_ingest_mds — all activities (incl. nested) + every connection GUID used
+if "pl_ingest_mds" in by_name:
+    c = get_def(by_name["pl_ingest_mds"])
+    if c:
+        props = c.get("properties", c)
+
+        def walk_acts(acts, depth=0):
+            for a in acts or []:
+                log("   " * depth + "- " + str(a.get("name")) + " | " + str(a.get("type")))
+                tp = a.get("typeProperties", {})
+                walk_acts(tp.get("activities"), depth + 1)  # ForEach/If inner activities
+        log("\n================ pl_ingest_mds activities ================")
+        walk_acts(props.get("activities"))
+        used = set(); walk_conns(c, used)
+        log("\nconnection GUIDs used by pl_ingest_mds:")
+        for g in used:
+            log("  ", g, "->", conns.get(g, "(unknown)"))

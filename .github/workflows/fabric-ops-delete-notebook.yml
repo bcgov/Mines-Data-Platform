@@ -7,6 +7,11 @@ on:
       item_name:
         description: 'Notebook display name to delete'
         required: true
+  push:
+    branches: ['medallion/**']
+    paths:
+      - 'medallion/deploy/delete_item.py'
+      - '.github/workflows/fabric-ops-delete-notebook.yml'
 
 jobs:
   delete:
@@ -24,4 +29,4 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           WORKSPACE_ID: '8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0'
-          ITEM_NAME: ${{ github.event.inputs.item_name }}
+          ITEM_NAME: ${{ github.event.inputs.item_name || 'nb_bronze_master' }}

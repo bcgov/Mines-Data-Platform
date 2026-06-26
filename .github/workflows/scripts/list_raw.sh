@@ -22,12 +22,10 @@ echo "$ENT" | head -20 >&2
 
 log ""
 log "=== full recursive listing for known data entities (paths + count) ==="
-for e in permit mine_incident address_type_code bond; do
+for e in permit mine_incident; do
   ALLP="$(curl -s -H "$H" "${BASE}?recursive=true&resource=filesystem&directory=${BRONZE_LH_ID}/Files/raw/${e}" \
     | jq -r '.paths[]?.name' | sed "s#^${BRONZE_LH_ID}/Files/raw/${e}/##")"
-  PARQ="$(echo "$ALLP" | grep -iE '\.parquet$' || true)"
-  N="$(echo "$PARQ" | grep -c . || true)"
-  log "--- ${e}: ${N} parquet files ---"
-  echo "$PARQ" | sort | head -3 >&2
-  echo "$PARQ" | sort | tail -2 >&2
+  N="$(echo "$ALLP" | grep -c . || true)"
+  log "--- ${e}: ${N} total paths (any type) ---"
+  echo "$ALLP" | sort | head -25 >&2
 done

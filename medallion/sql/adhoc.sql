@@ -1,7 +1,7 @@
--- Force a full silver pass (bronze rebuilt with dl_load_ts; old bronze_load_ts cursor is stale).
-UPDATE app.silver_settings SET force_full_all = 1, updated_date = SYSUTCDATETIME();
+SELECT COUNT(*) AS silver_errors_30min FROM app.error_log
+WHERE layer='silver' AND created_date >= DATEADD(minute,-30,SYSUTCDATETIME());
 GO
-DELETE FROM app.silver_load_state;
-GO
-SELECT force_full_all FROM app.silver_settings;
+SELECT TOP 3 entity, LEFT(CAST(error_message AS varchar(4000)),350) AS err, created_date
+FROM app.error_log WHERE layer='silver' AND created_date >= DATEADD(minute,-30,SYSUTCDATETIME())
+ORDER BY created_date DESC;
 GO

@@ -43,9 +43,19 @@ WAREHOUSE = "mines-data-platform-fabwh1"
 SILVER_SCHEMA = "silver"
 QUARANTINE_SCHEMA = "quarantine"
 
-# bronze lineage/control columns — used for dedup/cursor, then dropped from silver
+# bronze lineage/control columns — used for dedup/cursor, then dropped from silver.
+# (The team's bronze loader stamps bronze_load_ts/bronze_load_date; an alt loader uses dl_load_ts.)
 CTRL_COLS = {"dl_load_id", "bronze_file_name", "bronze_file_timestamp", "bronze_load_date",
-             "dl_load_ts", "dl_rowhash"}
+             "bronze_load_ts", "dl_load_ts", "dl_rowhash"}
+# bronze ingestion-time column, in preference order — auto-detected per table (schemas vary).
+LOAD_TS_CANDIDATES = ["bronze_load_ts", "dl_load_ts"]
+
+
+def load_ts_col(cols):
+    for c in LOAD_TS_CANDIDATES:
+        if c in cols:
+            return c
+    return None
 
 spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")  # MERGE schema evolution
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInWrite", "LEGACY")
@@ -116,13 +126,15 @@ def process(obj, last_ts, force_full):
     pk_cols = [c.strip() for c in (pk or "").split(",") if c.strip()]
     target = f"{SILVER_SCHEMA}.{t}"
 
-    full = bool(force_full) or (last_ts is None) or (not spark.catalog.tableExists(target))
-
     df = spark.read.format("delta").load(bronze_path(t))
-    if not full:
-        df = df.filter(F.col("dl_load_ts") > F.lit(last_ts))   # only the delta since last run
+    lts = load_ts_col(df.columns)   # bronze ingestion-time column actually present on THIS table
+    # full rebuild if forced, no cursor yet, no load-ts column (can't do incremental), or no silver table
+    full = bool(force_full) or (last_ts is None) or (lts is None) or (not spark.catalog.tableExists(target))
 
-    new_ts = df.agg(F.max("dl_load_ts").alias("mx")).collect()[0]["mx"]
+    if not full:
+        df = df.filter(F.col(lts) > F.lit(last_ts))   # only the delta since last run
+
+    new_ts = df.agg(F.max(lts).alias("mx")).collect()[0]["mx"] if lts else None
     delta_rows = df.count()
     if not full and delta_rows == 0:
         return {"status": "OK", "mode": "incremental", "action": "no-change",
@@ -141,13 +153,18 @@ def process(obj, last_ts, force_full):
 
     pk_ok = bool(pk_cols) and all(c in df.columns for c in pk_cols)
 
+    # which version of a PK wins: prefer the SOURCE change time (registry watermark, e.g.
+    # update_timestamp); fall back to bronze ingestion time. (cursor/snapshot still use lts.)
+    wm = normalize(obj.get("watermark_column") or "")
+    order_col = wm if (wm and wm in df.columns) else lts
+
     # dedup to current view (load_type-aware)
-    if load_type == "INCREMENTAL" and pk_ok and "dl_load_ts" in df.columns:
-        w = Window.partitionBy(*[F.col(c) for c in pk_cols]).orderBy(F.col("dl_load_ts").desc())
+    if load_type == "INCREMENTAL" and pk_ok and order_col:
+        w = Window.partitionBy(*[F.col(c) for c in pk_cols]).orderBy(F.col(order_col).desc())
         deduped = df.withColumn("_rn", F.row_number().over(w)).filter(F.col("_rn") == 1).drop("_rn")
-    elif load_type == "FULL" and "bronze_file_timestamp" in df.columns:
-        latest = df.agg(F.max("bronze_file_timestamp")).collect()[0][0]
-        deduped = (df.filter(F.col("bronze_file_timestamp") == F.lit(latest)).dropDuplicates()
+    elif load_type == "FULL" and lts:
+        latest = df.agg(F.max(lts)).collect()[0][0]   # latest full snapshot = newest load batch
+        deduped = (df.filter(F.col(lts) == F.lit(latest)).dropDuplicates()
                    if latest is not None else df.dropDuplicates())
     else:
         deduped = df.dropDuplicates()

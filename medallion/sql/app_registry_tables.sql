@@ -60,6 +60,37 @@ BEGIN
 END;
 GO
 
+-- ── silver_load_state (per-entity incremental cursor) ───────────────────────
+-- Silver reads only bronze rows with dl_load_ts > last_dl_load_ts, then advances the cursor.
+-- Reused dl_load_ts (already on every bronze row) — no bronze batch id needed.
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='silver_load_state')
+BEGIN
+    CREATE TABLE [app].[silver_load_state] (
+        [entity]            varchar(200)  NOT NULL,
+        [last_dl_load_ts]   datetime2(6)  NULL,      -- high-water mark (max bronze dl_load_ts processed)
+        [last_run_id]       varchar(100)  NULL,
+        [last_mode]         varchar(20)   NULL,      -- full | incremental | carried
+        [rows_processed]    bigint        NULL,
+        [updated_date]      datetime2(6)  NULL
+    );
+END;
+GO
+
+-- ── silver_settings (self-clearing full-reconcile flag) ─────────────────────
+-- Set force_full_all = 1 (e.g. weekly, or to correct drift/hard-deletes), run silver; the
+-- notebook does a full rebuild of every entity and resets the flag to 0.
+IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='silver_settings')
+BEGIN
+    CREATE TABLE [app].[silver_settings] (
+        [force_full_all]  bit           NOT NULL,
+        [updated_date]    datetime2(6)  NULL
+    );
+END;
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[silver_settings])
+    INSERT INTO [app].[silver_settings] (force_full_all, updated_date) VALUES (0, SYSUTCDATETIME());
+GO
+
 -- ── transform_registry (gold dim/fact) ──────────────────────────────────────
 IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='app' AND t.name='transform_registry')
 BEGIN

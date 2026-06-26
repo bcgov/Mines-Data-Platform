@@ -16,225 +16,195 @@
 
 # CELL ********************
 
-# nb_bronze_load — append-only Bronze loader. Discovers raw parquet under Files/raw,
-# appends each new file once (idempotent via bronze_file_name), adds control columns.
-from pyspark.sql.functions import lit, current_timestamp, sha2, concat_ws, col, coalesce
+# nb_bronze_load — append-only Bronze loader, OPTIMIZED.
+# Per entity: read ALL new raw parquet files in ONE spark.read (Spark parallelizes internally),
+# stamp per-file lineage from input_file_name(), write ONCE. Idempotency via a manifest
+# (bronze.load_manifest) — no per-file COUNT scans. Entities processed in PARALLEL (thread pool).
+# REBUILD=True drops every bronze table + the manifest and reloads from raw (our audit columns
+# become the single source of truth); set False after the one-time rebuild.
+from pyspark.sql.functions import (lit, current_timestamp, sha2, concat_ws, col, coalesce,
+                                   input_file_name, element_at, split, regexp_extract,
+                                   to_timestamp, to_date)
 from notebookutils import mssparkutils
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 import re
 import uuid
 import traceback
 
 RAW_ROOT_PATH = "Files/raw"
 TARGET_SCHEMA = "bronze"
+MANIFEST_TABLE = "bronze.load_manifest"
 SUMMARY_TABLE = "bronze.load_summary"
-
-# ONE-TIME: drop each bronze table before reloading from raw, so OUR audit columns
-# (dl_load_id/bronze_file_name/bronze_file_timestamp/bronze_load_date/dl_load_ts/dl_rowhash)
-# become the single source of truth (replaces the prior loader's bronze_load_ts schema).
-# Set back to False after the rebuild so routine runs stay append-only/idempotent.
-REBUILD = True
+REBUILD = True          # one-time full rebuild; set False afterwards
+MAX_WORKERS = 8
 
 spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
 spark.conf.set("spark.sql.parquet.int96RebaseModeInWrite", "LEGACY")
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInRead", "LEGACY")
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInWrite", "LEGACY")
 spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
+try:
+    spark.conf.set("spark.scheduler.mode", "FAIR")
+except Exception as e:
+    print(f"scheduler.mode set skipped: {e}")
 
 
 def get_table_name(entity):
-    entity = entity.strip()
-    if entity.lower().startswith("public."):
-        entity = entity[7:]
-    return entity.replace(".", "_").replace("-", "_").replace(" ", "_").lower()
+    e = entity.strip()
+    if e.lower().startswith("public."):
+        e = e[7:]
+    return e.replace(".", "_").replace("-", "_").replace(" ", "_").lower()
 
 
 def get_entities():
-    items = mssparkutils.fs.ls(RAW_ROOT_PATH)
-    return sorted([i.name.strip("/") for i in items if i.isDir])
-
-
-def get_file_timestamp(file_name):
-    m = re.search(r"(\d{8}_\d{6})", file_name)
-    return datetime.strptime(m.group(1), "%Y%m%d_%H%M%S") if m else None
+    return sorted([i.name.strip("/") for i in mssparkutils.fs.ls(RAW_ROOT_PATH) if i.isDir])
 
 
 def get_all_parquet_files(entity):
     """Walk Files/raw/<entity>/<yyyy>/<mm>/<dd>/*.parquet (numeric folders only)."""
-    found = []
-    base = f"{RAW_ROOT_PATH}/{entity}"
+    found, base = [], f"{RAW_ROOT_PATH}/{entity}"
     try:
         for y in mssparkutils.fs.ls(base):
-            yy = y.name.strip("/")
-            if not yy.isdigit():
+            if not y.name.strip("/").isdigit():
                 continue
-            for m in mssparkutils.fs.ls(f"{base}/{yy}"):
-                mm = m.name.strip("/")
-                if not mm.isdigit():
+            for m in mssparkutils.fs.ls(y.path):
+                if not m.name.strip("/").isdigit():
                     continue
-                for d in mssparkutils.fs.ls(f"{base}/{yy}/{mm}"):
-                    dd = d.name.strip("/")
-                    if not dd.isdigit():
+                for d in mssparkutils.fs.ls(m.path):
+                    if not d.name.strip("/").isdigit():
                         continue
-                    for f in mssparkutils.fs.ls(f"{base}/{yy}/{mm}/{dd}"):
+                    for f in mssparkutils.fs.ls(d.path):
                         if f.name.lower().endswith(".parquet"):
                             found.append((f.name, f.path))
     except Exception as e:
-        print(f"Error listing {entity}: {e}")
+        print(f"list {entity}: {e}")
     return found
 
 
-def table_exists(t):
+def file_ts(name):
+    m = re.search(r"(\d{8}_\d{6})", name)
+    return datetime.strptime(m.group(1), "%Y%m%d_%H%M%S") if m else None
+
+
+def load_manifest():
+    """Set of (entity, bronze_file_name) already loaded — cheap idempotency, no table scans."""
     try:
-        return spark.catalog.tableExists(t)
-    except Exception:
-        return False
-
-
-def file_already_loaded(table, file_name):
-    if not table_exists(table):
-        return False
-    try:
-        safe = file_name.replace("'", "''")
-        return spark.sql(
-            f"SELECT COUNT(*) FROM {table} WHERE bronze_file_name = '{safe}'"
-        ).first()[0] > 0
-    except Exception:
-        return False
-
-
-def load_file(entity, file_name, file_path):
-    table_name = f"{TARGET_SCHEMA}.{get_table_name(entity)}"
-
-    if file_already_loaded(table_name, file_name):
-        return ("SKIPPED", None)
-
-    file_ts = get_file_timestamp(file_name)
-    if file_ts is None:
-        return ("SKIPPED", None)
-
-    df = (
-        spark.read
-        .option("int96RebaseMode", "LEGACY")
-        .option("datetimeRebaseMode", "LEGACY")
-        .parquet(file_path)
-    )
-    row_count = df.count()
-    if row_count == 0:
-        return ("SKIPPED", 0)
-
-    data_cols = df.columns  # capture before adding control columns
-    df = (
-        df.withColumn("dl_load_id", lit(str(uuid.uuid4())))
-          .withColumn("bronze_file_name", lit(file_name))
-          .withColumn("bronze_file_timestamp", lit(file_ts))
-          .withColumn("bronze_load_date", lit(file_ts.date()))
-          .withColumn("dl_load_ts", current_timestamp())
-          .withColumn(
-              "dl_rowhash",
-              sha2(concat_ws("||", *[coalesce(col(c).cast("string"), lit("")) for c in data_cols]), 256),
-          )
-    )
-
-    if not table_exists(table_name):
-        (df.write.format("delta").partitionBy("bronze_load_date")
-           .mode("overwrite").option("overwriteSchema", "true").saveAsTable(table_name))
-    else:
-        (df.write.format("delta").mode("append")
-           .option("mergeSchema", "true").saveAsTable(table_name))
-
-    safe = file_name.replace("'", "''")
-    target_count = spark.sql(
-        f"SELECT COUNT(*) FROM {table_name} WHERE bronze_file_name = '{safe}'"
-    ).first()[0]
-    if target_count != row_count:
-        raise Exception(f"Row mismatch {file_name}: source={row_count} target={target_count}")
-
-    return ("LOADED", row_count)
+        if spark.catalog.tableExists(MANIFEST_TABLE):
+            return {(r["entity"], r["bronze_file_name"]) for r in spark.table(MANIFEST_TABLE).collect()}
+    except Exception as e:
+        print(f"manifest read: {e}")
+    return set()
 
 # METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
+# META { "language": "python", "language_group": "synapse_pyspark" }
 
 # CELL ********************
 
 print("=" * 80)
-print("BRONZE LOAD START")
+print(f"BRONZE LOAD START (optimized){' [REBUILD]' if REBUILD else ''}")
 print("=" * 80)
 
 RUN_ID = str(uuid.uuid4())
 START = datetime.now()
-loaded = skipped = failed = 0
-results = []
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {TARGET_SCHEMA}")
 
-for entity in get_entities():
+if REBUILD:
+    spark.sql(f"DROP TABLE IF EXISTS {MANIFEST_TABLE}")
+    loaded = set()
+else:
+    loaded = load_manifest()
+print(f"already-loaded files in manifest: {len(loaded)}")
+
+results, manifest_rows = [], []
+_lock = threading.Lock()
+
+
+def process_entity(entity):
+    table = get_table_name(entity)
+    target = f"{TARGET_SCHEMA}.{table}"
     if REBUILD:
-        tbl = f"{TARGET_SCHEMA}.{get_table_name(entity)}"
-        try:
-            spark.sql(f"DROP TABLE IF EXISTS {tbl}")
-            print(f"REBUILD: dropped {tbl}")
-        except Exception as e:
-            print(f"REBUILD drop {tbl} failed: {e}")
+        spark.sql(f"DROP TABLE IF EXISTS {target}")
+
     files = get_all_parquet_files(entity)
-    files = sorted(files, key=lambda x: get_file_timestamp(x[0]) or datetime.min)
-    for file_name, file_path in files:
+    todo = [(n, p) for (n, p) in files if file_ts(n) is not None and (entity, n) not in loaded]
+    if not todo:
+        return (entity, "SKIPPED", 0, [])
+
+    paths = [p for (_, p) in todo]
+    df = spark.read.option("int96RebaseMode", "LEGACY").option("datetimeRebaseMode", "LEGACY").parquet(*paths)
+    data_cols = df.columns  # original source columns (before control columns)
+    df = (df
+          .withColumn("bronze_file_name", element_at(split(input_file_name(), "/"), -1))
+          .withColumn("bronze_file_timestamp",
+                      to_timestamp(regexp_extract(col("bronze_file_name"), r"(\d{8}_\d{6})", 1), "yyyyMMdd_HHmmss"))
+          .withColumn("bronze_load_date", to_date(col("bronze_file_timestamp")))
+          .withColumn("dl_load_id", lit(RUN_ID))
+          .withColumn("dl_load_ts", current_timestamp())
+          .withColumn("dl_rowhash",
+                      sha2(concat_ws("||", *[coalesce(col(c).cast("string"), lit("")) for c in data_cols]), 256)))
+
+    mode = "overwrite" if (REBUILD or not spark.catalog.tableExists(target)) else "append"
+    opt = "overwriteSchema" if mode == "overwrite" else "mergeSchema"
+    (df.write.format("delta").partitionBy("bronze_load_date").mode(mode)
+        .option(opt, "true").saveAsTable(target))
+
+    rows = [(entity, n, file_ts(n)) for (n, _) in todo]
+    return (entity, "LOADED", len(todo), rows)
+
+
+with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
+    futs = {ex.submit(process_entity, e): e for e in get_entities()}
+    for fut in as_completed(futs):
+        e = futs[fut]
         try:
-            status, rows = load_file(entity, file_name, file_path)
-            if status == "LOADED":
-                loaded += 1
-            else:
-                skipped += 1
-            results.append({"entity": entity, "file_name": file_name, "status": status,
-                            "rows": rows, "error": None})
-        except Exception as e:
-            failed += 1
-            err = str(e)[:1000]
-            print(f"FAILED {entity}/{file_name}: {err}")
+            entity, status, nfiles, mrows = fut.result()
+            with _lock:
+                results.append((entity, status, nfiles, None))
+                manifest_rows.extend(mrows)
+            print(f"{status:8} {entity}: {nfiles} files")
+        except Exception as ex2:
+            with _lock:
+                results.append((e, "FAILED", 0, str(ex2)[:1000]))
+            print(f"FAILED {e}: {ex2}")
             traceback.print_exc()
-            results.append({"entity": entity, "file_name": file_name, "status": "FAILED",
-                            "rows": None, "error": err})
 
-# Write a queryable run summary into the bronze lakehouse (read later via SQL endpoint).
-# Explicit schema avoids void-type inference when a column (e.g. error) is entirely null.
-if results:
-    try:
-        from pyspark.sql.types import StructType, StructField, StringType, LongType
-        summary_schema = StructType([
-            StructField("entity", StringType()),
-            StructField("file_name", StringType()),
-            StructField("status", StringType()),
-            StructField("rows", LongType()),
-            StructField("error", StringType()),
-        ])
-        summary_rows = [
-            (r["entity"], r["file_name"], r["status"],
-             (int(r["rows"]) if r["rows"] is not None else None), r["error"])
-            for r in results
-        ]
-        summary_df = (
-            spark.createDataFrame(summary_rows, summary_schema)
-            .withColumn("run_id", lit(RUN_ID))
-            .withColumn("run_ts", current_timestamp())
-        )
-        if table_exists(SUMMARY_TABLE):
-            summary_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(SUMMARY_TABLE)
-        else:
-            summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(SUMMARY_TABLE)
-    except Exception as e:
-        print(f"Error writing {SUMMARY_TABLE}: {e}")
-        traceback.print_exc()
+# METADATA ********************
 
+# META { "language": "python", "language_group": "synapse_pyspark" }
+
+# CELL ********************
+
+from pyspark.sql.types import StructType, StructField, StringType, LongType, TimestampType
+
+# Manifest (append loaded files; REBUILD already dropped it so this is a fresh write).
+if manifest_rows:
+    msch = StructType([StructField("entity", StringType()), StructField("bronze_file_name", StringType()),
+                       StructField("bronze_file_timestamp", TimestampType())])
+    mdf = (spark.createDataFrame(manifest_rows, msch)
+           .withColumn("run_id", lit(RUN_ID)).withColumn("loaded_at", current_timestamp()))
+    mode = "overwrite" if REBUILD else "append"
+    mdf.write.format("delta").mode(mode).option("mergeSchema", "true").saveAsTable(MANIFEST_TABLE)
+
+# Run summary.
+ssch = StructType([StructField("entity", StringType()), StructField("status", StringType()),
+                   StructField("files_loaded", LongType()), StructField("error", StringType())])
+srows = [(r[0], r[1], int(r[2]), r[3]) for r in results]
+(spark.createDataFrame(srows, ssch)
+    .withColumn("run_id", lit(RUN_ID)).withColumn("run_ts", current_timestamp())
+    .write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(SUMMARY_TABLE))
+
+loaded_n = sum(1 for r in results if r[1] == "LOADED")
+skipped_n = sum(1 for r in results if r[1] == "SKIPPED")
+failed_n = sum(1 for r in results if r[1] == "FAILED")
+files_n = sum(r[2] for r in results)
 print("=" * 80)
-print(f"BRONZE LOAD DONE | loaded={loaded} skipped={skipped} failed={failed}")
-print(f"RUN_ID={RUN_ID} duration={(datetime.now() - START).total_seconds():.1f}s")
+print(f"BRONZE LOAD DONE | entities loaded={loaded_n} skipped={skipped_n} failed={failed_n} | "
+      f"files={files_n} | RUN_ID={RUN_ID} duration={(datetime.now()-START).total_seconds():.1f}s")
 print("=" * 80)
 
 # METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
+# META { "language": "python", "language_group": "synapse_pyspark" }

@@ -12,6 +12,25 @@ az login --service-principal --username "$CLIENT_ID" --password "$CLIENT_SECRET"
     --tenant "$TENANT_ID" --allow-no-subscriptions --output none
 export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
 
+log "=== Cancel any in-progress nb_bronze_load jobs (avoid concurrent writes) ==="
+NB_ID="$(curl -s -H "Authorization: Bearer $FABRIC_TOKEN" \
+   "https://api.fabric.microsoft.com/v1/workspaces/$WORKSPACE_ID/notebooks" \
+   | jq -r '.value[]? | select(.displayName=="nb_bronze_load") | .id')"
+if [[ -n "$NB_ID" ]]; then
+  for attempt in $(seq 1 24); do
+    IDS="$(curl -s -H "Authorization: Bearer $FABRIC_TOKEN" \
+       "https://api.fabric.microsoft.com/v1/workspaces/$WORKSPACE_ID/items/$NB_ID/jobs/instances" \
+       | jq -r '.value[]? | select(.status=="InProgress" or .status=="NotStarted" or .status=="Running") | .id')"
+    [[ -z "$IDS" ]] && { log "no in-progress jobs"; break; }
+    for j in $IDS; do
+      log "cancelling job $j"
+      curl -s -X POST -H "Authorization: Bearer $FABRIC_TOKEN" \
+        "https://api.fabric.microsoft.com/v1/workspaces/$WORKSPACE_ID/items/$NB_ID/jobs/instances/$j/cancel" >/dev/null || true
+    done
+    sleep 15
+  done
+fi
+
 log "=== Deploy + run nb_bronze_load ==="
 NOTEBOOK_NAME="nb_bronze_load" NOTEBOOK_DIR="Fabric/Notebook/nb_bronze_load.Notebook" RUN="true" \
     python3 medallion/deploy/deploy_notebook.py

@@ -482,9 +482,12 @@ Dispatch `fabric-ops-gold-test`: it mutates `stg` (update + delete rows), runs t
 ---
 
 ## 8. Testing strategy
-- **`nb_gold_test`** — black-box test of `build_dimension`/`build_fact`: purposely changes column values and deletes rows in `stg`, runs the builders, asserts update + soft-delete outcomes, restores gold. Re-runnable; results in `app.gold_test_log`.
-- **`nb_smoke_foundation`** — validates cross-lakehouse OneLake read/write as the SPN.
-- **Gap:** there is **no unit-test harness for the Spark logic** yet. The accelerator pattern (`src/mxfabric/*.py` + pytest + local Spark, notebooks consume via `%run`) is the intended path — see §9.
+- **`nb_gold_test`** — black-box test of `build_dimension`/`build_fact`: purposely changes column values and deletes rows in `stg`, runs the builders, asserts update + soft-delete outcomes, restores gold. Re-runnable; results in `app.gold_test_log`. (Run by `fabric-ops-gold-test`.)
+- **`nb_smoke_foundation`** — foundation smoke: validates a cross-lakehouse OneLake Delta write/read as the SPN. **Not a per-deploy gate** — it only runs via `deploy-notebooks` (push-triggered on the foundation files), so treat it as an on-demand / environment-validation check, not a recurring one. If a heartbeat is wanted, schedule it (cron) rather than wiring it into each layer's deploy.
+- **Unit tests — STARTED for the foundation only, and currently stalled/broken (fix planned, see §9.5):**
+  - `pytest.ini` + `tests/test_paths.py` cover `src/mxfabric/paths.py` (`LakehouseRegistry`/`StoragePathFactory`); `tests/test_notebook_sync.py` is a **drift-guard** keeping the `%run` block in `nb_util_paths` byte-identical to the module.
+  - ⚠️ The drift-guard test points at the **pre-reorg** path `Fabric/nb_util_paths.Notebook/...` (the notebook moved to `Fabric/Notebook/utility/...`) → it currently errors. And **no CI runs `pytest`**, so nothing caught it.
+  - The **actual ELT business logic** (bronze/silver/gold builders, dedup, SCD, merge) is **not** extracted into `src/mxfabric` and has **no unit tests** — it lives entirely in the notebooks. That extraction is the real work item (§9.5).
 
 ---
 
@@ -497,7 +500,7 @@ Dispatch `fabric-ops-gold-test`: it mutates `stg` (update + delete rows), runs t
 4. _(done 2026-06-26)_ **Incremental silver** — per-entity `dl_load_ts` cursor + load-type-aware MERGE; full-reconcile flag for hard deletes. _Remaining:_ the no-change floor is per-table job overhead — could push higher concurrency or a `runMultiple` fan-out.
 
 **Engineering hardening**
-5. **Unit tests** — extract the Spark logic into `src/mxfabric/*.py`, test with pytest + local Spark, keep notebooks `%run`-synced (drift-guard). Open the wheel path (build once, attach to the Spark environment) instead of `%run`.
+5. **Unit tests** — _pattern started, real coverage not._ `src/mxfabric/paths.py` + `tests/` (pytest) exist for the foundation path helper, but (a) `tests/test_notebook_sync.py` references the **pre-reorg** notebook path and now errors, (b) **no CI runs pytest**, and (c) the ELT business logic isn't extracted/tested. To-do: fix the drift-guard path, add a `pytest` CI workflow, then extract the Spark logic (builders, dedup, SCD, merge) into `src/mxfabric/*.py` with local-Spark tests; consider the wheel path instead of `%run`.
 6. _(done 2026-06-26)_ **Parallelism** — bronze (per-entity) and silver (per-table) run in a thread pool; **cap at ~4 workers** (8 killed the Spark session, F14). Heavy full passes are the limit; a `runMultiple` separate-notebook fan-out could go wider if needed.
 7. **Notebook-stdout observability** — standardize on per-run warehouse log tables (done for bronze/silver/gold) for everything; for a failed notebook, fetch the job-instance `failureReason` (stdout is hidden).
 8. **Secrets & connections** — our SPN can run pipelines using existing connections; document/confirm which connections it may use, and get the source/KV access formally granted if direct JDBC is ever wanted.

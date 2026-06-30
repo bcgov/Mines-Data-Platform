@@ -161,6 +161,13 @@ def build_fact(gold_object, source_table, mode, load_strategy="incremental", bus
     staged = (staged.withColumn("dl_insertdateutc", F.current_timestamp())
                     .withColumn("dl_transform_id", F.lit(transform_id).cast("int"))
                     .withColumn("dl_isdeleted", F.lit(False)))
+    # Reconcile benign schema drift: if the target has columns the staged source no longer
+    # produces (e.g. an upstream lineage column dropped after a silver rebuild), add them as
+    # typed NULLs so whenMatchedUpdateAll / whenNotMatchedInsertAll resolve every target column.
+    staged_cols = set(staged.columns)
+    for f in spark.table(gold_object).schema:
+        if f.name not in staged_cols:
+            staged = staged.withColumn(f.name, F.lit(None).cast(f.dataType))
     tgt = DeltaTable.forName(spark, gold_object)
     cond = " AND ".join([f"t.{k} <=> s.{k}" for k in nks])
     mrg = tgt.alias("t").merge(staged.alias("s"), cond)

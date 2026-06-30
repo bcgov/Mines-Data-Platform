@@ -19,7 +19,9 @@ H = {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}
 
 LAYOUT = {
     "_root":      ["nb_bronze_load", "nb_silver_registry", "nb_silver_build", "nb_gold_orchestrator"],
-    "stageQuery": ["nb_gold_tf_dim_permit", "nb_gold_tf_fact_permit_amendment"],
+    "stageQuery": ["nb_gold_tf_dim_permit", "nb_gold_tf_fact_permit_amendment",
+                   "nb_gold_tf_dim_party", "nb_gold_tf_dim_municipality",
+                   "nb_gold_tf_dim_amendment_enriched", "nb_gold_tf_fact_amendment_activity"],
     "utility":    ["nb_util_gold", "nb_util_paths"],
     "test":       ["nb_gold_test", "nb_smoke_foundation"],
 }

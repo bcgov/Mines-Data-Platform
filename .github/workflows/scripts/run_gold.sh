@@ -17,8 +17,12 @@ deploy_nb() { NOTEBOOK_NAME="$1" NOTEBOOK_DIR="$2" RUN="${3:-false}" python3 med
 
 log "=== Deploy gold notebooks (util + transforms, no run) ==="
 deploy_nb nb_util_gold                     Fabric/Notebook/utility/nb_util_gold.Notebook
-deploy_nb nb_gold_tf_dim_permit            Fabric/Notebook/stageQuery/nb_gold_tf_dim_permit.Notebook
-deploy_nb nb_gold_tf_fact_permit_amendment Fabric/Notebook/stageQuery/nb_gold_tf_fact_permit_amendment.Notebook
+deploy_nb nb_gold_tf_dim_permit              Fabric/Notebook/stageQuery/nb_gold_tf_dim_permit.Notebook
+deploy_nb nb_gold_tf_fact_permit_amendment   Fabric/Notebook/stageQuery/nb_gold_tf_fact_permit_amendment.Notebook
+deploy_nb nb_gold_tf_dim_party               Fabric/Notebook/stageQuery/nb_gold_tf_dim_party.Notebook
+deploy_nb nb_gold_tf_dim_municipality        Fabric/Notebook/stageQuery/nb_gold_tf_dim_municipality.Notebook
+deploy_nb nb_gold_tf_dim_amendment_enriched  Fabric/Notebook/stageQuery/nb_gold_tf_dim_amendment_enriched.Notebook
+deploy_nb nb_gold_tf_fact_amendment_activity Fabric/Notebook/stageQuery/nb_gold_tf_fact_amendment_activity.Notebook
 
 log "=== Deploy + RUN orchestrator ==="
 deploy_nb nb_gold_orchestrator Fabric/Notebook/nb_gold_orchestrator.Notebook true

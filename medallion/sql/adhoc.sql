@@ -1,16 +1,15 @@
--- True PKs + active flag for candidate demo tables.
-SELECT bronze_table, primary_key, load_type, is_active FROM app.object_registry
-WHERE bronze_table IN ('party','permit','permit_amendment','mine_party_appt','mine_incident',
-  'now_application_identity','bond','bond_permit_xref','mine_status','mine_type') ORDER BY bronze_table;
+-- Confirm PKs + active flag for the demo gold objects: type2 dim (party), type1 dim
+-- (a small reference table), and the join-based dim (permit_amendment + permit).
+SELECT bronze_table, primary_key, load_type, is_active, schema_name
+FROM app.object_registry
+WHERE bronze_table IN ('party','permit','permit_amendment','municipality','project',
+  'variance','equipment','party_business_role_appt','minespace_user')
+ORDER BY bronze_table;
 GO
--- Small active reference tables = good type1 dimension candidates.
-SELECT TOP 15 entity, silver_rows FROM app.silver_run_log
-WHERE status='OK' AND silver_rows BETWEEN 3 AND 400 ORDER BY silver_rows DESC;
-GO
--- Confirm join/key columns exist.
+-- Verify the join + business-key columns actually exist in silver field_registry.
 SELECT entity, column_name FROM app.field_registry
-WHERE (entity='permit_amendment' AND column_name IN ('permit_id','permit_amendment_id'))
-   OR (entity='party' AND column_name LIKE '%guid%')
-   OR (entity='mine_party_appt' AND column_name IN ('party_guid','mine_guid','mine_party_appt_id'))
+WHERE (entity='party'             AND column_name IN ('party_guid','party_type_code','first_name','party_name','email'))
+   OR (entity='permit'            AND column_name IN ('permit_id','permit_no','mine_guid'))
+   OR (entity='permit_amendment'  AND column_name IN ('permit_amendment_id','permit_id','permit_amendment_status_code'))
 ORDER BY entity, column_name;
 GO

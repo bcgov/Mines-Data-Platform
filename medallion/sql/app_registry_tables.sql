@@ -320,13 +320,78 @@ IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='fact_permit_ame
          NULL,'permit_amendment_id',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
 GO
 
+-- seed v2 (DEMO): a richer multi-level DAG proving technical capability (logic is artificial).
+--   Level 0 (parallel roots) : dim_permit, dim_party (type2), dim_municipality (type1)
+--   Level 1                  : dim_amendment_enriched (type2, JOIN; depends dim_permit)
+--                              fact_permit_amendment   (upsert; depends dim_permit, dim_party)
+--   Level 2                  : fact_amendment_activity (append; depends dim_amendment_enriched, dim_municipality)
+-- This exercises: parallel roots, dim->dim edges, multi-parent fan-in, and 3 topo levels.
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='dim_party')
+    INSERT INTO [app].[gold_build]
+        (node_name, gold_object, object_type, transform_notebook, source_table, table_type, load_strategy,
+         surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days,
+         is_active, created_date, created_by, modified_date, modified_by)
+    VALUES
+        ('dim_party','gold.dim_party','DIM','nb_gold_tf_dim_party','stg.dim_party','type2_dimension','full',
+         'Party_SK','party_guid',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='dim_municipality')
+    INSERT INTO [app].[gold_build]
+        (node_name, gold_object, object_type, transform_notebook, source_table, table_type, load_strategy,
+         surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days,
+         is_active, created_date, created_by, modified_date, modified_by)
+    VALUES
+        ('dim_municipality','gold.dim_municipality','DIM','nb_gold_tf_dim_municipality','stg.dim_municipality','type1_dimension','full',
+         'Municipality_SK','municipality_guid',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='dim_amendment_enriched')
+    INSERT INTO [app].[gold_build]
+        (node_name, gold_object, object_type, transform_notebook, source_table, table_type, load_strategy,
+         surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days,
+         is_active, created_date, created_by, modified_date, modified_by)
+    VALUES
+        ('dim_amendment_enriched','gold.dim_amendment_enriched','DIM','nb_gold_tf_dim_amendment_enriched','stg.dim_amendment_enriched','type2_dimension','full',
+         'Amendment_SK','permit_amendment_id',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_build] WHERE node_name='fact_amendment_activity')
+    INSERT INTO [app].[gold_build]
+        (node_name, gold_object, object_type, transform_notebook, source_table, table_type, load_strategy,
+         surrogate_key, business_keys, non_historized_columns, watermark_column, last_n_days,
+         is_active, created_date, created_by, modified_date, modified_by)
+    VALUES
+        ('fact_amendment_activity','gold.fact_amendment_activity','FACT','nb_gold_tf_fact_amendment_activity','stg.fact_amendment_activity','append_fact','full',
+         NULL,'permit_amendment_id',NULL,NULL,NULL,1,SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='dim_permit')
     INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
     VALUES ('dim_permit', NULL, SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
 GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='dim_party')
+    INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
+    VALUES ('dim_party', NULL, SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='dim_municipality')
+    INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
+    VALUES ('dim_municipality', NULL, SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='dim_amendment_enriched')
+    INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
+    VALUES ('dim_amendment_enriched', 'dim_permit', SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
 IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='fact_permit_amendment')
     INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
-    VALUES ('fact_permit_amendment', 'dim_permit', SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+    VALUES ('fact_permit_amendment', 'dim_permit,dim_party', SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+IF NOT EXISTS (SELECT 1 FROM [app].[gold_dependency] WHERE node_name='fact_amendment_activity')
+    INSERT INTO [app].[gold_dependency] (node_name, depends_on, created_date, created_by, modified_date, modified_by)
+    VALUES ('fact_amendment_activity', 'dim_amendment_enriched,dim_municipality', SYSUTCDATETIME(),'system',SYSUTCDATETIME(),'system');
+GO
+-- Reconcile a pre-existing v1 seed: fact_permit_amendment was single-parent (dim_permit only).
+-- Promote it to multi-parent (dim_permit + dim_party) so the demo DAG shows fan-in.
+UPDATE [app].[gold_dependency]
+   SET depends_on='dim_permit,dim_party', modified_date=SYSUTCDATETIME(), modified_by='system'
+ WHERE node_name='fact_permit_amendment' AND depends_on='dim_permit';
 GO
 
 -- ── verify ───────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 -- Confirm PKs + active flag for the demo gold objects: type2 dim (party), type1 dim
 -- (a small reference table), and the join-based dim (permit_amendment + permit).
-SELECT bronze_table, primary_key, load_type, is_active, schema_name
+SELECT bronze_table, primary_key, load_type, is_active
 FROM app.object_registry
 WHERE bronze_table IN ('party','permit','permit_amendment','municipality','project',
   'variance','equipment','party_business_role_appt','minespace_user')

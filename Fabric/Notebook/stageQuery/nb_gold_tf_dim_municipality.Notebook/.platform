@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "nb_gold_tf_dim_municipality"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9e52398f-c5fd-ab6b-4e2e-de607f12f338"
+  }
+}

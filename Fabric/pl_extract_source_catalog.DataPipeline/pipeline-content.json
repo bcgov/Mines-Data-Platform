@@ -1,0 +1,80 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "PostgreSqlSource",
+            "query": "WITH primary_keys AS (\n    SELECT\n        con.conrelid,\n        unnest(con.conkey) AS attnum\n    FROM pg_catalog.pg_constraint con\n    WHERE con.contype = 'p'\n),\nunique_keys AS (\n    SELECT\n        con.conrelid,\n        unnest(con.conkey) AS attnum\n    FROM pg_catalog.pg_constraint con\n    WHERE con.contype = 'u'\n),\nforeign_keys AS (\n    SELECT\n        con.conrelid,\n        src_cols.attnum AS attnum,\n        ref_ns.nspname AS referenced_schema,\n        ref_tbl.relname AS referenced_table,\n        ref_col.attname AS referenced_column,\n        con.conname AS foreign_key_name\n    FROM pg_catalog.pg_constraint con\n    JOIN pg_catalog.pg_class src_tbl\n        ON src_tbl.oid = con.conrelid\n    JOIN pg_catalog.pg_namespace src_ns\n        ON src_ns.oid = src_tbl.relnamespace\n    JOIN pg_catalog.pg_class ref_tbl\n        ON ref_tbl.oid = con.confrelid\n    JOIN pg_catalog.pg_namespace ref_ns\n        ON ref_ns.oid = ref_tbl.relnamespace\n    JOIN unnest(con.conkey) WITH ORDINALITY AS src_cols(attnum, ord)\n        ON true\n    JOIN unnest(con.confkey) WITH ORDINALITY AS ref_cols(attnum, ord)\n        ON src_cols.ord = ref_cols.ord\n    JOIN pg_catalog.pg_attribute ref_col\n        ON ref_col.attrelid = ref_tbl.oid\n       AND ref_col.attnum = ref_cols.attnum\n    WHERE con.contype = 'f'\n),\ntable_metadata AS (\n    SELECT\n        n.nspname AS table_schema,\n        c.relname AS table_name,\n        obj_description(c.oid, 'pg_class') AS table_comment,\n\n        a.attnum AS column_position,\n        a.attname AS column_name,\n        pg_catalog.format_type(a.atttypid, a.atttypmod) AS data_type,\n\n        CASE\n            WHEN a.attnotnull THEN 'NO'\n            ELSE 'YES'\n        END AS is_nullable,\n\n        pg_catalog.pg_get_expr(ad.adbin, ad.adrelid) AS column_default,\n\n        CASE\n            WHEN pk.attnum IS NOT NULL THEN 'YES'\n            ELSE 'NO'\n        END AS is_primary_key,\n\n        CASE\n            WHEN uk.attnum IS NOT NULL THEN 'YES'\n            ELSE 'NO'\n        END AS is_unique_key,\n\n        CASE\n            WHEN fk.attnum IS NOT NULL THEN 'YES'\n            ELSE 'NO'\n        END AS is_foreign_key,\n\n        fk.foreign_key_name,\n        fk.referenced_schema,\n        fk.referenced_table,\n        fk.referenced_column,\n\n        CASE a.attidentity\n            WHEN 'a' THEN 'ALWAYS'\n            WHEN 'd' THEN 'BY DEFAULT'\n            ELSE NULL\n        END AS identity_type,\n\n        CASE a.attgenerated\n            WHEN 's' THEN 'STORED'\n            ELSE NULL\n        END AS generated_type,\n\n        col_description(a.attrelid, a.attnum) AS column_comment\n\n    FROM pg_catalog.pg_class c\n    JOIN pg_catalog.pg_namespace n\n        ON n.oid = c.relnamespace\n    JOIN pg_catalog.pg_attribute a\n        ON a.attrelid = c.oid\n    LEFT JOIN pg_catalog.pg_attrdef ad\n        ON ad.adrelid = a.attrelid\n       AND ad.adnum = a.attnum\n    LEFT JOIN primary_keys pk\n        ON pk.conrelid = c.oid\n       AND pk.attnum = a.attnum\n    LEFT JOIN unique_keys uk\n        ON uk.conrelid = c.oid\n       AND uk.attnum = a.attnum\n    LEFT JOIN foreign_keys fk\n        ON fk.conrelid = c.oid\n       AND fk.attnum = a.attnum\n    WHERE n.nspname = 'public'\n      AND c.relkind IN ('r', 'p')\n      AND a.attnum > 0\n      AND NOT a.attisdropped\n)\nSELECT *\nFROM table_metadata\nORDER BY\n    table_schema,\n    table_name,\n    column_position;",
+            "queryTimeout": "02:00:00",
+            "datasetSettings": {
+              "type": "PostgreSqlTable",
+              "schema": [],
+              "externalReferences": {
+                "connection": "21b383a1-c561-4540-980d-ce3683e89236"
+              },
+              "annotations": []
+            }
+          },
+          "sink": {
+            "type": "DelimitedTextSink",
+            "formatSettings": {
+              "type": "DelimitedTextWriteSettings",
+              "fileExtension": ".txt"
+            },
+            "storeSettings": {
+              "type": "LakehouseWriteSettings"
+            },
+            "datasetSettings": {
+              "type": "DelimitedText",
+              "typeProperties": {
+                "location": {
+                  "type": "LakehouseLocation",
+                  "folderPath": "raw",
+                  "fileName": "mds_source_catalog"
+                },
+                "columnDelimiter": ",",
+                "quoteChar": "\"",
+                "escapeChar": "\\",
+                "firstRowAsHeader": true
+              },
+              "schema": [],
+              "linkedService": {
+                "name": "mines_data_platform_lh1",
+                "properties": {
+                  "type": "Lakehouse",
+                  "typeProperties": {
+                    "artifactId": "c2149858-5ad0-aa2d-47d9-500a8cd34a44",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "rootFolder": "Files"
+                  },
+                  "annotations": []
+                }
+              },
+              "annotations": []
+            }
+          },
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          },
+          "enableStaging": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Get_metadata_to_raw",
+        "dependsOn": []
+      }
+    ]
+  }
+}

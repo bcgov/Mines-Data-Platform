@@ -1,0 +1,297 @@
+table fact_inspection
+	lineageTag: 23b32cd6-cb03-4d41-b142-017e180a7fdf
+	sourceLineageTag: [gold].[fact_inspection]
+
+	/// All-time distinct count of inspections. Base measure.
+	measure 'Inspections Total' = DISTINCTCOUNT(fact_inspection[inspection_id])
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: b704fa70-290d-4ac4-b33a-7376a1ccdaa9
+
+	/// Inspections FYTD: current BC fiscal year (Apr 1 -> today, inclusive of all of today regardless of time-of-day), auto-detects current FY from today's date. Per Method Statement handout item 1.
+	measure 'Inspections FYTD' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR FYStart = DATE ( FYStartYear, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= FYStart, fact_inspection[inspection_date] < CurrentDate + 1 )
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: 310b24ee-f5f4-4613-83ba-967539d14d27
+
+	/// Inspections same time last FY: previous FY window Apr 1 (FY-1) to exactly one year ago from today (inclusive of that full day). Per Method Statement handout item 2.
+	measure 'Inspections Same Time Last FY' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR LastFYStart = DATE ( FYStartYear - 1, 4, 1 ) VAR LastFYSameDate = DATE ( YEAR ( CurrentDate ) - 1, MONTH ( CurrentDate ), DAY ( CurrentDate ) ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= LastFYStart, fact_inspection[inspection_date] < LastFYSameDate + 1 )
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: f0bdb947-cb2e-4ace-a367-37588dad19d1
+
+	/// Inspections in the last full completed calendar month: from start of last month up to but not including start of this month. Per Method Statement handout item 3.
+	measure 'Inspections Last Month' = VAR CurrentDate = TODAY() VAR ThisMonthStart = DATE ( YEAR ( CurrentDate ), MONTH ( CurrentDate ), 1 ) VAR LastMonthStart = EDATE ( ThisMonthStart, -1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= LastMonthStart, fact_inspection[inspection_date] < ThisMonthStart )
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: b13c9a17-ddf6-43d9-bde7-1a5e3c9940b3
+
+	/// Inspections per fiscal year trend. About 7 fiscal years back up to (exclusive of) Apr 1 of the current in-progress fiscal year. Per Method Statement handout item 4. Use with dim_date[fiscal_year_label] on the axis.
+	measure 'Inspections per Fiscal Year' = VAR CurrentDate = TODAY() VAR CurrentFYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR CutoffDate = DATE ( CurrentFYStartYear, 4, 1 ) VAR WindowStart = DATE ( CurrentFYStartYear - 7, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= WindowStart, fact_inspection[inspection_date] < CutoffDate )
+		formatString: #,##0
+		displayFolder: Inspections Trend
+		lineageTag: eb979d2f-1d2f-4c68-9706-43ccde249acd
+
+	/// Inspections per fiscal month and type, last ~4 fiscal years to today (inclusive of all of today). Per Method Statement handout item 5. Use with dim_date[fiscal_year_label]/[fiscal_month_label] and fact_inspection[inspection_type_id] (raw code - no label dim yet) as legend.
+	measure 'Inspections per Fiscal Month and Type' = VAR CurrentDate = TODAY() VAR CurrentFYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR WindowStart = DATE ( CurrentFYStartYear - 3, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= WindowStart, fact_inspection[inspection_date] < CurrentDate + 1 )
+		formatString: #,##0
+		displayFolder: Inspections Trend
+		lineageTag: 49a67126-e61d-4646-81e5-2db9273af700
+
+	/// Dynamic KPI card label for FYTD, auto-updates fiscal year.
+	measure 'Lbl FYTD' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) RETURN "Number of Inspections FYTD " & fy
+		displayFolder: Card Labels
+		lineageTag: 0e23c59e-8595-4c14-8880-ce19d8153443
+
+	/// Dynamic KPI card label for same-time-last-FY.
+	measure 'Lbl Same Last FY' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fyp = FORMAT ( s - 1, "0000" ) & "/" & RIGHT ( FORMAT ( s, "0000" ), 2 ) RETURN "Number of Inspections same time Last FY " & fyp
+		displayFolder: Card Labels
+		lineageTag: 2e1e68bf-2b0c-4f14-b05b-04d1a51a0164
+
+	/// Dynamic KPI card label for last completed month.
+	measure 'Lbl Last Month' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) VAR lm = FORMAT ( EOMONTH ( TODAY(), -1 ), "MMMM" ) RETURN "Number of Inspections Last Month " & lm & " FY " & fy
+		displayFolder: Card Labels
+		lineageTag: 4e4e03e9-2df6-4734-b69b-b827c25510a5
+
+	column inspection_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: deaf85ed-4c06-4b0e-9596-2db5d870d6da
+		sourceLineageTag: inspection_id
+		summarizeBy: sum
+		sourceColumn: inspection_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column external_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 7fca2147-e5a0-4447-b800-3880b5eba1dc
+		sourceLineageTag: external_id
+		summarizeBy: sum
+		sourceColumn: external_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 29cc5e8e-c738-4ece-be96-a6eab0401b2f
+		sourceLineageTag: inspection_date
+		summarizeBy: none
+		sourceColumn: inspection_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column completed_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 97085077-0e6f-44df-a493-9d81c6ab3e41
+		sourceLineageTag: completed_date
+		summarizeBy: none
+		sourceColumn: completed_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_from_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: acd3aa1d-a40e-4282-92e3-3ca658d2505b
+		sourceLineageTag: inspection_from_date
+		summarizeBy: none
+		sourceColumn: inspection_from_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_to_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 5d6c8949-d838-41d3-b0b0-405c3898f803
+		sourceLineageTag: inspection_to_date
+		summarizeBy: none
+		sourceColumn: inspection_to_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_report_sent_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 7db7f908-7590-4e5c-9578-1902462f8e65
+		sourceLineageTag: inspection_report_sent_date
+		summarizeBy: none
+		sourceColumn: inspection_report_sent_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_status_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: b1b24df9-da08-424d-bbb4-76a136a3883c
+		sourceLineageTag: inspection_status_id
+		summarizeBy: sum
+		sourceColumn: inspection_status_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_substatus_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 5aece41e-1990-4869-9928-ba17e3e9d308
+		sourceLineageTag: inspection_substatus_id
+		summarizeBy: sum
+		sourceColumn: inspection_substatus_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_type_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: ec06d627-afee-45bb-ac56-5dc87cc57105
+		sourceLineageTag: inspection_type_id
+		summarizeBy: sum
+		sourceColumn: inspection_type_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_reason_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 16b0f7f0-d243-4260-a71f-2ed99234e99f
+		sourceLineageTag: inspection_reason_id
+		summarizeBy: sum
+		sourceColumn: inspection_reason_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_type
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: c3c00762-580e-4bfb-ac4a-3a3481e7dd91
+		sourceLineageTag: inspection_auth_type
+		summarizeBy: none
+		sourceColumn: inspection_auth_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_status
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 6cbd245b-e5c4-4a70-93eb-3ec22bd76aa0
+		sourceLineageTag: inspection_auth_status
+		summarizeBy: none
+		sourceColumn: inspection_auth_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_source_application
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 0dd7e3f2-5b44-44d8-8f73-e4b76499155a
+		sourceLineageTag: inspection_auth_source_application
+		summarizeBy: none
+		sourceColumn: inspection_auth_source_application
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_source_id
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 735bc0ad-592f-46ba-a5b3-b845405da997
+		sourceLineageTag: inspection_auth_source_id
+		summarizeBy: none
+		sourceColumn: inspection_auth_source_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column assessment_sub_type
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 6826ea29-d091-402a-9307-3a148372eb45
+		sourceLineageTag: assessment_sub_type
+		summarizeBy: none
+		sourceColumn: assessment_sub_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column business_area
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: bd39f743-491e-4112-9902-00febed2ab64
+		sourceLineageTag: business_area
+		summarizeBy: none
+		sourceColumn: business_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspector_idir
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 435b5cef-3b55-4e9d-bd3b-5591af04334d
+		sourceLineageTag: inspector_idir
+		summarizeBy: none
+		sourceColumn: inspector_idir
+
+		annotation SummarizationSetBy = Automatic
+
+	column mine_no
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 7c4496b4-6d3b-4bb5-910e-c4ab71d0833b
+		sourceLineageTag: mine_no
+		summarizeBy: none
+		sourceColumn: mine_no
+
+		annotation SummarizationSetBy = Automatic
+
+	column mine_guid
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: cd0b13db-0e2a-40f3-bb25-ce3c9d4a8279
+		sourceLineageTag: mine_guid
+		summarizeBy: none
+		sourceColumn: mine_guid
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mine_SK
+		dataType: int64
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: 989a2ba4-b23a-4063-813a-d6323070037b
+		sourceLineageTag: Mine_SK
+		summarizeBy: none
+		sourceColumn: Mine_SK
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_date_key
+		dataType: dateTime
+		isHidden
+		formatString: Short Date
+		displayFolder: Keys
+		lineageTag: bbf6e573-2bad-4e4c-9846-0aa3b5aa4bde
+		summarizeBy: none
+		sourceColumn: inspection_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_inspection = entity
+		mode: directLake
+		source
+			entityName: fact_inspection
+			schemaName: gold
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

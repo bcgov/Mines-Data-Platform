@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Lakehouse",
+    "displayName": "lh_silver",
+    "description": "Medallion lh_silver"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9b6e6991-a2f2-ab90-4740-c2f5a0190e0e"
+  }
+}

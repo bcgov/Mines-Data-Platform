@@ -1,0 +1,193 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "name": "3c7edce9d74cc9d4ef50",
+  "position": {
+    "x": 20,
+    "y": 430,
+    "z": 4,
+    "height": 260,
+    "width": 1240,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "columnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_date"
+                    }
+                  },
+                  "Property": "fiscal_year_label"
+                }
+              },
+              "queryRef": "dim_date.fiscal_year_label",
+              "nativeQueryRef": "fiscal_year_label",
+              "active": true
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_date"
+                    }
+                  },
+                  "Property": "fiscal_month_label"
+                }
+              },
+              "queryRef": "dim_date.fiscal_month_label",
+              "nativeQueryRef": "fiscal_month_label",
+              "active": true
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
+                    }
+                  },
+                  "Property": "inspection_type_id"
+                }
+              },
+              "queryRef": "fact_inspection.inspection_type_id",
+              "nativeQueryRef": "Sum of inspection_type_id"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
+                    }
+                  },
+                  "Property": "Inspections per Fiscal Month and Type"
+                }
+              },
+              "queryRef": "fact_inspection.Inspections per Fiscal Month and Type",
+              "nativeQueryRef": "Inspections per Fiscal Month and Type"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "valueAxis": [
+        {
+          "properties": {
+            "titleText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Inspection Count'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "categoryAxis": [
+        {
+          "properties": {
+            "titleText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Fiscal Month Label'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Inspections per fiscal month and type'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "d8ec59a606b191862ed2",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_inspection"
+              }
+            },
+            "Property": "Inspections per Fiscal Month and Type"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "9c154616547ff9ba73af",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_date"
+              }
+            },
+            "Property": "fiscal_year_label"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "097b0bb6279b8b0e2020",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_inspection"
+              }
+            },
+            "Property": "inspection_type_id"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "eb40ebc7309c724f8dea",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_date"
+              }
+            },
+            "Property": "fiscal_month_label"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
+  }
+}

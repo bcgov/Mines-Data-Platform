@@ -1,0 +1,8 @@
+relationship fact_inspection_inspection_date_key_dim_date_full_date
+	fromColumn: fact_inspection.inspection_date_key
+	toColumn: dim_date.full_date
+
+relationship b91e7d78-21e0-a99b-6238-0478bed0ca9d
+	fromColumn: fact_inspection.Mine_SK
+	toColumn: dim_mine.Mine_SK
+

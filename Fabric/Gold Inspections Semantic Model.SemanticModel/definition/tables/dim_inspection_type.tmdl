@@ -31,3 +31,4 @@ table dim_inspection_type
 			expressionSource: DatabaseQuery
 
 	annotation PBI_ResultType = Table
+

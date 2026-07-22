@@ -53,6 +53,12 @@ table fact_inspection
 		displayFolder: Card Labels
 		lineageTag: 4e4e03e9-2df6-4734-b69b-b827c25510a5
 
+	/// Annual Service Plan target for inspections (static 1,600/yr as of FY26/27). OPEN: confirm whether static every year or tied to Service Plan cycle.
+	measure 'Inspections Service Plan Target' = 1600
+		formatString: #,0
+		displayFolder: Inspections KPIs
+		lineageTag: dcca6c58-2b1d-47ee-ab29-8b485adf5ac3
+
 	/// Year-over-year change: FYTD minus same-time-last-FY (apples-to-apples comparable windows).
 	measure 'Inspections YoY Delta' = [Inspections FYTD] - [Inspections Same Time Last FY]
 		formatString: +#,0;-#,0;0
@@ -64,12 +70,6 @@ table fact_inspection
 		formatString: +0.0%;-0.0%;0.0%
 		displayFolder: Inspections KPIs
 		lineageTag: 39b69dbc-8a71-4542-8f00-87d577145c59
-
-	/// Annual Service Plan target for inspections (static 1,600/yr as of FY26/27). OPEN: confirm whether static every year or tied to Service Plan cycle.
-	measure 'Inspections Service Plan Target' = 1600
-		formatString: #,0
-		displayFolder: Inspections KPIs
-		lineageTag: dcca6c58-2b1d-47ee-ab29-8b485adf5ac3
 
 	column inspection_id
 		dataType: int64

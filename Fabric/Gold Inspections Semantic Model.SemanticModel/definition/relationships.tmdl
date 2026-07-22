@@ -6,3 +6,7 @@ relationship b91e7d78-21e0-a99b-6238-0478bed0ca9d
 	fromColumn: fact_inspection.Mine_SK
 	toColumn: dim_mine.Mine_SK
 
+
+relationship f9968718-1711-c381-52e7-0366e4c445ff
+	fromColumn: fact_inspection.inspection_type_id
+	toColumn: dim_inspection_type.inspection_type_id

@@ -1,0 +1,33 @@
+table dim_inspection_type
+	lineageTag: cae40a2d-b7af-4c3a-9596-8efe00f383bd
+	sourceLineageTag: [gold].[dim_inspection_type]
+
+	column inspection_type_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 37597b0a-7344-49b3-9228-4cb1627ce374
+		sourceLineageTag: inspection_type_id
+		summarizeBy: none
+		sourceColumn: inspection_type_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_type_name
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: cce816c3-9a5c-4748-86e2-bd4611094139
+		sourceLineageTag: inspection_type_name
+		summarizeBy: none
+		sourceColumn: inspection_type_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_inspection_type = entity
+		mode: directLake
+		source
+			entityName: dim_inspection_type
+			schemaName: gold
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table

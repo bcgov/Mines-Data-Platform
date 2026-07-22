@@ -490,25 +490,25 @@
   "minimum": "#42814A",
   "textClasses": {
     "title": {
-      "fontFace": "BC Sans",
+      "fontFace": "Segoe UI",
       "fontSize": 28,
       "fontWeight": "bold",
       "color": "#252423"
     },
     "header": {
-      "fontFace": "BC Sans",
+      "fontFace": "Segoe UI",
       "fontSize": 20,
       "fontWeight": "bold",
       "color": "#252423"
     },
     "callout": {
-      "fontFace": "BC Sans",
+      "fontFace": "Segoe UI",
       "fontSize": 36,
       "fontWeight": "bold",
       "color": "#013366"
     },
     "label": {
-      "fontFace": "BC Sans",
+      "fontFace": "Segoe UI",
       "fontSize": 12,
       "color": "#605E5C"
     }
@@ -565,7 +565,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -604,7 +604,7 @@
                 "color": "#013366"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 36,
             "labelDisplayUnits": 0
           }
@@ -617,7 +617,7 @@
                 "color": "#605E5C"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 12
           }
         ],
@@ -650,7 +650,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 13,
             "alignment": "left"
           }
@@ -677,7 +677,7 @@
               }
             },
             "fontSize": 14,
-            "fontFamily": "BC Sans Bold"
+            "fontFamily": "Segoe UI Bold"
           }
         ],
         "items": [
@@ -688,7 +688,7 @@
               }
             },
             "fontSize": 14,
-            "fontFamily": "BC Sans"
+            "fontFamily": "Segoe UI"
           }
         ]
       }
@@ -708,7 +708,7 @@
               }
             },
             "fontSize": 12,
-            "fontFamily": "BC Sans Bold"
+            "fontFamily": "Segoe UI Bold"
           }
         ],
         "values": [
@@ -724,7 +724,7 @@
               }
             },
             "fontSize": 12,
-            "fontFamily": "BC Sans"
+            "fontFamily": "Segoe UI"
           }
         ],
         "grid": [
@@ -754,7 +754,7 @@
               }
             },
             "fontSize": 12,
-            "fontFamily": "BC Sans Bold"
+            "fontFamily": "Segoe UI Bold"
           }
         ]
       }
@@ -769,7 +769,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -803,14 +803,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -824,14 +824,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -852,7 +852,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -864,7 +864,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -881,7 +881,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -915,14 +915,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -936,14 +936,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -964,7 +964,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -976,7 +976,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -993,7 +993,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1027,14 +1027,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1048,14 +1048,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1076,7 +1076,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1088,7 +1088,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1105,7 +1105,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1139,14 +1139,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1160,14 +1160,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1188,7 +1188,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1200,7 +1200,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1217,7 +1217,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1251,14 +1251,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1272,14 +1272,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1300,7 +1300,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1312,7 +1312,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1329,7 +1329,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1363,14 +1363,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1384,14 +1384,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1412,7 +1412,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1424,7 +1424,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1441,7 +1441,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1475,14 +1475,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1496,14 +1496,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1524,7 +1524,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1536,7 +1536,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1553,7 +1553,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1587,14 +1587,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1608,14 +1608,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1636,7 +1636,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1648,7 +1648,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1665,7 +1665,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1699,14 +1699,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1720,14 +1720,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1748,7 +1748,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1760,7 +1760,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1777,7 +1777,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1811,14 +1811,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1832,14 +1832,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1860,7 +1860,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1872,7 +1872,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -1889,7 +1889,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -1923,14 +1923,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -1944,14 +1944,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -1972,7 +1972,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -1984,7 +1984,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -2001,7 +2001,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -2035,14 +2035,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -2056,14 +2056,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -2084,7 +2084,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -2096,7 +2096,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -2113,7 +2113,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -2147,14 +2147,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -2168,14 +2168,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -2196,7 +2196,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -2208,7 +2208,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -2225,7 +2225,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -2259,14 +2259,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -2280,14 +2280,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -2308,7 +2308,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -2320,7 +2320,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -2337,7 +2337,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -2371,14 +2371,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -2392,14 +2392,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -2420,7 +2420,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -2432,7 +2432,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -2449,7 +2449,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -2483,14 +2483,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -2504,14 +2504,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -2532,7 +2532,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -2544,7 +2544,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -2561,7 +2561,7 @@
                 "color": "#252423"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 14,
             "alignment": "left"
           }
@@ -2595,14 +2595,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineShow": false
@@ -2616,14 +2616,14 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "titleColor": {
               "solid": {
                 "color": "#605E5C"
               }
             },
-            "titleFontFamily": "BC Sans",
+            "titleFontFamily": "Segoe UI",
             "titleFontSize": 11,
             "showAxisTitle": true,
             "gridlineColor": {
@@ -2644,7 +2644,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11,
             "showTitle": false
           }
@@ -2656,7 +2656,7 @@
                 "color": "#3D3C3B"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 9,
             "labelDisplayUnits": 0
           }
@@ -2672,7 +2672,7 @@
                 "color": "#013366"
               }
             },
-            "fontFamily": "BC Sans"
+            "fontFamily": "Segoe UI"
           }
         ],
         "trendline": [
@@ -2716,7 +2716,7 @@
                 "color": "#013366"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 20
           }
         ],
@@ -2727,7 +2727,7 @@
                 "color": "#605E5C"
               }
             },
-            "fontFamily": "BC Sans",
+            "fontFamily": "Segoe UI",
             "fontSize": 11
           }
         ],

@@ -44,6 +44,11 @@
           "name": "BC_Design_System3835187669345729.json",
           "path": "BC_Design_System3835187669345729.json",
           "type": "Image"
+        },
+        {
+          "name": "Logo.png",
+          "path": "Logo.png",
+          "type": "Image"
         }
       ]
     },

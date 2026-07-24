@@ -349,3 +349,35 @@ print("=" * 80)
 # META   "language": "python",
 # META   "language_group": "synapse_pyspark"
 # META }
+
+# CELL ********************
+
+RUN_ID = "manual_insp_reload"
+res = process({"bronze_table": "nris_inspection", "primary_key": None, "load_type": "FULL"}, None, True)
+print("RESULT:", res)
+print("silver now:", spark.table("silver.nris_inspection").count())
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+print("SILVER nris_inspection count:", spark.table("silver.nris_inspection").count()) = "manual_insp_reload"
+obj = {"bronze_table": "nris_inspection", "primary_key": None, "load_type": "FULL"}
+_res = process(obj, None, True)
+print("RESULT:", _res)
+print("SILVER COUNT NOW:", spark.table("silver.nris_inspection").count())_rows = [r.asDict() for r in spark.read.synapsesql("mines-data-platform-fabwh1.app.object_registry").collect()]
+print("COLS:", list(_rows[0].keys()))
+print("N:", len(_rows))
+print("INSP:", [d for d in _rows if "inspection" in str(list(d.values())).lower()][:4])
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }

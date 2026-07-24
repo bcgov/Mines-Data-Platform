@@ -16,509 +16,45 @@
 # META           "id": "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
 # META         }
 # META       ]
+# META     },
+# META     "warehouse": {
+# META       "default_warehouse": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
+# META       "known_warehouses": [
+# META         {
+# META           "id": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
+# META           "type": "Datawarehouse"
+# META         }
+# META       ]
 # META     }
 # META   }
 # META }
 
 # CELL ********************
 
-# # ==========================================
-# # IMPORTS
-# # ==========================================
 
-# from pyspark.sql.functions import *
-# from pyspark.sql.types import *
-# from pyspark.sql.window import Window
-# from datetime import datetime
-# import traceback
-# import uuid
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from delta.tables import DeltaTable
+from datetime import datetime
+import traceback
 
-# from com.microsoft.spark.fabric import Constants
+spark = SparkSession.builder.getOrCreate()
 
+spark.conf.set("spark.sql.shuffle.partitions", "32")
+spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
 
-# # ==========================================
-# # CONFIG
-# # ==========================================
+# Fix ancient date/timestamp issue
+spark.conf.set(
+    "spark.sql.parquet.datetimeRebaseModeInWrite",
+    "LEGACY"
+)
 
-# # Replace this with your Fabric Warehouse name
-# warehouse_name = "mines-data-platform-fabwh1"
+spark.conf.set(
+    "spark.sql.parquet.int96RebaseModeInWrite",
+    "LEGACY"
+)
 
-# # Optional:
-# # If the Warehouse is in a different workspace, uncomment and set workspace_id.
-# # workspace_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-
-# # Schema/table names used by the framework
-# control_schema = "app"
-# control_table = "pipeline_control"
-
-# log_schema = "app"
-# pipeline_log_table = "pipeline_log"
-# error_log_table = "error_log"
-
-# source_schema = "bronze"
-
-# # Staging schema used for incremental loads
-# # Make sure this schema exists in the Warehouse.
-# staging_schema = "stg"
-
-
-# # ==========================================
-# # HELPER FUNCTIONS
-# # ==========================================
-
-# def wh_table(schema_name, table_name):
-#     """
-#     Returns Fabric Warehouse 3-part table name:
-#     Warehouse.Schema.Table
-#     """
-#     return f"{warehouse_name}.{schema_name}.{table_name}"
-
-
-# def read_wh_table(schema_name, table_name):
-#     """
-#     Reads a Fabric Warehouse table into a Spark DataFrame.
-#     """
-#     reader = spark.read
-
-#     # Use this only when reading from a different workspace.
-#     # reader = reader.option(Constants.WorkspaceId, workspace_id)
-
-#     return reader.synapsesql(wh_table(schema_name, table_name))
-
-
-# def write_wh_table(df, schema_name, table_name, mode="append"):
-#     """
-#     Writes a Spark DataFrame into a Fabric Warehouse table.
-#     mode can be append, overwrite, etc.
-#     """
-#     writer = df.write.mode(mode)
-
-#     # Use this only when writing to a different workspace.
-#     # writer = writer.option(Constants.WorkspaceId, workspace_id)
-
-#     writer.synapsesql(wh_table(schema_name, table_name))
-
-
-# def clean_sql_value(value):
-#     """
-#     Handles single quotes for SQL string values.
-#     """
-#     if value is None:
-#         return None
-
-#     return str(value).replace("'", "''")
-
-
-# def get_non_audit_columns(df):
-#     """
-#     Returns dataframe columns excluding generated row number if present.
-#     """
-#     return [c for c in df.columns if c.lower() != "rn"]
-
-
-# # ==========================================
-# # READ PIPELINE METADATA FROM WAREHOUSE
-# # ==========================================
-
-# metadata_df = (
-#     read_wh_table(control_schema, control_table)
-#     .filter(col("is_active") == lit(1))
-# )
-
-# metadata_list = metadata_df.collect()
-
-
-# # ==========================================
-# # LOOP THROUGH ALL TABLES
-# # ==========================================
-
-# for row in metadata_list:
-
-#     # ==========================================
-#     # METADATA
-#     # ==========================================
-
-#     pipeline_name = row["pipeline_name"]
-#     source_entity = row["source_entity"]
-#     target_schema = row["target_schema"]
-#     target_table = row["target_table"]
-#     watermark_column = row["watermark_column"]
-#     last_watermark = row["last_watermark"]
-#     load_type = row["load_type"]
-#     primary_key = row["primary_key"]
-
-#     run_id = str(uuid.uuid4())
-#     start_time = datetime.now()
-
-#     target_table_name = wh_table(target_schema, target_table)
-#     source_table_name = wh_table(source_schema, target_table)
-#     staging_table = f"{target_table}_stg"
-#     staging_table_name = wh_table(staging_schema, staging_table)
-
-#     print(f"Starting table: {target_table}")
-
-#     try:
-
-#         # ==========================================
-#         # READ BRONZE TABLE FROM WAREHOUSE
-#         # ==========================================
-
-#         source_df = read_wh_table(source_schema, target_table)
-
-#         rows_read = source_df.count()
-
-#         # ==========================================
-#         # INCREMENTAL FILTER
-#         # ==========================================
-
-#         if load_type == "INCREMENTAL":
-
-#             if watermark_column is None:
-#                 raise Exception(
-#                     f"Watermark column is required for incremental load: {target_table}"
-#                 )
-
-#             if last_watermark is not None:
-#                 source_df = source_df.filter(
-#                     col(watermark_column) > lit(last_watermark)
-#                 )
-
-#         # ==========================================
-#         # STANDARDIZE COLUMN NAMES
-#         # ==========================================
-
-#         source_df = source_df.toDF(
-#             *[c.lower() for c in source_df.columns]
-#         )
-
-#         # Normalize metadata columns too, because dataframe columns are now lowercase
-#         if watermark_column is not None:
-#             watermark_column = watermark_column.lower()
-
-#         if primary_key is not None:
-#             primary_key = primary_key.lower()
-
-#         # ==========================================
-#         # TRIM STRING COLUMNS
-#         # ==========================================
-
-#         for field in source_df.schema.fields:
-
-#             if isinstance(field.dataType, StringType):
-
-#                 source_df = source_df.withColumn(
-#                     field.name,
-#                     trim(col(field.name))
-#                 )
-
-#         # ==========================================
-#         # HANDLE NULL VALUES FOR STRING COLUMNS
-#         # ==========================================
-
-#         for field in source_df.schema.fields:
-
-#             if isinstance(field.dataType, StringType):
-
-#                 source_df = source_df.fillna(
-#                     {field.name: ""}
-#                 )
-
-#         # ==========================================
-#         # REMOVE DUPLICATES
-#         # ==========================================
-
-#         if primary_key is not None:
-
-#             if watermark_column is not None:
-
-#                 window_spec = (
-#                     Window
-#                     .partitionBy(primary_key)
-#                     .orderBy(col(watermark_column).desc())
-#                 )
-
-#                 source_df = (
-#                     source_df
-#                     .withColumn("rn", row_number().over(window_spec))
-#                     .filter(col("rn") == 1)
-#                     .drop("rn")
-#                 )
-
-#             else:
-
-#                 source_df = source_df.dropDuplicates([primary_key])
-
-#         # ==========================================
-#         # ADD AUDIT COLUMNS
-#         # ==========================================
-
-#         source_df = (
-#             source_df
-#             .withColumn("silver_load_timestamp", current_timestamp())
-#             .withColumn("silver_load_date", current_date())
-#         )
-
-#         rows_written = source_df.count()
-
-#         # ==========================================
-#         # FULL LOAD
-#         # ==========================================
-
-#         if load_type == "FULL":
-
-#             print("Executing FULL load")
-
-#             write_wh_table(
-#                 source_df,
-#                 target_schema,
-#                 target_table,
-#                 mode="overwrite"
-#             )
-
-#         # ==========================================
-#         # INCREMENTAL LOAD
-#         # ==========================================
-
-#         elif load_type == "INCREMENTAL":
-
-#             print("Executing INCREMENTAL load")
-
-#             if primary_key is None:
-#                 raise Exception(
-#                     f"Primary key is required for incremental load: {target_table}"
-#                 )
-
-#             # Write transformed data into Warehouse staging table
-#             write_wh_table(
-#                 source_df,
-#                 staging_schema,
-#                 staging_table,
-#                 mode="overwrite"
-#             )
-
-#             # Build MERGE SQL for Fabric Warehouse
-#             columns = get_non_audit_columns(source_df)
-
-#             update_set_clause = ",\n                ".join(
-#                 [
-#                     f"target.{c} = source.{c}"
-#                     for c in columns
-#                     if c != primary_key
-#                 ]
-#             )
-
-#             insert_columns = ", ".join(columns)
-
-#             insert_values = ", ".join(
-#                 [f"source.{c}" for c in columns]
-#             )
-
-#             merge_sql = f"""
-# MERGE INTO {target_schema}.{target_table} AS target
-# USING {staging_schema}.{staging_table} AS source
-# ON target.{primary_key} = source.{primary_key}
-# WHEN MATCHED THEN
-#     UPDATE SET
-#                 {update_set_clause}
-# WHEN NOT MATCHED THEN
-#     INSERT ({insert_columns})
-#     VALUES ({insert_values});
-# """
-
-#             print("Run this MERGE SQL in the Fabric Warehouse SQL editor:")
-#             print(merge_sql)
-
-#             # IMPORTANT:
-#             # PySpark synapsesql is mainly for reading/writing DataFrames.
-#             # For Warehouse DML like MERGE, run the printed SQL in:
-#             # 1. Warehouse SQL editor, or
-#             # 2. Stored procedure, or
-#             # 3. Fabric pipeline Script/Stored Procedure activity.
-
-#         else:
-
-#             raise Exception(f"Unsupported load_type: {load_type}")
-
-#         # ==========================================
-#         # UPDATE WATERMARK VALUE
-#         # ==========================================
-
-#         if (
-#             load_type == "INCREMENTAL"
-#             and watermark_column is not None
-#             and rows_written > 0
-#         ):
-
-#             max_watermark = source_df.agg(
-#                 max(watermark_column)
-#             ).collect()[0][0]
-
-#             safe_target_table = clean_sql_value(target_table)
-#             safe_max_watermark = clean_sql_value(max_watermark)
-
-#             update_watermark_sql = f"""
-# UPDATE {control_schema}.{control_table}
-# SET
-#     last_watermark = '{safe_max_watermark}',
-#     last_run_status = 'SUCCESS',
-#     last_run_date = CURRENT_TIMESTAMP
-# WHERE target_table = '{safe_target_table}';
-# """
-
-#             print("Run this watermark update SQL in the Fabric Warehouse SQL editor:")
-#             print(update_watermark_sql)
-
-#         else:
-
-#             max_watermark = None
-
-#         end_time = datetime.now()
-
-#         # ==========================================
-#         # PIPELINE SUCCESS LOGGING
-#         # ==========================================
-
-#         log_df = spark.createDataFrame(
-#             [
-#                 (
-#                     run_id,
-#                     pipeline_name,
-#                     source_entity,
-#                     target_schema,
-#                     target_table,
-#                     "SUCCESS",
-#                     rows_read,
-#                     rows_written,
-#                     last_watermark,
-#                     max_watermark,
-#                     None,
-#                     start_time,
-#                     end_time
-#                 )
-#             ],
-#             [
-#                 "run_id",
-#                 "pipeline_name",
-#                 "source_entity",
-#                 "target_schema",
-#                 "target_table",
-#                 "status",
-#                 "rows_read",
-#                 "rows_written",
-#                 "watermark_start",
-#                 "watermark_end",
-#                 "error_message",
-#                 "start_time",
-#                 "end_time"
-#             ]
-#         )
-
-#         log_df = log_df.withColumn(
-#             "created_date",
-#             current_timestamp()
-#         )
-
-#         write_wh_table(
-#             log_df,
-#             log_schema,
-#             pipeline_log_table,
-#             mode="append"
-#         )
-
-#         print(f"Completed: {target_table}")
-
-#     except Exception as e:
-
-#         error_message = str(e)
-#         stack_trace = traceback.format_exc()
-#         end_time = datetime.now()
-
-#         print(f"Failed: {target_table}")
-#         print(error_message)
-
-#         # ==========================================
-#         # ERROR LOGGING
-#         # ==========================================
-
-#         error_df = spark.createDataFrame(
-#             [
-#                 (
-#                     run_id,
-#                     pipeline_name,
-#                     error_message,
-#                     stack_trace
-#                 )
-#             ],
-#             [
-#                 "run_id",
-#                 "pipeline_name",
-#                 "error_message",
-#                 "stack_trace"
-#             ]
-#         )
-
-#         error_df = error_df.withColumn(
-#             "created_date",
-#             current_timestamp()
-#         )
-
-#         write_wh_table(
-#             error_df,
-#             log_schema,
-#             error_log_table,
-#             mode="append"
-#         )
-
-#         # ==========================================
-#         # PIPELINE FAILURE LOG
-#         # ==========================================
-
-#         failed_log_df = spark.createDataFrame(
-#             [
-#                 (
-#                     run_id,
-#                     pipeline_name,
-#                     source_entity,
-#                     target_schema,
-#                     target_table,
-#                     "FAILED",
-#                     0,
-#                     0,
-#                     last_watermark,
-#                     None,
-#                     error_message,
-#                     start_time,
-#                     end_time
-#                 )
-#             ],
-#             [
-#                 "run_id",
-#                 "pipeline_name",
-#                 "source_entity",
-#                 "target_schema",
-#                 "target_table",
-#                 "status",
-#                 "rows_read",
-#                 "rows_written",
-#                 "watermark_start",
-#                 "watermark_end",
-#                 "error_message",
-#                 "start_time",
-#                 "end_time"
-#             ]
-#         )
-
-#         failed_log_df = failed_log_df.withColumn(
-#             "created_date",
-#             current_timestamp()
-#         )
-
-#         write_wh_table(
-#             failed_log_df,
-#             log_schema,
-#             pipeline_log_table,
-#             mode="append"
-#         )
+print("BLOCK 1 COMPLETED - SPARK READY")
 
 # METADATA ********************
 
@@ -529,218 +65,374 @@
 
 # CELL ********************
 
-# =====================================================================================
-# NOTEBOOK : silver_dynamic_etl
-#
-# PURPOSE
-# -------
-# Dynamically transform ALL Bronze tables into Silver tables
-#
-# FEATURES
-# --------
-# 1. Auto-discover Bronze tables
-# 2. Column standardization
-# 3. Data cleansing
-# 4. Duplicate removal
-# 5. Audit columns
-# 6. Row hash generation
-# 7. Safe error handling per table
-# 8. No notebook failure on single table error
-# =====================================================================================
+CONTROL_TABLE = "app.pipeline_control"
 
-from pyspark.sql.functions import *
-from pyspark.sql.utils import AnalysisException
-from datetime import datetime
-import traceback
+BRONZE_DB = "bronze"
+SILVER_DB = "silver"
 
-# =====================================================================================
-# CONFIG
-# =====================================================================================
+DEFAULT_WATERMARK = "1900-01-01T00:00:00.000Z"
 
-BRONZE_SCHEMA = "bronze"
-SILVER_SCHEMA = "silver"
+run_summary = []
 
 start_time = datetime.now()
 
-print("=" * 100)
-print("DYNAMIC SILVER ETL STARTED")
-print(f"Start Time : {start_time}")
-print("=" * 100)
+print("BLOCK 2 COMPLETED - CONFIG READY")
 
-# =====================================================================================
-# HELPERS
-# =====================================================================================
+# METADATA ********************
 
-def normalize_name(name):
-    return (
-        name.strip()
-            .replace(" ", "_")
-            .replace("-", "_")
-            .replace(".", "_")
-            .lower()
-    )
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
-def get_bronze_tables():
-    """Fetch all tables from bronze schema safely"""
-    try:
-        tables = spark.sql(f"SHOW TABLES IN {BRONZE_SCHEMA}").collect()
-        return [t["tableName"] for t in tables]
-    except Exception as e:
-        print("ERROR: Unable to fetch Bronze tables")
-        print(str(e))
+# CELL ********************
+
+def table_exists(table_name):
+    return spark.catalog.tableExists(table_name)
+
+
+def resolve_bronze(source_entity):
+
+    source_table = source_entity.split(".")[-1]
+
+    return f"{BRONZE_DB}.{source_table.lower()}"
+
+
+def get_pk_cols(primary_key):
+
+    if primary_key is None:
         return []
 
-# =====================================================================================
-# GET ALL BRONZE TABLES
-# =====================================================================================
+    return [
+        c.strip()
+        for c in str(primary_key).split(",")
+        if c.strip()
+    ]
 
-bronze_tables = get_bronze_tables()
 
-if not bronze_tables:
-    print("No Bronze tables found. Exiting safely.")
-    mssparkutils.notebook.exit("NO_TABLES")
+def deduplicate(df, pk_cols):
 
-print(f"Found Bronze Tables: {bronze_tables}")
+    if not pk_cols:
+        return df
 
-# =====================================================================================
-# PROCESS EACH TABLE
-# =====================================================================================
+    return df.dropDuplicates(pk_cols)
 
-results = []
 
-for table_name in bronze_tables:
+def is_empty(df):
 
-    bronze_table = f"{BRONZE_SCHEMA}.{table_name}"
-    silver_table = f"{SILVER_SCHEMA}.{table_name}"
+    return len(df.take(1)) == 0
 
-    print("\n" + "=" * 80)
-    print(f"PROCESSING TABLE : {table_name}")
-    print("=" * 80)
+
+print("BLOCK 3 COMPLETED - HELPERS READY")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+def process_table(row):
+
+    source_entity = row["source_entity"]
+
+    target_table = row["target_table"].strip().lower()
+
+    silver_table = f"{SILVER_DB}.{target_table}"
+
+    load_type = (
+        str(row["load_type"]).upper()
+        if row["load_type"]
+        else "FULL"
+    )
+
+    watermark_column = row["watermark_column"]
+
+    last_watermark = row["last_watermark"]
+
+    primary_key = row["primary_key"]
 
     try:
 
-        # =========================================================================
+        print("\n" + "=" * 90)
+        print(f"SOURCE : {source_entity}")
+        print(f"TARGET : {silver_table}")
+        print(f"LOAD   : {load_type}")
+        print("=" * 90)
+
+        # --------------------------------------------------
+        # PRIMARY KEY CHECK
+        # --------------------------------------------------
+
+        pk_cols = get_pk_cols(primary_key)
+
+        if len(pk_cols) == 0:
+
+            print("SKIPPED - PRIMARY KEY NOT DEFINED")
+
+            run_summary.append({
+                "table": source_entity,
+                "status": "SKIPPED",
+                "reason": "Primary key missing"
+            })
+
+            return
+
+        # --------------------------------------------------
+        # BRONZE TABLE CHECK
+        # --------------------------------------------------
+
+        bronze_table = resolve_bronze(source_entity)
+
+        if not table_exists(bronze_table):
+
+            print(f"SKIPPED - BRONZE TABLE NOT FOUND: {bronze_table}")
+
+            run_summary.append({
+                "table": source_entity,
+                "status": "SKIPPED",
+                "reason": "Bronze table missing"
+            })
+
+            return
+
+        # --------------------------------------------------
         # READ BRONZE
-        # =========================================================================
+        # --------------------------------------------------
 
         df = spark.table(bronze_table)
 
-        row_count = df.count()
+        # --------------------------------------------------
+        # FULL LOAD
+        # --------------------------------------------------
 
-        if row_count == 0:
-            print(f"Skipping {table_name} (no data)")
-            continue
+        if load_type == "FULL" or not last_watermark:
 
-        print(f"Rows Read : {row_count}")
+            print("MODE: FULL LOAD")
 
-        # =========================================================================
-        # STANDARDIZE COLUMN NAMES
-        # =========================================================================
+            if table_exists(silver_table):
 
-        for old_name in df.columns:
-            new_name = normalize_name(old_name)
+                spark.sql(
+                    f"DROP TABLE IF EXISTS {silver_table}"
+                )
 
-            if old_name != new_name:
-                df = df.withColumnRenamed(old_name, new_name)
-
-        # =========================================================================
-        # STRING CLEANING
-        # =========================================================================
-
-        string_cols = [c for c, d in df.dtypes if d == "string"]
-
-        for c in string_cols:
-            df = df.withColumn(c, trim(col(c)))
-
-        # =========================================================================
-        # EMPTY STRING → NULL
-        # =========================================================================
-
-        df = df.replace("", None)
-
-        # =========================================================================
-        # REMOVE DUPLICATES
-        # =========================================================================
-
-        before = df.count()
-        df = df.dropDuplicates()
-        after = df.count()
-
-        print(f"Duplicates Removed : {before - after}")
-
-        # =========================================================================
-        # AUDIT COLUMN
-        # =========================================================================
-
-        df = df.withColumn("silver_load_ts", current_timestamp())
-
-        # =========================================================================
-        # ROW HASH
-        # =========================================================================
-
-        hash_cols = [c for c in df.columns if c != "silver_load_ts"]
-
-        df = df.withColumn(
-            "row_hash",
-            sha2(
-                concat_ws(
-                    "||",
-                    *[coalesce(col(c).cast("string"), lit("")) for c in hash_cols]
-                ),
-                256
+            (
+                df.write
+                .format("delta")
+                .mode("overwrite")
+                .option("overwriteSchema", "true")
+                .saveAsTable(silver_table)
             )
+
+            run_summary.append({
+                "table": source_entity,
+                "status": "SUCCESS"
+            })
+
+            print("FULL LOAD COMPLETED")
+
+            return
+
+        # --------------------------------------------------
+        # INCREMENTAL LOAD
+        # --------------------------------------------------
+
+        print(
+            f"MODE: INCREMENTAL FROM {last_watermark}"
         )
 
-        # =========================================================================
-        # WRITE TO SILVER
-        # =========================================================================
+        watermark_ts = F.to_timestamp(
+            F.lit(last_watermark)
+        )
 
-        df.write \
-          .format("delta") \
-          .mode("overwrite") \
-          .option("overwriteSchema", "true") \
-          .saveAsTable(silver_table)
+        inc_df = df.filter(
+            F.to_timestamp(
+                F.col(watermark_column)
+            ) > watermark_ts
+        )
 
-        print(f"SUCCESS : {silver_table}")
+        if is_empty(inc_df):
 
-        results.append({
-            "table": table_name,
-            "status": "SUCCESS",
-            "rows": row_count
+            print("NO NEW DATA FOUND")
+
+            run_summary.append({
+                "table": source_entity,
+                "status": "SUCCESS"
+            })
+
+            return
+
+        # Remove duplicate PK records
+        inc_df = deduplicate(
+            inc_df,
+            pk_cols
+        )
+
+        merge_condition = " AND ".join(
+            [f"t.{c}=s.{c}" for c in pk_cols]
+        )
+
+        # --------------------------------------------------
+        # CREATE SILVER TABLE
+        # --------------------------------------------------
+
+        if not table_exists(silver_table):
+
+            print(
+                "SILVER TABLE DOES NOT EXIST - CREATING"
+            )
+
+            (
+                inc_df.write
+                .format("delta")
+                .mode("overwrite")
+                .option("overwriteSchema", "true")
+                .saveAsTable(silver_table)
+            )
+
+        else:
+
+            print("MERGING INTO SILVER")
+
+            (
+                DeltaTable.forName(
+                    spark,
+                    silver_table
+                )
+                .alias("t")
+                .merge(
+                    inc_df.alias("s"),
+                    merge_condition
+                )
+                .whenMatchedUpdateAll()
+                .whenNotMatchedInsertAll()
+                .execute()
+            )
+
+        run_summary.append({
+            "table": source_entity,
+            "status": "SUCCESS"
         })
+
+        print("PROCESS COMPLETED")
 
     except Exception as e:
 
-        print(f"FAILED TABLE : {table_name}")
-        print(str(e))
-        print(traceback.format_exc())
+        print(
+            f"FAILED TABLE: {source_entity}"
+        )
 
-        results.append({
-            "table": table_name,
+        traceback.print_exc()
+
+        run_summary.append({
+            "table": source_entity,
             "status": "FAILED",
             "error": str(e)
         })
+print("BLOCK 4 COMPLETED - PROCESS TABLE")
 
-# =====================================================================================
-# FINAL SUMMARY
-# =====================================================================================
+# METADATA ********************
 
-end_time = datetime.now()
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
-print("\n" + "=" * 100)
-print("DYNAMIC ETL SUMMARY")
-print("=" * 100)
+# CELL ********************
 
-for r in results:
-    print(r)
+print("=" * 90)
+print("DYNAMIC SILVER ETL STARTED")
+print("=" * 90)
 
-print("=" * 100)
-print(f"Start Time : {start_time}")
-print(f"End Time   : {end_time}")
-print(f"Duration   : {end_time - start_time}")
-print("=" * 100)
+control_df = (
+    spark.table(CONTROL_TABLE)
+    .filter(F.col("is_active") == 1)
+    .select(
+        "source_entity",
+        "target_table",
+        "primary_key",
+        "watermark_column",
+        "last_watermark",
+        "load_type"
+    )
+)
+
+rows = control_df.collect()
+
+print(
+    f"TABLES FROM CONTROL TABLE: {len(rows)}"
+)
+
+for row in rows:
+
+    process_table(row)
+
+# ==================================================
+# SUMMARY
+# ==================================================
+
+print("\n" + "=" * 90)
+print("ETL SUMMARY")
+print("=" * 90)
+
+success_count = len(
+    [x for x in run_summary
+     if x["status"] == "SUCCESS"]
+)
+
+failed_count = len(
+    [x for x in run_summary
+     if x["status"] == "FAILED"]
+)
+
+skipped_count = len(
+    [x for x in run_summary
+     if x["status"] == "SKIPPED"]
+)
+
+print(f"SUCCESS : {success_count}")
+print(f"FAILED  : {failed_count}")
+print(f"SKIPPED : {skipped_count}")
+
+print("\nFAILED TABLES")
+print("-" * 90)
+
+for item in run_summary:
+
+    if item["status"] == "FAILED":
+
+        print(
+            f"{item['table']} --> "
+            f"{item['error']}"
+        )
+
+print("\nSKIPPED TABLES")
+print("-" * 90)
+
+for item in run_summary:
+
+    if item["status"] == "SKIPPED":
+
+        print(
+            f"{item['table']} --> "
+            f"{item['reason']}"
+        )
+
+print("\n" + "=" * 90)
+
+print(f"START TIME : {start_time}")
+print(f"END TIME   : {datetime.now()}")
+print(
+    f"DURATION   : "
+    f"{datetime.now() - start_time}"
+)
+
+print("=" * 90)
 
 print("DYNAMIC SILVER ETL COMPLETED")
+print("BLOCK 5 COMPLETED - MAIN EXECUTION")
 
 # METADATA ********************
 

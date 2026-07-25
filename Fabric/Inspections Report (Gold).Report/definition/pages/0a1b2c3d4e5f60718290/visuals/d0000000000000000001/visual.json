@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "d0000000000000000001",
   "position": {
     "x": 24,
@@ -21,13 +21,6 @@
                   "PackageName": "RegisteredResources",
                   "PackageType": 1,
                   "ItemName": "Logo.png"
-                }
-              }
-            },
-            "imageScalingType": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Fit'"
                 }
               }
             }

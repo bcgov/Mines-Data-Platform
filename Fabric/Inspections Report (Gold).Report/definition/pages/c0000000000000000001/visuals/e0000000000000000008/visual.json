@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "e0000000000000000008",
   "position": {
-    "x": 650,
-    "y": 310,
-    "z": 0,
-    "height": 112,
-    "width": 606,
-    "tabOrder": 0
+    "x": 649.5167286245354,
+    "y": 310.48327137546471,
+    "z": 7000,
+    "height": 130.8550185873606,
+    "width": 606.69144981412637,
+    "tabOrder": 7000
   },
   "visual": {
     "visualType": "textbox",
@@ -21,9 +21,9 @@
                   {
                     "value": "RELATIONSHIPS",
                     "textStyle": {
+                      "fontWeight": "bold",
                       "fontSize": "12px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "color": "#013366"
                     }
                   }
                 ]
@@ -33,9 +33,9 @@
                   {
                     "value": "Mine",
                     "textStyle": {
+                      "fontWeight": "bold",
                       "fontSize": "11px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "color": "#013366"
                     }
                   },
                   {
@@ -52,9 +52,9 @@
                   {
                     "value": "Inspection",
                     "textStyle": {
+                      "fontWeight": "bold",
                       "fontSize": "11px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "color": "#013366"
                     }
                   },
                   {
@@ -71,9 +71,9 @@
                   {
                     "value": "Inspection",
                     "textStyle": {
+                      "fontWeight": "bold",
                       "fontSize": "11px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "color": "#013366"
                     }
                   },
                   {
@@ -91,7 +91,7 @@
                     "value": "BC fiscal year: Apr 1 - Mar 31",
                     "textStyle": {
                       "fontSize": "11px",
-                      "color": "#605E5C"
+                      "color": "#605e5c"
                     }
                   }
                 ]
@@ -101,7 +101,6 @@
         }
       ]
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "background": [
         {
@@ -158,6 +157,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

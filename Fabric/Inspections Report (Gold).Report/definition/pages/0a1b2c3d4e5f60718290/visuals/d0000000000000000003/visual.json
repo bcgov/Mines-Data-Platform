@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "d0000000000000000003",
   "position": {
-    "x": 24,
-    "y": 78,
-    "z": 2,
-    "height": 196,
-    "width": 1232,
-    "tabOrder": 2
+    "x": 23.59447004608295,
+    "y": 77.665130568356375,
+    "z": 2000,
+    "height": 140.58371735791093,
+    "width": 1232.8110599078343,
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "textbox",
@@ -21,13 +21,12 @@
                   {
                     "value": "1. Number of inspections in FY 26/27      2. Number of Inspections same time last FY 25/26      3. Number of Inspections in the last month of current FY 26/27",
                     "textStyle": {
+                      "fontWeight": "bold",
                       "fontSize": "12px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "color": "#013366"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                ]
               },
               {
                 "textRuns": [
@@ -38,8 +37,7 @@
                       "color": "#252423"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                ]
               },
               {
                 "textRuns": [
@@ -50,40 +48,32 @@
                       "color": "#252423"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                ]
               },
               {
                 "textRuns": [
                   {
-                    "value": "Data as of 11 June 2026 - the gold layer has not refreshed since, so current fiscal-year figures may read low until the pipeline refreshes.",
+                    "value": "Data current as of 7 July 2026 - gold layer refreshed; fiscal-year figures are up to date.",
                     "textStyle": {
+                      "fontWeight": "bold",
                       "fontSize": "12px",
-                      "color": "#8A6D1A",
-                      "fontWeight": "bold"
+                      "color": "#8a6d1a"
                     }
-                  }
-                ],
-                "horizontalTextAlignment": "left"
-              },
-              {
-                "textRuns": [
+                  },
                   {
                     "value": "Contact Raj (Rajneesh.1.Gulati@gov.bc.ca) or Nhung (Nhung.Nguyen@gov.bc.ca) for more information.",
                     "textStyle": {
                       "fontSize": "12px",
-                      "color": "#605E5C"
+                      "color": "#605e5c"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                ]
               }
             ]
           }
         }
       ]
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "background": [
         {
@@ -140,6 +130,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "d0000000000000000002",
   "position": {
     "x": 200,
     "y": 26,
-    "z": 1,
+    "z": 1000,
     "height": 42,
     "width": 1056,
-    "tabOrder": 1
+    "tabOrder": 1000
   },
   "visual": {
     "visualType": "textbox",
@@ -27,7 +27,7 @@
                     }
                   },
                   {
-                    "value": "   \u2014   Inspections Corporate Report",
+                    "value": "   —   Inspections Corporate Report",
                     "textStyle": {
                       "fontSize": "15px",
                       "color": "#605E5C"

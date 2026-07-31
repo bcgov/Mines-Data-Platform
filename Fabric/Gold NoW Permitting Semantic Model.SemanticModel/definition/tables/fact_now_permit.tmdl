@@ -1,0 +1,188 @@
+table fact_now_permit
+	lineageTag: 2b94ca64-973e-4095-97f1-5143d8ff1e90
+	sourceLineageTag: [gold].[fact_now_permit]
+
+	/// NoWs issued FYTD: distinct approved (AIA) OGP+AMD permits, excluding administrative amendments, issue_date in current BC fiscal year (Apr 1 -> today). NOTE: reads low/0 until source data refresh (data currently through Jan 2026).
+	measure 'NoWs Issued FYTD' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR FYStart = DATE ( FYStartYear, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[issue_date] >= FYStart, fact_now_permit[issue_date] < CurrentDate + 1, fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] IN { "OGP", "AMD" } )
+		formatString: #,##0
+		displayFolder: NoW KPIs
+		lineageTag: 6453ebde-2518-4b50-9ac7-3e169454cfa3
+
+	/// NoWs issued same time last FY (prior FY Apr 1 -> one year ago today).
+	measure 'NoWs Issued Same Time Last FY' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR LastFYStart = DATE ( FYStartYear - 1, 4, 1 ) VAR LastFYSameDate = DATE ( YEAR ( CurrentDate ) - 1, MONTH ( CurrentDate ), DAY ( CurrentDate ) ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[issue_date] >= LastFYStart, fact_now_permit[issue_date] < LastFYSameDate + 1, fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] IN { "OGP", "AMD" } )
+		formatString: #,##0
+		displayFolder: NoW KPIs
+		lineageTag: 1863dda9-ca1d-49c9-a15a-aaaf2683f4f9
+
+	/// NoWs issued in the last full completed calendar month.
+	measure 'NoWs Issued Last Month' = VAR CurrentDate = TODAY() VAR ThisMonthStart = DATE ( YEAR ( CurrentDate ), MONTH ( CurrentDate ), 1 ) VAR LastMonthStart = EDATE ( ThisMonthStart, -1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[issue_date] >= LastMonthStart, fact_now_permit[issue_date] < ThisMonthStart, fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] IN { "OGP", "AMD" } )
+		formatString: #,##0
+		displayFolder: NoW KPIs
+		lineageTag: feeceaf0-cca4-4632-8bff-19043a076285
+
+	/// FYTD minus same time last FY.
+	measure 'NoWs YoY Delta' = [NoWs Issued FYTD] - [NoWs Issued Same Time Last FY]
+		formatString: +#,0;-#,0;0
+		displayFolder: NoW KPIs
+		lineageTag: ada82c70-c929-42cf-8679-ee0486840f16
+
+	/// Approved new permits (OGP). Series for the by-type bar charts.
+	measure 'NoWs New Permits' = CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] = "OGP" )
+		formatString: #,##0
+		displayFolder: NoW Trend
+		lineageTag: 43c7e063-85cb-45e7-85fe-f7ce38b82716
+
+	/// Approved (non-administrative) amendments (AMD). Series for the by-type bar charts.
+	measure 'NoWs Amendments' = CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] = "AMD" )
+		formatString: #,##0
+		displayFolder: NoW Trend
+		lineageTag: 4a50c0ae-8d62-4c98-8be7-6366efedf9ca
+
+	/// Approved administrative amendments (reason-code present). Third series in the per-fiscal-year by-type bar.
+	measure 'NoWs Administrative Amendments' = CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 1 )
+		formatString: #,##0
+		displayFolder: NoW Trend
+		lineageTag: e4d65f3d-742d-4d4f-a6ff-2558e3fcdb4b
+
+	/// Dynamic KPI card label for FYTD.
+	measure 'Lbl NoW FYTD' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) RETURN "Number of NoWs Issued FYTD " & fy
+		displayFolder: NoW Card Labels
+		lineageTag: 9db67784-ef7c-4d58-955d-a6dfd90c742f
+
+	/// Dynamic KPI card label for same-time-last-FY.
+	measure 'Lbl NoW Same Last FY' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fyp = FORMAT ( s - 1, "0000" ) & "/" & RIGHT ( FORMAT ( s, "0000" ), 2 ) RETURN "Number of NoWs Issued same time Last FY " & fyp
+		displayFolder: NoW Card Labels
+		lineageTag: b7f5b215-98b5-4ada-9191-e962a419ae5c
+
+	/// Dynamic KPI card label for last completed month.
+	measure 'Lbl NoW Last Month' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) VAR lm = FORMAT ( EOMONTH ( TODAY(), -1 ), "MMMM" ) RETURN "Number of NoWs Issued Last Month " & lm & " FY " & fy
+		displayFolder: NoW Card Labels
+		lineageTag: ff2dce0c-7100-465c-97b6-c49f9fe33484
+
+	/// Dynamic data-freshness label = latest issue_date in the gold data.
+	measure 'NoW Data As Of Label' = "Data current through " & FORMAT ( MAX ( fact_now_permit[issue_date] ), "d MMM yyyy" )
+		displayFolder: NoW Card Labels
+		lineageTag: 67b545c6-05bc-4903-bd0f-87f838bc61fe
+
+	column permit_amendment_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 6019a42b-9abf-40ab-ab41-983b31e72b73
+		sourceLineageTag: permit_amendment_id
+		summarizeBy: sum
+		sourceColumn: permit_amendment_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column permit_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 373babc3-25ba-45fe-9d5f-9c7b687d9e95
+		sourceLineageTag: permit_id
+		summarizeBy: sum
+		sourceColumn: permit_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column permit_amendment_type_code
+		dataType: string
+		lineageTag: 7e8382e1-7c67-4d10-9979-3e982329baef
+		sourceLineageTag: permit_amendment_type_code
+		summarizeBy: none
+		sourceColumn: permit_amendment_type_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column permit_amendment_status_code
+		dataType: string
+		lineageTag: 7990fbef-8da5-49a8-b469-33a1afe387a5
+		sourceLineageTag: permit_amendment_status_code
+		summarizeBy: none
+		sourceColumn: permit_amendment_status_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column now_application_guid
+		dataType: string
+		lineageTag: 573a9005-73be-4b42-8024-8f7daea7085d
+		sourceLineageTag: now_application_guid
+		summarizeBy: none
+		sourceColumn: now_application_guid
+
+		annotation SummarizationSetBy = Automatic
+
+	column mine_guid
+		dataType: string
+		lineageTag: c0aa75d4-79d6-4827-9f92-9674b11f0078
+		sourceLineageTag: mine_guid
+		summarizeBy: none
+		sourceColumn: mine_guid
+
+		annotation SummarizationSetBy = Automatic
+
+	column issue_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: adeeffd5-f76b-47a2-8621-69f89b38a03d
+		sourceLineageTag: issue_date
+		summarizeBy: none
+		sourceColumn: issue_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column issue_date_key
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 62b68d57-9238-45e4-8e8e-f436705e357a
+		sourceLineageTag: issue_date_key
+		summarizeBy: none
+		sourceColumn: issue_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column deleted_ind
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 82bb6c8c-019b-4149-adee-0065c7a22976
+		sourceLineageTag: deleted_ind
+		summarizeBy: none
+		sourceColumn: deleted_ind
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_approved_aia
+		dataType: int64
+		formatString: 0
+		lineageTag: 27b35578-dc1c-4fa2-abf6-74d5129342e5
+		sourceLineageTag: is_approved_aia
+		summarizeBy: sum
+		sourceColumn: is_approved_aia
+
+		annotation SummarizationSetBy = Automatic
+
+	column now_application_status_code
+		dataType: string
+		lineageTag: 82d5ec10-cc68-4d30-a63d-1217cac61c80
+		sourceLineageTag: now_application_status_code
+		summarizeBy: none
+		sourceColumn: now_application_status_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_administrative_amendment
+		dataType: int64
+		formatString: 0
+		lineageTag: 95a024c6-e660-4739-b883-ce8626b3d61d
+		sourceLineageTag: is_administrative_amendment
+		summarizeBy: sum
+		sourceColumn: is_administrative_amendment
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_now_permit = entity
+		mode: directLake
+		source
+			entityName: fact_now_permit
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_gold'
+

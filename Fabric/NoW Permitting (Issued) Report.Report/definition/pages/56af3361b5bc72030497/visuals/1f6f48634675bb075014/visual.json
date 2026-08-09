@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "1f6f48634675bb075014",
+  "position": {
+    "x": 24,
+    "y": 548,
+    "z": 3,
+    "height": 36,
+    "width": 1232,
+    "tabOrder": 3
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Data contacts: Raj · Nhung      |      Source: Core (MCM Database)      |      Grain: permit_amendment_id      |      FY range: FY2021–FY2026",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#605E5C",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

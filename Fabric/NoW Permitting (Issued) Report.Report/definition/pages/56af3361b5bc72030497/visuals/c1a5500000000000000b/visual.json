@@ -1,0 +1,167 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "c1a5500000000000000b",
+  "position": {
+    "x": 24,
+    "y": 359,
+    "z": 0,
+    "height": 100,
+    "width": 606,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "TEMPORAL",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#3470B1",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  filter",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#605E5C",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "issue_date",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  date  -  drives every KPI and both charts",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "issue_date_key",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  FK -> dim_date[full_date]",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "fiscal year",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  Apr 1 – Mar 31 (BC)",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

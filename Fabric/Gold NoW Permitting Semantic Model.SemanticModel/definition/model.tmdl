@@ -10,7 +10,7 @@ annotation __PBI_TimeIntelligenceEnabled = 1
 
 annotation PBI_QueryOrder = ["DirectLake - lh_gold"]
 
-annotation PBI_ProTooling = ["DirectLakeOnOneLakeInWeb","MCP-PBIModeling"]
+annotation PBI_ProTooling = ["DirectLakeOnOneLakeInWeb","MCP-PBIModeling","WebModelingEdit","DaxQueryView_Desktop"]
 
 ref table fact_now_permit
 ref table dim_date

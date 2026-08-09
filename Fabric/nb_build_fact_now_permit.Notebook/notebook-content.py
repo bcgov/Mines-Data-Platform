@@ -83,6 +83,46 @@ print("rows", df.count(), "cols", len(df.columns))
 
 # CELL ********************
 
+r=spark.read.option("recursiveFileLookup","true").parquet(B+"Files/raw/public.now_application/"); r.selectExpr("count(1) c","max(submitted_date) m").show()
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+pa=spark.read.option("recursiveFileLookup","true").parquet(B+"Files/raw/public.permit_amendment/")
+print("RAW_PA rows=", pa.count(), " distinct_id=", pa.select("permit_amendment_id").distinct().count())
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+r=spark.sql("select year(current_date()) as y, month(current_date()) as m").first()
+curfy = r.y if r.m>=4 else r.y-1
+lo=curfy-5
+spark.sql("ALTER TABLE gold.dim_date ADD COLUMNS (fiscal_year_last6 STRING)")
+spark.sql("UPDATE gold.dim_date SET fiscal_year_last6 = CASE WHEN fiscal_year >= "+str(lo)+" AND fiscal_year <= "+str(curfy)+" THEN fiscal_year_label ELSE NULL END")
+print("curfy", curfy, "lo", lo)
+spark.sql("SELECT DISTINCT fiscal_year, fiscal_year_last6 FROM gold.dim_date WHERE fiscal_year_last6 IS NOT NULL ORDER BY fiscal_year").show()
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 # quick sanity check on the flags after the build.
 # approved_ogpamd_permits should land around 157 - the all-time approved new plus amendment permits.
 spark.sql("SELECT COUNT(*) AS total_rows, SUM(is_approved_aia) AS aia_rows, SUM(is_administrative_amendment) AS admin_rows, COUNT(DISTINCT CASE WHEN is_approved_aia=1 AND permit_amendment_type_code IN ('OGP','AMD') AND is_administrative_amendment=0 THEN permit_id END) AS approved_ogpamd_permits, MAX(issue_date_key) AS max_issue_date_key FROM gold.fact_now_permit").show()

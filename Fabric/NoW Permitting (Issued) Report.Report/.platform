@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "NoW Permitting (Issued) Report"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "bdffaae6-1ca7-a824-40d7-64455c517861"
+  }
+}

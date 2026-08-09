@@ -163,6 +163,7 @@ table dim_date
 		sourceLineageTag: fiscal_month_label
 		summarizeBy: none
 		sourceColumn: fiscal_month_label
+		sortByColumn: fiscal_year_month_key
 
 		annotation SummarizationSetBy = Automatic
 
@@ -175,6 +176,13 @@ table dim_date
 		sourceColumn: fiscal_year_month_key
 
 		annotation SummarizationSetBy = Automatic
+
+	column fiscal_year_last6
+		dataType: string
+		lineageTag: 814d06f3-c127-47eb-901b-1946444f8ba2
+		summarizeBy: none
+		sourceColumn: fiscal_year_last6
+		sortByColumn: fiscal_year
 
 	partition dim_date = entity
 		mode: directLake

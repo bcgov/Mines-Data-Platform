@@ -1,0 +1,201 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "c1a5500000000000000c",
+  "position": {
+    "x": 650,
+    "y": 118,
+    "z": 0,
+    "height": 150,
+    "width": 606,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "DERIVED METRICS",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#42814a",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "NoWs Issued FYTD",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  531 (latest complete FY; self-anchoring)",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "NoWs Issued same period prior FY",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  546",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "NoWs Issued last month",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  10",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "New Permits (OGP) / Amendments (AMD)",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  two series on both charts",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Data as of",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  stale source; auto-heals when the live source refreshes",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

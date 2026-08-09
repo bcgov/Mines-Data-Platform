@@ -1,0 +1,47 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "3af1b830830cddd0020d",
+  "position": {
+    "x": 188,
+    "y": 24,
+    "z": 1,
+    "height": 36,
+    "width": 1068,
+    "tabOrder": 1
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Ministry of Mining & Critical Minerals",
+                    "textStyle": {
+                      "fontSize": "18px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "   —   Notice of Work (Issued): Object Model & Definitions",
+                    "textStyle": {
+                      "fontSize": "13px",
+                      "color": "#605E5C",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

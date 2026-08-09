@@ -1,0 +1,145 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "cc33dd44ee55ff6600aa",
+  "position": {
+    "x": 24,
+    "y": 78,
+    "z": 12,
+    "height": 196,
+    "width": 1232,
+    "tabOrder": 12
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "1. Number of NoWs Issued in FY 26/27      2. NoWs Issued same time last FY 25/26      3. NoWs Issued in the last month of current FY 26/27",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "12px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Counts are distinct issued permit actions — New Permits (OGP) and Amendments (AMD) — excluding administrative amendments, based on the permit issue date.",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "The left chart shows NoWs issued per fiscal year (FY2021/22–FY2025/26). The right chart shows NoWs issued by fiscal month from April 2023, broken down by type. Both split into two series: New Permit and Amendments.",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Data reflects the current gold layer; issued-permit counts collapse after FY2021/22 and will read low until the NoW source (now_application / permit_amendment) is refreshed.",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "12px",
+                      "color": "#8a6d1a",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Contact Raj (Rajneesh.1.Gulati@gov.bc.ca) or Nhung (Nhung.Nguyen@gov.bc.ca) for more information.",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#605e5c",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

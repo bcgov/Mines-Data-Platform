@@ -2,20 +2,20 @@ table fact_now_permit
 	lineageTag: 2b94ca64-973e-4095-97f1-5143d8ff1e90
 	sourceLineageTag: [gold].[fact_now_permit]
 
-	/// NoWs issued FYTD: distinct approved (AIA) OGP+AMD permits, excluding administrative amendments, issue_date in current BC fiscal year (Apr 1 -> today). NOTE: reads low/0 until source data refresh (data currently through Jan 2026).
-	measure 'NoWs Issued FYTD' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR FYStart = DATE ( FYStartYear, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[issue_date] >= FYStart, fact_now_permit[issue_date] < CurrentDate + 1, fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] IN { "OGP", "AMD" } )
+	/// ALIGNED to Metabase/corporate report: distinct issued permits (permit_amendment_id), status ACT, types OGP+AMD, exclude administrative amendments, by issue_date. (Previously gated on now_application AIA — corrected.) DEMO ANCHOR: latest fiscal year with >=300 issued (currently FY2020/21); self-heals to true FYTD once current data lands.
+	measure 'NoWs Issued FYTD' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=300), dim_date[fiscal_year]) VAR CurrentDate = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR FYStartYear = IF(MONTH(CurrentDate)>=4, YEAR(CurrentDate), YEAR(CurrentDate)-1) VAR FYStart = DATE(FYStartYear,4,1) RETURN CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[issue_date]>=FYStart, fact_now_permit[issue_date]<CurrentDate+1, fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})
 		formatString: #,##0
 		displayFolder: NoW KPIs
 		lineageTag: 6453ebde-2518-4b50-9ac7-3e169454cfa3
 
-	/// NoWs issued same time last FY (prior FY Apr 1 -> one year ago today).
-	measure 'NoWs Issued Same Time Last FY' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR LastFYStart = DATE ( FYStartYear - 1, 4, 1 ) VAR LastFYSameDate = DATE ( YEAR ( CurrentDate ) - 1, MONTH ( CurrentDate ), DAY ( CurrentDate ) ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[issue_date] >= LastFYStart, fact_now_permit[issue_date] < LastFYSameDate + 1, fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] IN { "OGP", "AMD" } )
+	/// ALIGNED: prior-FY comparison, same definition as NoWs Issued FYTD (ACT, OGP+AMD, exclude admin, permit_amendment_id). Currently FY2019/20.
+	measure 'NoWs Issued Same Time Last FY' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=300), dim_date[fiscal_year]) VAR CurrentDate = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR FYStartYear = IF(MONTH(CurrentDate)>=4, YEAR(CurrentDate), YEAR(CurrentDate)-1) VAR LastFYStart = DATE(FYStartYear-1,4,1) VAR LastFYSameDate = DATE(YEAR(CurrentDate)-1, MONTH(CurrentDate), DAY(CurrentDate)) RETURN CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[issue_date]>=LastFYStart, fact_now_permit[issue_date]<LastFYSameDate+1, fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})
 		formatString: #,##0
 		displayFolder: NoW KPIs
 		lineageTag: 1863dda9-ca1d-49c9-a15a-aaaf2683f4f9
 
-	/// NoWs issued in the last full completed calendar month.
-	measure 'NoWs Issued Last Month' = VAR CurrentDate = TODAY() VAR ThisMonthStart = DATE ( YEAR ( CurrentDate ), MONTH ( CurrentDate ), 1 ) VAR LastMonthStart = EDATE ( ThisMonthStart, -1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[issue_date] >= LastMonthStart, fact_now_permit[issue_date] < ThisMonthStart, fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] IN { "OGP", "AMD" } )
+	/// ALIGNED: last completed month, same definition (ACT, OGP+AMD, exclude admin, permit_amendment_id).
+	measure 'NoWs Issued Last Month' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=300), dim_date[fiscal_year]) VAR CurrentDate = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR ThisMonthStart = DATE(YEAR(CurrentDate), MONTH(CurrentDate),1) VAR LastMonthStart = EDATE(ThisMonthStart,-1) RETURN CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[issue_date]>=LastMonthStart, fact_now_permit[issue_date]<ThisMonthStart, fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})
 		formatString: #,##0
 		displayFolder: NoW KPIs
 		lineageTag: feeceaf0-cca4-4632-8bff-19043a076285
@@ -26,14 +26,14 @@ table fact_now_permit
 		displayFolder: NoW KPIs
 		lineageTag: ada82c70-c929-42cf-8679-ee0486840f16
 
-	/// Approved new permits (OGP). Series for the by-type bar charts.
-	measure 'NoWs New Permits' = CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] = "OGP" )
+	/// ALIGNED (Metabase 'New Permit'): distinct issued Original Permits (permit_amendment_id), status ACT, type OGP, exclude admin. By issue_date via dim_date.
+	measure 'NoWs New Permits' = CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code]="OGP")
 		formatString: #,##0
 		displayFolder: NoW Trend
 		lineageTag: 43c7e063-85cb-45e7-85fe-f7ce38b82716
 
-	/// Approved (non-administrative) amendments (AMD). Series for the by-type bar charts.
-	measure 'NoWs Amendments' = CALCULATE ( DISTINCTCOUNT ( fact_now_permit[permit_id] ), fact_now_permit[is_approved_aia] = 1, fact_now_permit[is_administrative_amendment] = 0, fact_now_permit[permit_amendment_type_code] = "AMD" )
+	/// ALIGNED (Metabase 'Amendments'): distinct issued Amendments (permit_amendment_id), status ACT, type AMD, exclude admin. By issue_date via dim_date.
+	measure 'NoWs Amendments' = CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code]="AMD")
 		formatString: #,##0
 		displayFolder: NoW Trend
 		lineageTag: 4a50c0ae-8d62-4c98-8be7-6366efedf9ca
@@ -44,18 +44,18 @@ table fact_now_permit
 		displayFolder: NoW Trend
 		lineageTag: e4d65f3d-742d-4d4f-a6ff-2558e3fcdb4b
 
-	/// Dynamic KPI card label for FYTD.
-	measure 'Lbl NoW FYTD' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) RETURN "Number of NoWs Issued FYTD " & fy
+	/// Dynamic KPI card label for FYTD (ACT-aligned anchor).
+	measure 'Lbl NoW FYTD' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_amendment_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=300), dim_date[fiscal_year]) VAR d = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR s = IF(MONTH(d)>=4, YEAR(d), YEAR(d)-1) VAR fy = RIGHT(FORMAT(s,"0000"),2) & "/" & RIGHT(FORMAT(s+1,"0000"),2) RETURN "Number of NoWs Issued FYTD " & fy & " (latest complete FY)"
 		displayFolder: NoW Card Labels
 		lineageTag: 9db67784-ef7c-4d58-955d-a6dfd90c742f
 
-	/// Dynamic KPI card label for same-time-last-FY.
-	measure 'Lbl NoW Same Last FY' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fyp = FORMAT ( s - 1, "0000" ) & "/" & RIGHT ( FORMAT ( s, "0000" ), 2 ) RETURN "Number of NoWs Issued same time Last FY " & fyp
+	/// Dynamic KPI card label for same-time-last-FY (ACT-aligned anchor).
+	measure 'Lbl NoW Same Last FY' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_amendment_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=300), dim_date[fiscal_year]) VAR d = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR s = IF(MONTH(d)>=4, YEAR(d), YEAR(d)-1) VAR fyp = FORMAT(s-1,"0000") & "/" & RIGHT(FORMAT(s,"0000"),2) RETURN "Number of NoWs Issued same time Last FY " & fyp
 		displayFolder: NoW Card Labels
 		lineageTag: b7f5b215-98b5-4ada-9191-e962a419ae5c
 
-	/// Dynamic KPI card label for last completed month.
-	measure 'Lbl NoW Last Month' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) VAR lm = FORMAT ( EOMONTH ( TODAY(), -1 ), "MMMM" ) RETURN "Number of NoWs Issued Last Month " & lm & " FY " & fy
+	/// Dynamic KPI card label for last completed month (ACT-aligned anchor).
+	measure 'Lbl NoW Last Month' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_permit[permit_amendment_id]), fact_now_permit[permit_amendment_status_code]="ACT", fact_now_permit[is_administrative_amendment]=0, fact_now_permit[permit_amendment_type_code] IN {"OGP","AMD"})) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=300), dim_date[fiscal_year]) VAR d = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR s = IF(MONTH(d)>=4, YEAR(d), YEAR(d)-1) VAR fy = RIGHT(FORMAT(s,"0000"),2) & "/" & RIGHT(FORMAT(s+1,"0000"),2) VAR lm = FORMAT(EOMONTH(d,-1),"MMMM") RETURN "Number of NoWs Issued Last Month " & lm & " FY " & fy
 		displayFolder: NoW Card Labels
 		lineageTag: ff2dce0c-7100-465c-97b6-c49f9fe33484
 

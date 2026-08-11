@@ -76,6 +76,12 @@ table fact_inspection
 		displayFolder: Card Labels
 		lineageTag: 59c9a0e9-92f7-4993-ac70-8b2e8874ad3d
 
+	/// Dynamic flag (1/0): 1 when the current context's fiscal year is within the most recent 7 fiscal years (CurrentFY-6..CurrentFY), else 0. Uses TODAY() so it rolls forward automatically. Used as a visual-level filter to drive the dynamic last-7-fiscal-years window on the Inspection Report.
+	measure 'Is Last 7 FY' = VAR CurFY = YEAR(TODAY()) - IF(MONTH(TODAY())>=4,0,1) VAR FY = SELECTEDVALUE(dim_date[fiscal_year]) RETURN IF(NOT ISBLANK(FY) && FY >= CurFY-6 && FY <= CurFY, 1, 0)
+		formatString: 0
+		isHidden
+		lineageTag: fac82391-39cc-42b7-b8ca-af1d9f786228
+
 	column inspection_id
 		dataType: int64
 		formatString: 0

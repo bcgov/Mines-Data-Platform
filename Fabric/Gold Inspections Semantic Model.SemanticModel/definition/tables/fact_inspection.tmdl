@@ -59,6 +59,12 @@ table fact_inspection
 		displayFolder: Inspections KPIs
 		lineageTag: dcca6c58-2b1d-47ee-ab29-8b485adf5ac3
 
+	/// Dynamic flag (1/0): 1 when the current context's fiscal year is within the most recent 7 fiscal years (CurrentFY-6..CurrentFY), else 0. Uses TODAY() so it rolls forward automatically. Used as a visual-level filter to drive the dynamic last-7-fiscal-years window on the Inspection Report.
+	measure 'Is Last 7 FY' = VAR CurFY = YEAR(TODAY()) - IF(MONTH(TODAY())>=4,0,1) VAR FY = SELECTEDVALUE(dim_date[fiscal_year]) RETURN IF(NOT ISBLANK(FY) && FY >= CurFY-6 && FY <= CurFY, 1, 0)
+		formatString: 0
+		isHidden
+		lineageTag: fac82391-39cc-42b7-b8ca-af1d9f786228
+
 	/// Year-over-year change: FYTD minus same-time-last-FY (apples-to-apples comparable windows).
 	measure 'Inspections YoY Delta' = [Inspections FYTD] - [Inspections Same Time Last FY]
 		formatString: +#,0;-#,0;0
@@ -76,11 +82,216 @@ table fact_inspection
 		displayFolder: Card Labels
 		lineageTag: 59c9a0e9-92f7-4993-ac70-8b2e8874ad3d
 
-	/// Dynamic flag (1/0): 1 when the current context's fiscal year is within the most recent 7 fiscal years (CurrentFY-6..CurrentFY), else 0. Uses TODAY() so it rolls forward automatically. Used as a visual-level filter to drive the dynamic last-7-fiscal-years window on the Inspection Report.
-	measure 'Is Last 7 FY' = VAR CurFY = YEAR(TODAY()) - IF(MONTH(TODAY())>=4,0,1) VAR FY = SELECTEDVALUE(dim_date[fiscal_year]) RETURN IF(NOT ISBLANK(FY) && FY >= CurFY-6 && FY <= CurFY, 1, 0)
-		formatString: 0
-		isHidden
-		lineageTag: fac82391-39cc-42b7-b8ca-af1d9f786228
+	/// Total inspections in the last completed fiscal year. Feeds the hub 'what changed' narrative.
+	measure 'Inspections Prev FY Total' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= DATE ( s - 1, 4, 1 ), fact_inspection[inspection_date] < DATE ( s, 4, 1 ) )
+		formatString: #,0
+		displayFolder: Hub
+		lineageTag: 07b186af-8609-47af-96ca-0d044c3e2b40
+
+	/// Freshness pill on the hub intro tile. Latest inspection date in gold - never typed in.
+	measure 'Hub Data As At' = "Data as at " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMMM yyyy" )
+		displayFolder: Hub
+		lineageTag: 99752c34-26c7-4c09-9b38-462fc63748c7
+
+	/// Interim next-refresh line on the hub intro tile (monthly cadence until the pipeline runs daily).
+	measure 'Hub Next Refresh' = "Next refresh: " & FORMAT ( EOMONTH ( TODAY (), 0 ) + 1, "d MMMM yyyy" )
+		displayFolder: Hub
+		lineageTag: 46a4015d-4f37-4d31-9de5-bd0b6bf373b9
+
+	/// Footer line on the Inspections report card in the hub.
+	measure 'Hub Updated Inspections' = "Updated " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMM yyyy" )
+		displayFolder: Hub
+		lineageTag: 2be42d0f-39b6-47f3-8c6a-9aab9c724fa6
+
+	/// Trust-tag state for the Inspections card. Single point of change until the validation/metadata layer lands.
+	measure 'Hub Trust Inspections' = "Certified"
+		displayFolder: Hub
+		lineageTag: 15d9043d-cdf7-4180-8ac9-cb1c5bc782ce
+
+	/// Hub 'what changed this month' narrative for Inspections. Every figure is a live measure - nothing hard-coded.
+	measure 'Hub Changed Inspections' = VAR f = [Inspections FYTD] VAR p = [Inspections Same Time Last FY] VAR lm = [Inspections Last Month] VAR pf = [Inspections Prev FY Total] VAR t = [Inspections Service Plan Target] VAR dlt = f - p VAR pct = DIVIDE ( dlt, p ) VAR dir = SWITCH ( TRUE (), ABS ( pct ) < 0.02, "effectively flat against", dlt > 0, "up from", "down from" ) VAR s = IF ( MONTH ( TODAY () ) >= 4, YEAR ( TODAY () ), YEAR ( TODAY () ) - 1 ) VAR pfy = "FY" & FORMAT ( s - 1, "0000" ) & "/" & RIGHT ( FORMAT ( s, "0000" ), 2 ) VAR mth = FORMAT ( EOMONTH ( TODAY (), -1 ), "MMMM" ) VAR vt = IF ( pf >= t, "at or above", "below" ) RETURN FORMAT ( f, "#,0" ) & " completed FYTD, " & dir & " " & FORMAT ( p, "#,0" ) & " at the same point last year. " & mth & " contributed " & FORMAT ( lm, "#,0" ) & ". " & pfy & " finished at " & FORMAT ( pf, "#,0" ) & ", " & vt & " the " & FORMAT ( t, "#,0" ) & " Service Plan target."
+		displayFolder: Hub
+		lineageTag: 7d044269-be38-46a4-889e-acb56de01493
+
+	/// Trust-tag state for the Incidents card. Provisional until the Incidents report is built and validated.
+	measure 'Hub Trust Incidents' = "Provisional"
+		displayFolder: Hub
+		lineageTag: 4daf75d5-6ebc-4300-a91e-19d3d980bb0d
+
+	/// Trust-tag state for the Notice of Work card. Provisional while the now_application source extract is stale.
+	measure 'Hub Trust NoW' = "Provisional"
+		displayFolder: Hub
+		lineageTag: ee5f6af2-7120-4f63-87e1-dbb4f5ac4d2b
+
+	/// Footer line on the Incidents report card in the hub.
+	measure 'Hub Updated Incidents' = "Not yet published"
+		displayFolder: Hub
+		lineageTag: 3070ba27-16dd-4a15-a360-37ce0f613d4c
+
+	/// Footer line on the Notice of Work report card in the hub.
+	measure 'Hub Updated NoW' = "Source extract stale"
+		displayFolder: Hub
+		lineageTag: 7573e029-7a1b-496b-a6fa-13b328678615
+
+	/// Hub 'what changed' text for Incidents. Honest placeholder rather than an empty card.
+	measure 'Hub Changed Incidents' = "Report not yet built. Commentary lands with the Incidents build - no figures are shown until they can be validated."
+		displayFolder: Hub
+		lineageTag: 76758f22-8a28-445b-86a1-c586681836ac
+
+	/// Hub 'what changed' text for Notice of Work. Honest placeholder rather than an empty card.
+	measure 'Hub Changed NoW' = "Permitting logic is built and matches the corporate report, but the now_application source extract has not landed since April 2025. Figures publish once the full extract is refreshed."
+		displayFolder: Hub
+		lineageTag: b40ef8d5-d493-4287-aa9b-c141ff10a9b4
+
+	/// Trust-badge label - validated and approved.
+	measure 'Hub Badge Certified' = "Certified"
+		displayFolder: Hub
+		lineageTag: 18eff42a-c2c5-4911-8226-5b67ecc7801b
+
+	/// Trust-badge label - owner recommends, not yet certified.
+	measure 'Hub Badge Promoted' = "Promoted"
+		displayFolder: Hub
+		lineageTag: 01dc123c-2c20-4a49-b539-94e3dfd47294
+
+	/// Trust-badge label - visible but not yet validated.
+	measure 'Hub Badge Provisional' = "Provisional"
+		displayFolder: Hub
+		lineageTag: 07d04935-79cf-407f-b538-6527bd6c8ffa
+
+	/// Trust-badge label - ad-hoc or user-built content.
+	measure 'Hub Badge Not Validated' = "Not validated"
+		displayFolder: Hub
+		lineageTag: dd104d71-3ef1-429f-93e4-f0408d4baae5
+
+	/// Trust state for the Inspection planning map card.
+	measure 'Hub Trust Planning Map' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: 608d8013-f5b7-453c-b82e-1606350ac884
+
+	/// Trust state for the Permit turnaround card.
+	measure 'Hub Trust Permit Turnaround' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: 9f210646-d332-4593-b928-71233b2774b8
+
+	/// Trust state for the Mineral Titles extract card.
+	measure 'Hub Trust Mineral Titles' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: d12aaed9-fde3-4fe0-9bd9-016386b4d634
+
+	/// Trust state for the Dictionary and lineage card.
+	measure 'Hub Trust Dictionary' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: 9a93d5bb-2da4-45ec-8b44-72c58235e4e6
+
+	/// Footer line on the Inspection planning map card.
+	measure 'Hub Updated Planning Map' = "In design - GIS team"
+		displayFolder: Hub
+		lineageTag: 78d606ad-e120-4944-92b6-828091f23aae
+
+	/// Footer line on the Permit turnaround card.
+	measure 'Hub Updated Permit Turnaround' = "In design"
+		displayFolder: Hub
+		lineageTag: 2e1e6ee0-5367-4384-b3df-eecf18f7a6a1
+
+	/// Footer line on the Mineral Titles extract card.
+	measure 'Hub Updated Mineral Titles' = "Source: Mineral Titles Online"
+		displayFolder: Hub
+		lineageTag: 3965db98-4b28-4c4f-814d-a87e723d1bef
+
+	/// Footer line on the Dictionary and lineage card.
+	measure 'Hub Updated Dictionary' = "Maintained by MDS"
+		displayFolder: Hub
+		lineageTag: 4b99223e-5959-402a-8b58-95d45f20d9ab
+
+	/// Hub what-changed line for Inspections, written for field and planning use.
+	measure 'Hub Changed Inspections Ops' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR pfy = "FY" & FORMAT ( sy - 1, "0000" ) & "/" & RIGHT ( FORMAT ( sy, "0000" ), 2 ) RETURN FORMAT ( [Inspections FYTD], "#,0" ) & " completed FYTD against " & FORMAT ( [Inspections Same Time Last FY], "#,0" ) & " at the same point last year. " & pfy & " closed at " & FORMAT ( [Inspections Prev FY Total], "#,0" ) & " against a " & FORMAT ( [Inspections Service Plan Target], "#,0" ) & " target - the planning map is what steers which sites are visited next."
+		displayFolder: Hub
+		lineageTag: cdd90d85-1b08-41d7-9008-e6f888458906
+
+	/// Hub what-changed line for the Inspection planning map.
+	measure 'Hub Changed Planning Map' = "Provisional. Risk criteria are not yet agreed, so the tile is visible and labelled rather than hidden - the operational tier explicitly rejected hiding unvalidated metrics."
+		displayFolder: Hub
+		lineageTag: a03f3563-517c-4a8f-b414-7d2abac1a518
+
+	/// Hub what-changed line for Notice of Work, written for permitting staff.
+	measure 'Hub Changed NoW Permitting' = "Permitting logic is built and matches the corporate report, counting distinct permit_id on permit-side ACT status. Figures publish once the now_application extract is current."
+		displayFolder: Hub
+		lineageTag: 3e46207b-14a6-448c-8cdd-d7d913482227
+
+	/// Hub what-changed line for administrative amendments.
+	measure 'Hub Changed Admin Amendments' = "Administrative amendments are excluded from the headline permit count and carried as a separate series. Worth separating in any turnaround measure rather than folding them in."
+		displayFolder: Hub
+		lineageTag: 63623fc5-a1cd-47f6-8b0f-541261c3199f
+
+	/// Hub what-changed line for the Mineral Titles extract.
+	measure 'Hub Changed Mineral Titles' = "Provisional. Sourced from Mineral Titles Online - the join to permitted sites is not yet certified, so the tile is labelled rather than hidden."
+		displayFolder: Hub
+		lineageTag: b64f2f02-5f52-47bf-9de8-0bb14c64d9d7
+
+	/// Saved audit window - current fiscal year to date. Dates recalculate.
+	measure 'Hub Window FYTD' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "1 April " & FORMAT ( sy, "0000" ) & " to " & FORMAT ( d, "d MMMM yyyy" ) & " - all three reports, applied at page level and overridable per visual."
+		displayFolder: Hub
+		lineageTag: d6bce1de-4f1c-4fb7-908b-6e349692621f
+
+	/// Saved audit window - same period last fiscal year. Dates recalculate.
+	measure 'Hub Window Same Last FY' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "1 April " & FORMAT ( sy - 1, "0000" ) & " to " & FORMAT ( DATE ( YEAR ( d ) - 1, MONTH ( d ), DAY ( d ) ), "d MMMM yyyy" ) & " - the comparison behind every same time last FY figure on the executive view."
+		displayFolder: Hub
+		lineageTag: e40b4a3a-6a14-4d77-849f-21fd4cf1168e
+
+	/// Saved audit window - rolling five fiscal years. Dates recalculate.
+	measure 'Hub Window Rolling 5' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "FY" & FORMAT ( sy - 5, "0000" ) & "/" & RIGHT ( FORMAT ( sy - 4, "0000" ), 2 ) & " to FY" & FORMAT ( sy - 1, "0000" ) & "/" & RIGHT ( FORMAT ( sy, "0000" ), 2 ) & " - the window behind the Service Plan target trend and the NoW type mix."
+		displayFolder: Hub
+		lineageTag: 610220d1-ab30-4396-aff1-a11767042329
+
+	/// Definitions page - the DEFINITION line of the worked example.
+	measure 'Hub Def Inspections FYTD' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( sy, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( sy + 1, "0000" ), 2 ) RETURN "Inspections FYTD " & fy & ": count of distinct inspection records with a completed date falling in the current fiscal year to date. Includes Site Visit, Compliance Review, Inspection, Desktop and Meeting types."
+		displayFolder: Hub
+		lineageTag: a14d0751-06c1-4ffa-a597-e18273295779
+
+	/// Definitions page - the SOURCE line of the worked example.
+	measure 'Hub Def Source' = "CORE and NRIS to bronze to silver to gold.fact_inspection, served through the Gold Inspections Semantic Model in Direct Lake mode."
+		displayFolder: Hub
+		lineageTag: 4e5f8b1d-435b-4b27-b6ba-fd51e31176d7
+
+	/// Definitions page - the LAST REFRESH line. Reads the data, not a typed date.
+	measure 'Hub Def Last Refresh' = "Data current through " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMMM yyyy" ) & ". Refresh cadence is monthly until the pipeline runs daily."
+		displayFolder: Hub
+		lineageTag: 10815d6c-2996-4b57-be0a-9095af96a2e0
+
+	/// Definitions page - the VALIDATED BY line.
+	measure 'Hub Def Validated By' = "Reconciled against the Ministry corporate report before publication. Fabric Certify is admin-gated, so Promoted is the highest endorsement we can set today."
+		displayFolder: Hub
+		lineageTag: 7a535d55-192c-4087-8303-052f84f9fed8
+
+	/// Definitions page - fiscal calendar rule. Recalculates each year.
+	measure 'Hub Rule Fiscal Year' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "April to March. FY" & RIGHT ( FORMAT ( sy, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( sy + 1, "0000" ), 2 ) & " runs 1 April " & FORMAT ( sy, "0000" ) & " to 31 March " & FORMAT ( sy + 1, "0000" ) & ". Every FYTD figure is measured to today within that window."
+		displayFolder: Hub
+		lineageTag: 6991e367-20ae-481d-ae64-67c7330aa8ee
+
+	/// Definitions page - inspection counting rule.
+	measure 'Hub Rule Inspections' = "Distinct inspection_id counted on inspection_date. No de-duplication by mine or inspector - one inspection record is one inspection."
+		displayFolder: Hub
+		lineageTag: dba24731-9e4e-476c-b61e-3efe9437d08a
+
+	/// Definitions page - Notice of Work counting rule.
+	measure 'Hub Rule NoW' = "Distinct permit_id counted on issue_date, filtered to permit-side ACT status. Administrative amendments are excluded from the headline and reported as a separate series."
+		displayFolder: Hub
+		lineageTag: ccd692d5-85ad-4600-95bc-509be7c97a02
+
+	/// Definitions page - Service Plan target rule.
+	measure 'Hub Rule Target' = "Service Plan target of " & FORMAT ( [Inspections Service Plan Target], "#,0" ) & " inspections per fiscal year, drawn as a reference line rather than a data series so it never enters a count."
+		displayFolder: Hub
+		lineageTag: a3d49061-64d9-4754-9da8-a93253b1966f
+
+	/// Access state - the line under the request-access buttons.
+	measure 'Hub Access Note' = "Access is granted by audience, not by report. Rajneesh Gulati or Nhung Nguyen can add you to the right one."
+		displayFolder: Hub
+		lineageTag: 39366f03-b735-454e-a847-675a1674c874
+
+	/// Stale-refresh state - the warning banner. Dates come from the data.
+	measure 'Hub Stale Warning' = "The " & FORMAT ( EOMONTH ( TODAY (), 0 ) + 1, "d MMMM" ) & " refresh has not completed. Figures below are still as at " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMMM yyyy" ) & " and should not be quoted as current. MDS is notified automatically."
+		displayFolder: Hub
+		lineageTag: c13ea8f3-7406-423c-8b8c-b64d4ab6ccb4
 
 	column inspection_id
 		dataType: int64

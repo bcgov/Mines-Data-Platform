@@ -121,10 +121,6 @@
         }
       ]
     },
-    "visualLink": {
-      "type": "PageNavigation",
-      "navigationSection": "b0000000000000000006"
-    },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
       "title": [

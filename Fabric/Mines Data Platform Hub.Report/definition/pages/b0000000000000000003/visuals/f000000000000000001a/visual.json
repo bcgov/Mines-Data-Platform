@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "f000000000000000001a",
+  "position": {
+    "x": 44,
+    "y": 308,
+    "z": 2600,
+    "height": 62,
+    "width": 354,
+    "tabOrder": 2600
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "How many NoW permits have been issued, split by new, amended and amalgamated, and administrative amendments?",
+                    "textStyle": {
+                      "fontSize": "10px",
+                      "color": "#252423"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

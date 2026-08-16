@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "f000000000000000001c",
+  "position": {
+    "x": 948,
+    "y": 300,
+    "z": 2800,
+    "height": 42,
+    "width": 280,
+    "tabOrder": 2800
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Ad-hoc or user-built content. Distinct grey styling so it is never mistaken for a governed figure.",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#252423"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

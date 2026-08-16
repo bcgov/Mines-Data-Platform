@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "f0000000000000000035",
+  "position": {
+    "x": 986,
+    "y": 308,
+    "z": 5300,
+    "height": 62,
+    "width": 250,
+    "tabOrder": 5300
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Where each measure comes from, how it is calculated, and when it was last validated.",
+                    "textStyle": {
+                      "fontSize": "10px",
+                      "color": "#252423"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

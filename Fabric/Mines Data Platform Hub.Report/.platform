@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Mines Data Platform Hub"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "22aaa6e1-aad6-425d-8ec6-65017f13105f"
+  }
+}

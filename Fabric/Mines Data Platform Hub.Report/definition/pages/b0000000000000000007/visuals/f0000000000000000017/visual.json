@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "f0000000000000000017",
+  "position": {
+    "x": 190,
+    "y": 324,
+    "z": 2300,
+    "height": 44,
+    "width": 900,
+    "tabOrder": 2300
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Mines Data Platform is organised into four audiences \u2014 Executive, Compliance & Enforcement, Permitting & Titles, and Audit & Analysis. Your account is not yet a member of any of them, so there is nothing to display.",
+                    "textStyle": {
+                      "fontSize": "10px",
+                      "color": "#605E5C"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "center"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

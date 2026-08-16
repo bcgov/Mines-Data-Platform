@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "f0000000000000000038",
+  "position": {
+    "x": 24,
+    "y": 684,
+    "z": 5600,
+    "height": 32,
+    "width": 1232,
+    "tabOrder": 5600
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Definitions are maintained here as the single source of truth. Power BI cannot auto-sync this page into per-visual tooltips, so any change made here is also applied to the report tooltips as part of the same change request.",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#8A8886"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

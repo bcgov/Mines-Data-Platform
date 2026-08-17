@@ -245,28 +245,23 @@ def pill_card(x, y, w, measure, size=9, color=INK, fill=None, border=None,
 
 def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
            bold=True, align="center", link_to=None):
+    """A shape plus a centred textbox, NOT an actionButton.
+
+    actionButton text does not paint in the Power BI Service - verified on the
+    live reports: the JSON is byte-identical between a button that renders and
+    one that does not, and the label never reaches the DOM, so Share, the
+    persona rail, Open and Submit a change request all drew as empty boxes.
+    A shape carries the fill/border/radius and a textbox carries the label.
+    Nothing is lost: navigation is off anyway because Fabric rejects
+    `visualLink`.
+    """
     need = text_width(label, pt_to_px(size), bold) + 24
     if need > w:
         _issues.append(f"{_state['page']}: button {label!r} w={w} needs {int(need)}")
-    objs = {
-        "icon": [{"properties": {"shapeType": s("blank")}, "selector": {"id": "default"}},
-                 {"properties": {"show": lit("false")}}],
-        "text": [{"properties": {
-            "show": lit("true"), "text": s(label), "fontColor": solid(color),
-            "fontSize": num(size), "bold": lit("true" if bold else "false"),
-            "horizontalAlignment": s(align)}, "selector": {"id": "default"}}],
-        "outline": [{"properties": {"show": lit("false")}}],
-    }
-    if fill:
-        objs["fill"] = [{"properties": {"show": lit("true")}},
-                        {"properties": {"fillColor": solid(fill)},
-                         "selector": {"id": "default"}}]
-    else:
-        objs["fill"] = [{"properties": {"show": lit("false")}}]
-    add("actionButton", x, y, w, h, {"objects": objs},
-        container(border=border, radius=4), link_to=link_to)
+    rect(x, y, w, h, fill=fill, border=border, radius=4)
+    text(x + 8, vcy(y, h), w - 16, [(label, int(round(pt_to_px(size))), color, bold)],
+         align=align, lines=1)
     return h
-
 
 # The widest string each measure actually returns, read back from the live model.
 # cardVisual does not wrap, so every one of these has to fit on ONE line.

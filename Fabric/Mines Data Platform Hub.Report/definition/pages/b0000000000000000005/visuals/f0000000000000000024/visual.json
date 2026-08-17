@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000024",
   "position": {
-    "x": 54,
-    "y": 573,
+    "x": 984,
+    "y": 442,
     "z": 3600,
-    "height": 33,
-    "width": 1052,
+    "height": 54,
+    "width": 431,
     "tabOrder": 3600
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "What every KPI states \u2014 the bundle, not a single signal.",
+                    "value": "Definition not yet agreed, or the source is behind. Visible and labelled \u2014 never hidden.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#605E5C"
+                      "color": "#252423"
                     }
                   }
                 ],

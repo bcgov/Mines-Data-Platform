@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000038",
   "position": {
-    "x": 30,
-    "y": 1036,
+    "x": 1180,
+    "y": 735,
     "z": 5600,
     "height": 33,
-    "width": 1860,
+    "width": 118,
     "tabOrder": 5600
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definitions are maintained here as the single source of truth. Power BI cannot auto-sync this page into per-visual tooltips, so any change made here is applied to the report tooltips as part of the same change request.",
+                    "value": "INSPECTIONS",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#8A8886"
+                      "fontSize": "8px",
+                      "color": "#8A8886",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

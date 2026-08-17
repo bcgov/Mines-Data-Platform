@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003f",
   "position": {
-    "x": 800,
-    "y": 731,
+    "x": 434,
+    "y": 905,
     "z": 6300,
     "height": 82,
     "width": 318,
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Obj Val Same Last FY"
+                  "Property": "Obj Win FYTD"
                 }
               },
-              "queryRef": "fact_inspection.Obj Val Same Last FY",
-              "nativeQueryRef": "Obj Val Same Last FY"
+              "queryRef": "fact_inspection.Obj Win FYTD",
+              "nativeQueryRef": "Obj Win FYTD"
             }
           ]
         }
@@ -56,7 +56,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "13D"
+                  "Value": "9D"
                 }
               }
             },
@@ -72,16 +72,9 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#013366'"
+                      "Value": "'#605E5C'"
                     }
                   }
-                }
-              }
-            },
-            "bold": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
                 }
               }
             }

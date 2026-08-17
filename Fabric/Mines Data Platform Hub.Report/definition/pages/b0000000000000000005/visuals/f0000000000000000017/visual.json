@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000017",
   "position": {
-    "x": 54,
-    "y": 354,
+    "x": 1603,
+    "y": 154,
     "z": 2300,
     "height": 82,
-    "width": 148,
+    "width": 261,
     "tabOrder": 2300
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Badge Certified"
+                  "Property": "Hub Data As At"
                 }
               },
-              "queryRef": "fact_inspection.Hub Badge Certified",
-              "nativeQueryRef": "Hub Badge Certified"
+              "queryRef": "fact_inspection.Hub Data As At",
+              "nativeQueryRef": "Hub Data As At"
             }
           ]
         }
@@ -56,7 +56,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "10D"
                 }
               }
             },
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#0F6CBD'"
+                      "Value": "'#013366'"
                     }
                   }
                 }

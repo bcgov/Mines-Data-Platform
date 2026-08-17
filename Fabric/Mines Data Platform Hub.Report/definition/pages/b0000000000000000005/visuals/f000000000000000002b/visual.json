@@ -3,7 +3,7 @@
   "name": "f000000000000000002b",
   "position": {
     "x": 54,
-    "y": 933,
+    "y": 636,
     "z": 4300,
     "height": 33,
     "width": 126,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "VALIDATED BY",
+                    "value": "DEFINITION",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#8A8886",

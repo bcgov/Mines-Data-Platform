@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001d",
   "position": {
-    "x": 984,
+    "x": 54,
     "y": 354,
     "z": 2900,
     "height": 82,
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Badge Provisional"
+                  "Property": "Hub Badge Certified"
                 }
               },
-              "queryRef": "fact_inspection.Hub Badge Provisional",
-              "nativeQueryRef": "Hub Badge Provisional"
+              "queryRef": "fact_inspection.Hub Badge Certified",
+              "nativeQueryRef": "Hub Badge Certified"
             }
           ]
         }
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8A6100'"
+                      "Value": "'#0F6CBD'"
                     }
                   }
                 }

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001b",
   "position": {
-    "x": 519,
-    "y": 442,
+    "x": 54,
+    "y": 313,
     "z": 2700,
-    "height": 54,
-    "width": 431,
+    "height": 33,
+    "width": 900,
     "tabOrder": 2700
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "The owner recommends it, but it has not been through certification. For reports awaiting MDS sign-off.",
+                    "value": "Shown on every report card and, once the validation layer lands, on every KPI.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#252423"
+                      "color": "#605E5C"
                     }
                   }
                 ],

@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001e",
   "position": {
-    "x": 984,
+    "x": 54,
     "y": 442,
     "z": 3000,
     "height": 54,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definition not yet agreed, or the source is behind. Visible and labelled \u2014 never hidden.",
+                    "value": "Validated and approved by MDS. Used on the corporate reports and every measure derived from them.",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#252423"

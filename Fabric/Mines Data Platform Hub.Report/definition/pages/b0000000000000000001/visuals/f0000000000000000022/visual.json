@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000022",
   "position": {
-    "x": 708,
-    "y": 349,
+    "x": 54,
+    "y": 452,
     "z": 3400,
-    "height": 33,
-    "width": 388,
+    "height": 54,
+    "width": 554,
     "tabOrder": 3400
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Incidents",
+                    "value": "How many inspections have we completed this fiscal year, and how does that track against the Service Plan target?",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],

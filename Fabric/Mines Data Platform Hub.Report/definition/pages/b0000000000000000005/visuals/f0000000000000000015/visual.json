@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000015",
   "position": {
-    "x": 54,
-    "y": 313,
+    "x": 56,
+    "y": 189,
     "z": 2100,
     "height": 33,
-    "width": 900,
+    "width": 1240,
     "tabOrder": 2100
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Shown on every report card and, once the validation layer lands, on every KPI.",
+                    "value": "One page for every definition, so meanings are not scattered across reports. Each figure states what it counts, where it comes from, when it last refreshed and who validated it. Report a disagreement through Request a change.",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],

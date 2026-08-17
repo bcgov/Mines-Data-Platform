@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003f",
   "position": {
-    "x": 54,
-    "y": 667,
+    "x": 1493,
+    "y": 349,
     "z": 6300,
     "height": 33,
-    "width": 620,
+    "width": 231,
     "tabOrder": 6300
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Saved audit windows",
+                    "value": "Dictionary & lineage",
                     "textStyle": {
                       "fontSize": "12px",
                       "color": "#252423",

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001c",
   "position": {
-    "x": 100,
-    "y": 429,
+    "x": 54,
+    "y": 321,
     "z": 2800,
     "height": 33,
-    "width": 1346,
+    "width": 26,
     "tabOrder": 2800
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "The button writes a work item through Power Automate \u2014 no separate form to find and no email that gets lost.",
+                    "value": "1",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#605E5C"
+                      "color": "#FFFFFF",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000027",
   "position": {
-    "x": 54,
-    "y": 735,
+    "x": 1449,
+    "y": 442,
     "z": 3900,
-    "height": 33,
-    "width": 126,
+    "height": 54,
+    "width": 431,
     "tabOrder": 3900
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "SOURCE",
+                    "value": "Ad-hoc or user-built content. Distinct grey styling so it is never mistaken for a governed figure.",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#252423"
                     }
                   }
                 ],

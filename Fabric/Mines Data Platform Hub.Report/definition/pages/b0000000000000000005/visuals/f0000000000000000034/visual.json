@@ -3,10 +3,10 @@
   "name": "f0000000000000000034",
   "position": {
     "x": 1180,
-    "y": 834,
+    "y": 540,
     "z": 5200,
     "height": 33,
-    "width": 118,
+    "width": 686,
     "tabOrder": 5200
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "NOTICE OF WORK",
+                    "value": "Counting rules and the fiscal calendar",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
+                      "fontSize": "12px",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }

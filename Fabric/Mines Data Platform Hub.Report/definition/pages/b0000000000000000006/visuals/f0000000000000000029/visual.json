@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000029",
   "position": {
-    "x": 1520,
-    "y": 406,
+    "x": 100,
+    "y": 555,
     "z": 4100,
     "height": 33,
-    "width": 346,
+    "width": 600,
     "tabOrder": 4100
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Opens the Power Automate flow in this report.",
+                    "value": "The outcome is published",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

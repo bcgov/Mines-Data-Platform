@@ -3,7 +3,7 @@
   "name": "f000000000000000002c",
   "position": {
     "x": 194,
-    "y": 909,
+    "y": 612,
     "z": 4400,
     "height": 82,
     "width": 912,
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Def Validated By"
+                  "Property": "Hub Def Inspections FYTD"
                 }
               },
-              "queryRef": "fact_inspection.Hub Def Validated By",
-              "nativeQueryRef": "Hub Def Validated By"
+              "queryRef": "fact_inspection.Hub Def Inspections FYTD",
+              "nativeQueryRef": "Hub Def Inspections FYTD"
             }
           ]
         }

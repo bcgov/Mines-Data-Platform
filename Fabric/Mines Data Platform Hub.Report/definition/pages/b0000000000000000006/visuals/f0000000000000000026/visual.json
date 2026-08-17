@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000026",
   "position": {
-    "x": 1520,
-    "y": 280,
+    "x": 100,
+    "y": 507,
     "z": 3800,
     "height": 33,
-    "width": 346,
+    "width": 1346,
     "tabOrder": 3800
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Raise it now",
+                    "value": "The named owner on the report card is accountable for the answer, rather than a shared inbox.",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

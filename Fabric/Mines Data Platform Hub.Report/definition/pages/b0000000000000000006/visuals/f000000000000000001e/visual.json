@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001e",
   "position": {
-    "x": 54,
-    "y": 477,
+    "x": 100,
+    "y": 351,
     "z": 3000,
     "height": 33,
-    "width": 26,
+    "width": 1346,
     "tabOrder": 3000
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "3",
+                    "value": "Report, figure, and what you expected instead. The current filter context and \"data as at\" date are attached automatically.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

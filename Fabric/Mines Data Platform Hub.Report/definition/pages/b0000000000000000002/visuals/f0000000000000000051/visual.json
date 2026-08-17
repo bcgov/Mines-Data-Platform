@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000051",
   "position": {
-    "x": 30,
-    "y": 1036,
+    "x": 1566,
+    "y": 768,
     "z": 8100,
     "height": 33,
-    "width": 1860,
+    "width": 300,
     "tabOrder": 8100
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "The GIS team is folded into this audience rather than given its own tab \u2014 their work here is inspection planning, and they consume curated data through APIs.",
+                    "value": "Nhung Nguyen",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#8A8886"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

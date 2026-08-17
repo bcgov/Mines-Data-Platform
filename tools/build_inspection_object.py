@@ -166,24 +166,20 @@ def pill(x, y, w, measure, size=9, color=INK, fill=None, border=None, ph=PILL_H)
 
 
 def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None, bold=True):
+    """A shape plus a centred textbox, NOT an actionButton.
+
+    actionButton text does not paint in the Power BI Service - verified on the
+    live report: the JSON is byte-identical to a hub button and the label is
+    absent from the DOM either way, so every button rendered as an empty box.
+    A shape carries the fill/border/radius and a textbox carries the label,
+    both of which render reliably. Nothing is lost: page navigation is off
+    anyway because Fabric rejects `visualLink`.
+    """
     if text_width(label, pt_to_px(size), bold) + 26 > w:
         _issues.append(f"{_state['page']}: button {label!r} too narrow ({w})")
-    objs = {"icon": [{"properties": {"shapeType": s("blank")},
-                      "selector": {"id": "default"}},
-                     {"properties": {"show": lit("false")}}],
-            "text": [{"properties": {"show": lit("true"), "text": s(label),
-                                     "fontColor": solid(color), "fontSize": num(size),
-                                     "bold": lit("true" if bold else "false"),
-                                     "horizontalAlignment": s("center")},
-                      "selector": {"id": "default"}}],
-            "outline": [{"properties": {"show": lit("false")}}]}
-    if fill:
-        objs["fill"] = [{"properties": {"show": lit("true")}},
-                        {"properties": {"fillColor": solid(fill)},
-                         "selector": {"id": "default"}}]
-    else:
-        objs["fill"] = [{"properties": {"show": lit("false")}}]
-    add("actionButton", x, y, w, h, {"objects": objs}, container(border=border))
+    rect(x, y, w, h, fill=fill, border=border, radius=4)
+    text(x + 8, vcy(y, h), w - 16, [(label, int(round(pt_to_px(size))), color, bold)],
+         align="center", lines=1)
 
 
 def start(pid, name):

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000000e",
   "position": {
-    "x": 56,
-    "y": 154,
+    "x": 220,
+    "y": 84,
     "z": 1400,
     "height": 33,
-    "width": 800,
+    "width": 203,
     "tabOrder": 1400
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Request a change",
+                    "value": "Compliance & Enforcement",
                     "textStyle": {
-                      "fontSize": "17px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "fontSize": "13px",
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

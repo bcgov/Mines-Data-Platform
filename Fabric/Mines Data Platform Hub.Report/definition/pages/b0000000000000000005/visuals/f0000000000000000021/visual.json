@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000021",
   "position": {
-    "x": 1449,
+    "x": 519,
     "y": 442,
     "z": 3300,
     "height": 54,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Ad-hoc or user-built content. Distinct grey styling so it is never mistaken for a governed figure.",
+                    "value": "The owner recommends it, but it has not been through certification. For reports awaiting MDS sign-off.",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#252423"

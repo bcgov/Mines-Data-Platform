@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000041",
   "position": {
-    "x": 1520,
-    "y": 667,
+    "x": 68,
+    "y": 759,
     "z": 6500,
     "height": 33,
-    "width": 340,
+    "width": 154,
     "tabOrder": 6500
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Contacts & help",
+                    "value": "Inspections",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "10px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

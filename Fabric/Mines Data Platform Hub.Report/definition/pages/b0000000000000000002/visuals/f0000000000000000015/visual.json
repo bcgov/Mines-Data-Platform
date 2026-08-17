@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000015",
   "position": {
-    "x": 180,
-    "y": 261,
+    "x": 56,
+    "y": 154,
     "z": 2100,
     "height": 33,
-    "width": 340,
+    "width": 800,
     "tabOrder": 2100
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "3 items in this audience",
+                    "value": "Start here \u2014 Compliance & Enforcement",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "17px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

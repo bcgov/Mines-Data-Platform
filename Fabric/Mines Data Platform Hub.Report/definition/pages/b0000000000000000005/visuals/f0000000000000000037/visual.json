@@ -3,7 +3,7 @@
   "name": "f0000000000000000037",
   "position": {
     "x": 1312,
-    "y": 909,
+    "y": 612,
     "z": 5500,
     "height": 82,
     "width": 554,
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Rule Target"
+                  "Property": "Hub Rule Fiscal Year"
                 }
               },
-              "queryRef": "fact_inspection.Hub Rule Target",
-              "nativeQueryRef": "Hub Rule Target"
+              "queryRef": "fact_inspection.Hub Rule Fiscal Year",
+              "nativeQueryRef": "Hub Rule Fiscal Year"
             }
           ]
         }

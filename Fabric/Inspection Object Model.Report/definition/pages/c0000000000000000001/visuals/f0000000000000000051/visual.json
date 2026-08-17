@@ -2,85 +2,33 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000051",
   "position": {
-    "x": 1532,
-    "y": 891,
+    "x": 30,
+    "y": 1036,
     "z": 8100,
-    "height": 74,
-    "width": 318,
+    "height": 33,
+    "width": 1860,
     "tabOrder": 8100
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_inspection"
-                    }
-                  },
-                  "Property": "Obj Win Prev FY"
-                }
-              },
-              "queryRef": "fact_inspection.Obj Win Prev FY",
-              "nativeQueryRef": "Obj Win Prev FY"
-            }
-          ]
-        }
-      }
-    },
+    "visualType": "textbox",
     "objects": {
-      "label": [
+      "general": [
         {
           "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
-      "value": [
-        {
-          "properties": {
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "9D"
-                }
-              }
-            },
-            "horizontalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'left'"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#605E5C'"
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Inspection is the reference object. Notice of Work and Incident reuse this frame unchanged \u2014 only the identity metadata differs (inspector_idir becomes permit_type and application_status).",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#8A8886"
                     }
                   }
-                }
+                ],
+                "horizontalTextAlignment": "left"
               }
-            }
-          },
-          "selector": {
-            "id": "default"
+            ]
           }
         }
       ]

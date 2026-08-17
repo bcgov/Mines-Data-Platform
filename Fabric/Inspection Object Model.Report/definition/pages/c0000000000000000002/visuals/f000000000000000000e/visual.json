@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000000e",
   "position": {
-    "x": 352,
-    "y": 250,
+    "x": 52,
+    "y": 322,
     "z": 1400,
     "height": 33,
-    "width": 628,
+    "width": 288,
     "tabOrder": 1400
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "WHAT IT COUNTS",
+                    "value": "KPI",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#8A8886",

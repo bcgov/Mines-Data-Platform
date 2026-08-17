@@ -369,12 +369,12 @@ table fact_inspection
 		lineageTag: 0b1e0014-0000-4000-8000-000000000014
 
 	/// Object page - plain-language statement of what the data does and does not cover.
-	measure 'Obj Coverage Note' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fyStart = DATE ( fy, 4, 1 ) VAR d = TODAY () RETURN IF ( ISBLANK ( mx ), "No inspection data is present in gold.", IF ( mx >= d, "Gold covers the full fiscal year to date - every window on this page is complete.", "Gold ends " & FORMAT ( mx, "d MMMM yyyy" ) & ", so windows running past that date are incomplete. Figures are shown and labelled rather than hidden." ) )
+	measure 'Obj Coverage Note' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN IF ( ISBLANK ( mx ), "No inspection data is present in gold.", IF ( mx >= d, "Gold covers the full fiscal year to date - every window on this page is complete.", "Gold ends " & FORMAT ( mx, "d MMMM yyyy" ) & ", so windows running past that date are incomplete. Figures are shown and labelled rather than hidden." ) )
 		displayFolder: Object
 		lineageTag: 0b1e0015-0000-4000-8000-000000000015
 
 	/// Object page - where this object sits in the bronze / silver / gold medallion, per the 5 Aug ask.
-	measure 'Obj Layer' = "Gold  ·  lh_gold.fact_inspection  ·  built from CORE and NRIS via the bronze and silver layers"
+	measure 'Obj Layer' = "Gold  ·  lh_gold.fact_inspection"
 		displayFolder: Object
 		lineageTag: 0b1e0016-0000-4000-8000-000000000016
 

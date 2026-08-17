@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000015",
   "position": {
-    "x": 992,
-    "y": 297,
+    "x": 352,
+    "y": 357,
     "z": 2100,
-    "height": 74,
-    "width": 540,
+    "height": 82,
+    "width": 620,
     "tabOrder": 2100
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Obj Win Total"
+                  "Property": "Obj Def Total"
                 }
               },
-              "queryRef": "fact_inspection.Obj Win Total",
-              "nativeQueryRef": "Obj Win Total"
+              "queryRef": "fact_inspection.Obj Def Total",
+              "nativeQueryRef": "Obj Def Total"
             }
           ]
         }
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#605E5C'"
+                      "Value": "'#252423'"
                     }
                   }
                 }

@@ -3,10 +3,10 @@
   "name": "f0000000000000000031",
   "position": {
     "x": 52,
-    "y": 816,
+    "y": 843,
     "z": 4900,
     "height": 33,
-    "width": 180,
+    "width": 700,
     "tabOrder": 4900
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "SOURCE",
+                    "value": "Where these figures come from",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
+                      "fontSize": "12px",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }

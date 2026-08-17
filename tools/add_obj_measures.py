@@ -72,14 +72,13 @@ add("Obj Trust Prev FY",
 
 # --- coverage / medallion / identity ------------------------------------------
 add("Obj Coverage Note",
-    COVER + FY + 'VAR fyStart = DATE ( fy, 4, 1 ) VAR d = TODAY () '
-    'RETURN IF ( ISBLANK ( mx ), "No inspection data is present in gold.", '
+    COVER + FY + 'RETURN IF ( ISBLANK ( mx ), "No inspection data is present in gold.", '
     'IF ( mx >= d, "Gold covers the full fiscal year to date - every window on this page is complete.", '
     '"Gold ends " & FORMAT ( mx, "d MMMM yyyy" ) & ", so windows running past that date are incomplete. '
     'Figures are shown and labelled rather than hidden." ) )',
     "Object page - plain-language statement of what the data does and does not cover.")
 add("Obj Layer",
-    '"Gold  ·  lh_gold.fact_inspection  ·  built from CORE and NRIS via the bronze and silver layers"',
+    '"Gold  ·  lh_gold.fact_inspection"',
     "Object page - where this object sits in the bronze / silver / gold medallion, per the 5 Aug ask.")
 add("Obj Record Count",
     'VAR n = DISTINCTCOUNT ( fact_inspection[inspection_id] ) VAR m = DISTINCTCOUNT ( fact_inspection[mine_guid] ) '

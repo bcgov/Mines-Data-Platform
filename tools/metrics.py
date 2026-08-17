@@ -87,7 +87,9 @@ def tb_height(txt, box_w, font_px, bold=False, lines=None):
 
 
 # --- card sizing -------------------------------------------------------------
-CARD_CONTENT_H = 40   # measured 36-37 whatever the point size, +3 margin
+CARD_CONTENT_H = 48   # measured again on the live report: 41 at 9pt, 45 at
+                      # 13pt against 40 available. The earlier 36-37 reading was
+                      # taken from cards that were themselves still short.
 
 
 def card_line_h(size_pt=10):

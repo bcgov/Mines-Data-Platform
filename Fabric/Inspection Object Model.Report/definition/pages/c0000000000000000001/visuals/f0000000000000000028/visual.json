@@ -3,7 +3,7 @@
   "name": "f0000000000000000028",
   "position": {
     "x": 1308,
-    "y": 355,
+    "y": 411,
     "z": 4000,
     "height": 40,
     "width": 560,
@@ -52,7 +52,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Open the Inspections report'"
+                  "Value": "'View all definitions'"
                 }
               }
             },
@@ -61,7 +61,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#013366'"
                     }
                   }
                 }
@@ -113,28 +113,10 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             }
-          }
-        },
-        {
-          "properties": {
-            "fillColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
           }
         }
       ]
@@ -156,7 +138,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#013366'"
+                      "Value": "'#E1DFDD'"
                     }
                   }
                 }

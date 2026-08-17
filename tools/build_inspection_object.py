@@ -257,7 +257,7 @@ y += TILE_H + 14
 # --- three columns: identity | relationships | call to actions ---------------
 GAP = 24
 COL_W = (CONTENT_W - GAP * 2) // 3
-COL_H = 320
+COL_H = 310
 IDENTITY_CORE = ["inspection_id  —  key", "external_id", "inspection_date",
                  "completed_date", "inspection_status_id"]
 IDENTITY_META = ["inspector_idir", "business_area", "assessment_sub_type",
@@ -286,9 +286,7 @@ for i, title in enumerate(["IDENTITY", "RELATIONSHIPS", "CALL TO ACTIONS"]):
                                lines=1) - 6
 
         elif i == 1:
-            cy += text(x + 22, cy, COL_W - 44,
-                       [("Live from the model, not drawn by hand.", 9, MUTED, False)],
-                       lines=1) + 4
+            cy += 2
             for m, colour in [("Obj Rel Mine", BLUE), ("Obj Rel Type", PURPLE),
                               ("Obj Rel Date", GREEN)]:
                 rect(x + 22, cy, 4, card_height(9), fill=colour, radius=0)
@@ -311,8 +309,7 @@ for i, title in enumerate(["IDENTITY", "RELATIONSHIPS", "CALL TO ACTIONS"]):
 y += COL_H + 14
 
 # --- derived metrics ---------------------------------------------------------
-COVER_Y = H - card_height(9) - 6
-DM_H = (COVER_Y - 14) - y
+DM_H = (H - 44 - 12) - y
 rect(MARGIN, y, CONTENT_W, DM_H, fill=WHITE, border=LINE)
 with region(MARGIN, y, CONTENT_W, DM_H, "derived metrics panel"):
     cy = y + 12
@@ -339,7 +336,10 @@ with region(MARGIN, y, CONTENT_W, DM_H, "derived metrics panel"):
             ky += card_height(9) + 6
             card(kx + 16, ky, kw - 32, win_m, size=9, color=MUTED)
 
-card(MARGIN, COVER_Y, CONTENT_W, "Obj Coverage Note", size=9, color=FAINT)
+text(MARGIN, H - 44, CONTENT_W,
+     [("Inspection is the reference object. Notice of Work and Incident reuse this "
+       "frame unchanged — only the identity metadata differs (inspector_idir becomes "
+       "permit_type and application_status).", 9, FAINT, False)], lines=1)
 n1 = finish()
 
 # =============================================================================
@@ -350,42 +350,43 @@ chrome("Every KPI: what it counts, the exact date logic, its trust state and whe
        "the data sits")
 
 y = HEADER_H + 16
-rect(MARGIN, y, CONTENT_W, 96, fill=WHITE, border=LINE)
-with region(MARGIN, y, CONTENT_W, 96, "defs intro"):
-    cy = y + 14
-    cy += text(MARGIN + 26, cy, 900,
-               [("Definitions — Inspection", 17, NAVY, True)])
-    text(MARGIN + 26, cy + 2, CONTENT_W - 60,
-         [("Each KPI can use a different date filter, so the window is stated "
-           "explicitly next to every figure. These lines are measures — change the "
-           "definition once in the model and it changes everywhere.", 10, INK, False)],
-         lines=1)
-y += 96 + 16
+INTRO_H = 12 + 33 + 33 + card_height(9) + 12
+rect(MARGIN, y, CONTENT_W, INTRO_H, fill=WHITE, border=LINE)
+with region(MARGIN, y, CONTENT_W, INTRO_H, "defs intro"):
+    cy = y + 12
+    cy += text(MARGIN + 26, cy, 900, [("Definitions — Inspection", 17, NAVY, True)])
+    cy += text(MARGIN + 26, cy, CONTENT_W - 60,
+               [("Each KPI can use a different date filter, so the window is stated "
+                 "explicitly next to every figure. These lines are measures — change "
+                 "the definition once in the model and it changes everywhere.",
+                 10, INK, False)], lines=1)
+    card(MARGIN + 26, cy, CONTENT_W - 60, "Obj Coverage Note", size=9, color=MUTED)
+y += INTRO_H + 14
 
 HDR = ["KPI", "WHAT IT COUNTS", "DATE WINDOW", "TRUST"]
 COLS = [300, 640, 560, 240]
-row_h = card_height(9) + 12
-TBL_H = 14 + 33 + len(KPIS) * row_h + 16
+row_h = card_height(9) + 8
+TBL_H = 12 + 29 + len(KPIS) * row_h + 12
 rect(MARGIN, y, CONTENT_W, TBL_H, fill=WHITE, border=LINE)
 with region(MARGIN, y, CONTENT_W, TBL_H, "definitions table"):
-    cy = y + 14
+    cy = y + 12
     cx = MARGIN + 22
     for i, hcol in enumerate(HDR):
         text(cx, cy, COLS[i] - 12, [(hcol, 8, FAINT, True)], lines=1)
         cx += COLS[i]
-    cy += 33
+    cy += 29
     for label, val_m, def_m, win_m, trust_m, colour in KPIS:
         rect(MARGIN + 22, cy, CONTENT_W - 44, 1, fill=LINE, radius=0)
         cx = MARGIN + 22
-        rect(cx, cy + 14, 4, card_height(9), fill=colour, radius=0)
-        text(cx + 14, vcy(cy + 14, card_height(9)), COLS[0] - 40,
+        rect(cx, cy + 6, 4, card_height(9), fill=colour, radius=0)
+        text(cx + 14, vcy(cy + 6, card_height(9)), COLS[0] - 40,
              [(label, 10, INK, True)], lines=1)
         cx += COLS[0]
-        card(cx, cy + 14, COLS[1] - 20, def_m, size=9, color=INK)
+        card(cx, cy + 6, COLS[1] - 20, def_m, size=9, color=INK)
         cx += COLS[1]
-        card(cx, cy + 14, COLS[2] - 20, win_m, size=9, color=MUTED)
+        card(cx, cy + 6, COLS[2] - 20, win_m, size=9, color=MUTED)
         cx += COLS[2]
-        card(cx, cy + 14, COLS[3] - 20, trust_m, size=9, color=NAVY, bold=True)
+        card(cx, cy + 6, COLS[3] - 20, trust_m, size=9, color=NAVY, bold=True)
         cy += row_h
 y += TBL_H + 16
 
@@ -397,12 +398,11 @@ with region(MARGIN, y, CONTENT_W, PROV_H, "provenance panel"):
     cy = y + 14
     cy += text(MARGIN + 22, cy, 700, [("Where these figures come from", 12, INK, True)],
                lines=1) + 4
-    half = (CONTENT_W - 44 - 24) // 2
+    qw = (CONTENT_W - 44 - 20 * 3) // 4
     for k, (label, m) in enumerate(PROV):
-        px = MARGIN + 22 + (k % 2) * (half + 24)
-        py = cy + (k // 2) * (card_height(9) + 8)
-        text(px, vcy(py, card_height(9)), 180, [(label, 8, FAINT, True)], lines=1)
-        card(px + 190, py, half - 190, m, size=9, color=INK)
+        px = MARGIN + 22 + k * (qw + 20)
+        py = cy + text(px, cy, qw, [(label, 8, FAINT, True)], lines=1) - 4
+        card(px, py, qw, m, size=9, color=INK)
 
 text(MARGIN, H - 44, CONTENT_W,
      [("Power BI cannot auto-sync a central definitions library into per-visual "

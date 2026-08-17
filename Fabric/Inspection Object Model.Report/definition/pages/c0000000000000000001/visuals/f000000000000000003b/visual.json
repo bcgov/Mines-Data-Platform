@@ -3,10 +3,10 @@
   "name": "f000000000000000003b",
   "position": {
     "x": 434,
-    "y": 811,
+    "y": 905,
     "z": 5900,
-    "height": 74,
-    "width": 148,
+    "height": 82,
+    "width": 318,
     "tabOrder": 5900
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Obj Trust FYTD"
+                  "Property": "Obj Win FYTD"
                 }
               },
-              "queryRef": "fact_inspection.Obj Trust FYTD",
-              "nativeQueryRef": "Obj Trust FYTD"
+              "queryRef": "fact_inspection.Obj Win FYTD",
+              "nativeQueryRef": "Obj Win FYTD"
             }
           ]
         }
@@ -63,7 +63,7 @@
             "horizontalAlignment": {
               "expr": {
                 "Literal": {
-                  "Value": "'center'"
+                  "Value": "'left'"
                 }
               }
             },
@@ -72,16 +72,9 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#013366'"
+                      "Value": "'#605E5C'"
                     }
                   }
-                }
-              }
-            },
-            "bold": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
                 }
               }
             }

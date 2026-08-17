@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000010",
   "position": {
-    "x": 1552,
-    "y": 250,
+    "x": 992,
+    "y": 322,
     "z": 1600,
     "height": 33,
-    "width": 228,
+    "width": 548,
     "tabOrder": 1600
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "TRUST",
+                    "value": "DATE WINDOW",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#8A8886",

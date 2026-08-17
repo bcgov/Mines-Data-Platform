@@ -22,7 +22,13 @@ cardVisual
       (404-34, 44-34). A pill card 165x44 reported clientWidth 116 /
       clientHeight 0 (165-49, 44-49 clamped to zero) - which is exactly why
       every trust badge rendered empty.
-    * the value line needs ~1.95x the font px: 12px -> 21, 13.333px -> 26.
+    * the content block is a FIXED ~36px whatever the point size - not a
+      multiple of the font. Measured once the cards finally had room: 12px
+      text reported scrollHeight 36, 13.333px reported 37, against the 29/31
+      of available height a 63/65px box gave them. (While clientHeight was 0
+      the card under-reported scrollHeight as 21, which is what led the
+      previous pass to size these at 63px.) So a card box needs 36 + 34 = 70
+      minimum; 74 is used for margin.
 
 Segoe UI advance width, measured from rendered strings:
     "Certified"          9 chars, 12px bold      -> 47px  (0.435/char/px)
@@ -81,9 +87,13 @@ def tb_height(txt, box_w, font_px, bold=False, lines=None):
 
 
 # --- card sizing -------------------------------------------------------------
-def card_line_h(size_pt):
-    """Height the value line occupies inside the card's content area."""
-    return int(math.ceil(pt_to_px(size_pt) * 1.95)) + 1
+CARD_CONTENT_H = 40   # measured 36-37 whatever the point size, +3 margin
+
+
+def card_line_h(size_pt=10):
+    """Height the value block occupies inside the card's content area.
+    Constant: it does NOT scale with the point size."""
+    return CARD_CONTENT_H
 
 
 def card_pad(pill=False):
@@ -91,8 +101,8 @@ def card_pad(pill=False):
 
 
 def card_height(size_pt=10, pill=False):
-    """Smallest box height that actually renders the value."""
-    return card_line_h(size_pt) + card_pad(pill) + CARD_SLACK
+    """Smallest box height that actually renders the value. 74px plain."""
+    return card_line_h(size_pt) + card_pad(pill)
 
 
 def card_min_width(sample_text, size_pt, pill=False, bold=False):

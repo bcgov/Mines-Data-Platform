@@ -222,7 +222,7 @@ def measure_card(x, y, w, measure, size=10, color=INK, align="center", bold=Fals
     return box_h
 
 
-PILL_H = 44
+PILL_H = 48          # the visible pill; the card box around it is taller
 
 
 def pill_card(x, y, w, measure, size=9, color=INK, fill=None, border=None,
@@ -235,11 +235,12 @@ def pill_card(x, y, w, measure, size=9, color=INK, fill=None, border=None,
     so it keeps the cheaper 34px chrome and can overhang the pill invisibly.
     Returns the pill's visual height, which is what the layout should reserve.
     """
-    rect(x, y, w, pill_h, fill=fill, border=border, radius=pill_h // 2)
     ch = card_height(size)
-    measure_card(x, y + (pill_h - ch) // 2, w, measure, size=size, color=color,
-                 align="center", bold=bold, sample=sample)
-    return pill_h
+    rect(x, y + (ch - pill_h) // 2, w, pill_h, fill=fill, border=border,
+         radius=pill_h // 2)
+    measure_card(x, y, w, measure, size=size, color=color, align="center",
+                 bold=bold, sample=sample)
+    return ch
 
 
 def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
@@ -388,8 +389,7 @@ def intro_tile(title, body, pill="Hub Data As At", refresh="Hub Next Refresh"):
     body_w = min(1240, W - PILL_W - MARGIN - 90)
     th = tb_height(title, 800, 17, True)
     bh = tb_height(body, body_w, 10)
-    refresh_h = card_height(9)
-    stack_h = PILL_H + 6 + refresh_h              # pill + the refresh line
+    stack_h = card_height(10)          # both pills sit on ONE row
     tile_h = 14 + max(th + 2 + bh, stack_h) + 14
     rect(MARGIN, INTRO_Y, CONTENT_W, tile_h, fill=WHITE, border=LINE)
     with region(MARGIN, INTRO_Y, CONTENT_W, tile_h, "intro tile"):
@@ -398,9 +398,8 @@ def intro_tile(title, body, pill="Hub Data As At", refresh="Hub Next Refresh"):
         px = W - MARGIN - 26 - PILL_W
         pill_card(px, INTRO_Y + 14, PILL_W, pill, size=10, color=NAVY,
                   fill=PILL_BG, border=PILL_BG, sample=S_ASAT)
-        measure_card(px + PILL_W - REFRESH_W, INTRO_Y + 14 + PILL_H + 6,
-                     REFRESH_W, refresh, size=9, color=MUTED, align="right",
-                     sample=S_REFRESH)
+        measure_card(px - REFRESH_W - 10, INTRO_Y + 14, REFRESH_W, refresh,
+                     size=9, color=MUTED, align="right", sample=S_REFRESH)
     return INTRO_Y + tile_h
 
 
@@ -424,7 +423,7 @@ def report_cards(cards, top=None):
     th = TB_LINE * t_lines + TB_VPAD
     qh = TB_LINE * q_lines + TB_VPAD
     upd_h = card_height(9)
-    head_h = max(th, PILL_H)
+    head_h = max(th, card_height(9))
     ch = 22 + head_h + 8 + (TB_LINE + TB_VPAD) + 4 + qh + 14 + 1 + 12 + upd_h + 22
     for i, (title, chip, trust_m, state, updated_m, question) in enumerate(cards):
         x = MARGIN + i * (cw + gap)
@@ -434,7 +433,7 @@ def report_cards(cards, top=None):
             rect(x + pad, cy + (head_h - 16) // 2, 16, 16, fill=chip, radius=3)
             text(x + pad + 26, cy + (head_h - th) // 2, title_w,
                  [(title, title_size, INK, True)], lines=t_lines)
-            badge(x + cw - pad - BADGE_W, cy + (head_h - PILL_H) // 2,
+            badge(x + cw - pad - BADGE_W, cy + (head_h - card_height(9)) // 2,
                   trust_m, state)
             cy += head_h + 8
             cy += text(x + pad, cy, 240, [("ANSWERS", 8, FAINT, True)],
@@ -465,14 +464,15 @@ def commentary_panel(heading, subtitle, rows, y, h):
     cy += text(x + 24, cy, 760, [(subtitle, 9, MUTED, False)]) + 2
     # cardVisual does not wrap, so the label sits ABOVE and the card gets the
     # panel's full width - the widest commentary sentence needs ~1260px.
-    card_h = card_height(9)
-    rowh = TB_LINE + TB_VPAD + card_h
+    rowh = card_height(9)
+    label_w = 168
+    card_x = x + 24 + 14 + label_w
+    card_w = x + w - 24 - card_x
     for label, colour, m in rows:
         rect(x + 24, cy, 4, rowh, fill=colour, radius=0)
-        text(x + 24 + 14, cy, w - 24 - 14 - 24, [(label, 10, INK, True)],
+        text(x + 24 + 14, vcy(cy, rowh), label_w - 14, [(label, 10, INK, True)],
              lines=1)
-        measure_card(x + 24 + 14, cy + TB_LINE + TB_VPAD, w - 24 - 14 - 24, m,
-                     size=9, color=INK, align="left")
+        measure_card(card_x, cy, card_w, m, size=9, color=INK, align="left")
         cy += rowh + 10
     _regions.pop()
     return y + h
@@ -573,13 +573,15 @@ def kv_panel(x, y, w, h, heading, sub, rows, label_w=160, size=10, color=INK):
     if sub:
         cy += text(x + 24, cy, w - 48, [(sub, 9, MUTED, False)], lines=1)
     cy += 6
-    rowh = TB_LINE + TB_VPAD + card_height(size)
+    rowh = card_height(size)
+    card_x = x + 24 + label_w
+    card_w = x + w - 24 - card_x
     avail = (y + h - 14) - cy
-    pitch = max(rowh + 6, avail // len(rows))
+    pitch = min(max(rowh + 8, avail // len(rows)), rowh + 24)
     for label, m in rows:
-        text(x + 24, cy, w - 48, [(label, 8, FAINT, True)], lines=1)
-        measure_card(x + 24, cy + TB_LINE + TB_VPAD, w - 48, m, size=size,
-                     color=color, align="left")
+        text(x + 24, vcy(cy, rowh), label_w - 14, [(label, 8, FAINT, True)],
+             lines=1)
+        measure_card(card_x, cy, card_w, m, size=size, color=color, align="left")
         cy += pitch
     _regions.pop()
     return y + h
@@ -711,7 +713,7 @@ BADGE_DOC = [
 ]
 col_w = CONTENT_W // 4
 desc_lines = max(wrap_lines(d, col_w - 34 - TB_HPAD, 9) for _, _, d in BADGE_DOC)
-LEG_H = 14 + 33 + 33 + 8 + PILL_H + 6 + (TB_LINE * desc_lines + TB_VPAD) + 14
+LEG_H = 14 + 33 + 33 + 8 + card_height(9) + 6 + (TB_LINE * desc_lines + TB_VPAD) + 14
 rect(MARGIN, LEG_Y, CONTENT_W, LEG_H, fill=WHITE, border=LINE)
 ly = LEG_Y + 14
 ly += text(MARGIN + 24, ly, 600, [("Trust badges — four states", 12, INK, True)])
@@ -721,7 +723,7 @@ ly += text(MARGIN + 24, ly, 900,
 for i, (m, state, desc) in enumerate(BADGE_DOC):
     bx = MARGIN + 24 + i * col_w
     badge(bx, ly, m, state)
-    text(bx, ly + PILL_H + 6, col_w - 34, [(desc, 9, INK, False)],
+    text(bx, ly + card_height(9) + 6, col_w - 34, [(desc, 9, INK, False)],
          lines=desc_lines)
 
 # anatomy of a definition + counting rules
@@ -897,7 +899,7 @@ for i, (label, chip) in enumerate([("Inspections", BLUE), ("Incidents", RED),
     text(mx + 42, sy + 14, mini_w - 70, [(label, 11, MUTED, True)], lines=1)
     pill_card(mx + 20, sy + 54, mini_w - 40, "Hub Data As At", size=9,
               color=ALERT, fill="#FDF3F0", border=ALERT, sample=S_ASAT)
-    text(mx + 20, sy + 54 + PILL_H + 6, mini_w - 40,
+    text(mx + 20, sy + 54 + card_height(9) + 6, mini_w - 40,
          [("Not current — verify against source before quoting.", 9, MUTED, False)],
          lines=1)
 footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for severity, "

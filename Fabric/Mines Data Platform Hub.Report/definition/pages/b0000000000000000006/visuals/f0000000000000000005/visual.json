@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000005",
   "position": {
-    "x": 152,
-    "y": 14,
+    "x": 190,
+    "y": 18,
     "z": 500,
-    "height": 22,
-    "width": 420,
+    "height": 33,
+    "width": 520,
     "tabOrder": 500
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Mines Data Platform",
                     "textStyle": {
-                      "fontSize": "16px",
+                      "fontSize": "17px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

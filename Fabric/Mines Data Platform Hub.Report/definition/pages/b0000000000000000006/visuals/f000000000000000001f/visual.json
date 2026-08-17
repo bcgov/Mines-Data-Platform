@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001f",
   "position": {
-    "x": 80,
-    "y": 396,
+    "x": 100,
+    "y": 514,
     "z": 3100,
-    "height": 36,
-    "width": 716,
+    "height": 33,
+    "width": 906,
     "tabOrder": 3100
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "The named owner on the report card is accountable for the answer, not a shared inbox.",
+                    "value": "The named owner on the report card is accountable for the answer, rather than a shared inbox.",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

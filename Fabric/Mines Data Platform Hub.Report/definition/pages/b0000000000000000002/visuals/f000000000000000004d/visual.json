@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004d",
   "position": {
-    "x": 24,
-    "y": 684,
+    "x": 30,
+    "y": 936,
     "z": 7700,
-    "height": 32,
-    "width": 1232,
+    "height": 33,
+    "width": 1540,
     "tabOrder": 7700
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "The GIS team is folded into this audience rather than given its own tab \u2014 their work here is inspection planning, and they consume curated data through APIs rather than through app navigation.",
+                    "value": "The GIS team is folded into this audience rather than given its own tab \u2014 their work here is inspection planning, and they consume curated data through APIs.",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#8A8886"

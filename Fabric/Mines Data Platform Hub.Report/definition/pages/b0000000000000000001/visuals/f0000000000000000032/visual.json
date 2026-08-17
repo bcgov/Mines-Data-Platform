@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000032",
   "position": {
-    "x": 48,
-    "y": 451,
+    "x": 54,
+    "y": 627,
     "z": 5000,
-    "height": 19,
-    "width": 520,
+    "height": 33,
+    "width": 760,
     "tabOrder": 5000
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Curated commentary \u2014 1 short paragraph per report",
+                    "value": "Curated commentary \u2014 one short paragraph per report",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

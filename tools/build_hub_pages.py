@@ -2,14 +2,25 @@
 """Generate the whole Option C hub: 4 persona pages + definitions + request-a-change
 + access/data states, as PBIR pages.
 
+v2 - laid out against Power BI Service text metrics measured from the live report
+(see metrics.py). v1 was sized against an HTML approximation, which clipped every
+textbox and collapsed every small card.
+
 Every value slot is a cardVisual bound to a measure on the Gold Inspections Semantic
 Model - nothing is typed in (Romil's rule: "313 in FY26/27 must update itself").
-Persona-rail and help buttons carry real PageNavigation links.
+
+Page-navigation links are OFF by default: Fabric's report import schema rejects the
+`visualLink` property. Pass --nav to re-enable once the correct shape is confirmed.
 """
 import json, os, sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from metrics import (TB_LINE, TB_VPAD, TB_HPAD, CARD_LINE, CARD_VPAD,
+                     tb_height, card_height, card_min_width, card_lines,
+                     wrap_lines, text_width, pt_to_px)
+
 ROOT = sys.argv[1]
-NAV = "--no-nav" not in sys.argv          # allow generating a link-free fallback
+NAV = "--nav" in sys.argv
 PAGES_DIR = os.path.join(ROOT, "definition", "pages")
 
 VC = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json"
@@ -25,7 +36,6 @@ PILL_BG = "#E9F1F8"
 BLUE, RED, GREEN, PURPLE = "#1F4E9C", "#C8102E", "#2E8540", "#5C2D91"
 ALERT = "#D83B01"
 
-# Four trust states: (label colour, fill, border)
 BADGE = {
     "certified":   ("#0F6CBD", "#EFF6FC", "#B4D6F0"),
     "promoted":    ("#107C41", "#F1FAF1", "#9FD5A0"),
@@ -33,7 +43,12 @@ BADGE = {
     "notvalid":    (MUTED,     "#F3F2F1", "#D2D0CE"),
 }
 
-W, H = 1280, 720
+# 1600x980 (1.63:1). The 21px line box is fixed in canvas units, so a larger
+# canvas is the only way to buy vertical room without shrinking type below the
+# Service's floor. 1.63 letterboxes ~8% against 16:9 - acceptable, and nothing scrolls.
+W, H = 1600, 980
+MARGIN = 30
+CONTENT_W = W - MARGIN * 2          # 1540
 
 # --- page registry -----------------------------------------------------------
 P_EXEC = "b0000000000000000001"
@@ -46,9 +61,20 @@ P_STATES = "b0000000000000000007"
 
 PERSONAS = [("All", None), ("Executive", P_EXEC), ("Compliance & Enforcement", P_COMP),
             ("Permitting & Titles", P_PERM), ("Audit & Analysis", P_AUDIT)]
-RAIL_GEOM = [(24, 44), (76, 88), (172, 176), (356, 132), (496, 120)]
+
+# Rail geometry derived from the rendered label width (button fonts are points).
+def _rail_geom():
+    x, geom = MARGIN, []
+    for label, _ in PERSONAS:
+        w = int(text_width(label, pt_to_px(10), True) * 1.10) + 36
+        geom.append((x, w))
+        x += w + 10
+    return geom
+
+RAIL_GEOM = _rail_geom()
 
 _state = {"page": None, "n": 0, "visuals": []}
+_issues = []
 
 
 # --- PBIR primitives ---------------------------------------------------------
@@ -82,6 +108,9 @@ def container(bg=None, border=None, radius=4, title=False):
 
 
 def add(vtype, x, y, w, h, visual_body, vc_objects=None, link_to=None):
+    if x < 0 or y < 0 or x + w > W or y + h > H:
+        _issues.append(f"{_state['page']}: {vtype} out of canvas "
+                       f"({x},{y},{w},{h})")
     _state["n"] += 1
     z = _state["n"] * 100
     vid = "f" + format(_state["n"], "019x")
@@ -100,17 +129,29 @@ def add(vtype, x, y, w, h, visual_body, vc_objects=None, link_to=None):
 
 
 # --- element helpers ---------------------------------------------------------
-def text(x, y, w, h, runs, align="left"):
+def vcy(y, h):
+    """Top for a one-line textbox whose glyph should centre on a y..y+h shape.
+    The 21px line box sits TB_VPAD/2 below the box top."""
+    return y + (h - TB_LINE) // 2 - TB_VPAD // 2
+
+
+def text(x, y, w, runs, align="left", lines=None):
+    """Auto-heights to the Service's 21px line box. Returns the height used."""
+    joined = " ".join(r[0] for r in runs)
+    size = max(r[1] for r in runs)
+    bold = any(r[3] for r in runs)
+    h = tb_height(joined, w, size, bold, lines)
     tr = []
-    for value, size, color, bold in runs:
-        style = {"fontSize": f"{size}px", "color": color}
-        if bold:
+    for value, sz, color, bd in runs:
+        style = {"fontSize": f"{sz}px", "color": color}
+        if bd:
             style["fontWeight"] = "bold"
         tr.append({"value": value, "textStyle": style})
-    return add("textbox", x, y, w, h,
-               {"objects": {"general": [{"properties": {
-                   "paragraphs": [{"textRuns": tr, "horizontalTextAlignment": align}]}}]}},
-               container(title=False))
+    add("textbox", x, y, w, h,
+        {"objects": {"general": [{"properties": {
+            "paragraphs": [{"textRuns": tr, "horizontalTextAlignment": align}]}}]}},
+        container(title=False))
+    return h
 
 
 def rect(x, y, w, h, fill=None, border=None, radius=4):
@@ -130,12 +171,21 @@ def oval(x, y, w, h, fill):
                container(title=False))
 
 
-def measure_card(x, y, w, h, measure, size=10, color=INK, align="center",
-                 bold=False, bg=None, border=None, radius=4):
+def measure_card(x, y, w, measure, size=10, color=INK, align="center", bold=False,
+                 bg=None, border=None, radius=4, lines=1, sample=None):
+    """Auto-heights from the card line box. `sample` is the widest string the
+    measure can return - used to warn when the box is too narrow to render it."""
+    h = card_height(lines)
+    pill = bool(bg or border)
+    if sample:
+        need = card_min_width(sample, size, pill, bold)
+        if lines == 1 and need > w:
+            _issues.append(f"{_state['page']}: card '{measure}' w={w} needs {need} "
+                           f"for {sample!r}")
     props = {"fontSize": num(size), "horizontalAlignment": s(align), "color": solid(color)}
     if bold:
         props["bold"] = lit("true")
-    return add("cardVisual", x, y, w, h, {
+    add("cardVisual", x, y, w, h, {
         "query": {"queryState": {"Data": {"projections": [{
             "field": {"Measure": {"Expression": {"SourceRef": {"Entity": ENTITY}},
                                   "Property": measure}},
@@ -144,10 +194,14 @@ def measure_card(x, y, w, h, measure, size=10, color=INK, align="center",
             "label": [{"properties": {"show": lit("false")}, "selector": {"id": "default"}}],
             "value": [{"properties": props, "selector": {"id": "default"}}]}},
         container(bg=bg, border=border, radius=radius))
+    return h
 
 
 def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
            bold=True, align="center", link_to=None):
+    need = text_width(label, pt_to_px(size), bold) + 24
+    if need > w:
+        _issues.append(f"{_state['page']}: button {label!r} w={w} needs {int(need)}")
     objs = {
         "icon": [{"properties": {"shapeType": s("blank")}, "selector": {"id": "default"}},
                  {"properties": {"show": lit("false")}}],
@@ -163,116 +217,183 @@ def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
                          "selector": {"id": "default"}}]
     else:
         objs["fill"] = [{"properties": {"show": lit("false")}}]
-    return add("actionButton", x, y, w, h, {"objects": objs},
-               container(border=border, radius=4), link_to=link_to)
+    add("actionButton", x, y, w, h, {"objects": objs},
+        container(border=border, radius=4), link_to=link_to)
+    return h
 
 
-def badge(x, y, w, h, measure, state):
+# Widest string each measure family can return, for width checks.
+S_BADGE = "Not validated"
+S_ASAT = "Data as at 30 September 2026"
+S_REFRESH = "Next refresh: 30 September 2026"
+S_UPDATED = "Source extract stale"
+
+BADGE_W = card_min_width(S_BADGE, 9, pill=True, bold=True) + 8
+PILL_W = card_min_width(S_ASAT, 10, pill=True, bold=True) + 8
+REFRESH_W = card_min_width(S_REFRESH, 9, pill=False) + 8
+
+
+def badge(x, y, measure, state, w=None):
     col, fill, brd = BADGE[state]
-    return measure_card(x, y, w, h, measure, size=9, color=col, bold=True,
-                        bg=fill, border=brd, radius=11)
+    return measure_card(x, y, w or BADGE_W, measure, size=9, color=col, bold=True,
+                        bg=fill, border=brd, radius=card_height(1) // 2,
+                        sample=S_BADGE)
 
 
 # --- shared page chrome ------------------------------------------------------
+HEADER_H = 124
+
+
 def chrome(active_page, show_rail=True):
-    """Backdrop, header band, logo, title, Share, persona rail."""
     rect(0, 0, W, H, fill=BODY, radius=0)
-    rect(0, 0, W, 97, fill=WHITE, radius=0)
-    rect(0, 96, W, 1, fill=LINE, radius=0)
-    add("image", 24, 16, 116, 34, {"objects": {"general": [{"properties": {
+    rect(0, 0, W, HEADER_H - 2, fill=WHITE, radius=0)
+    rect(0, HEADER_H - 2, W, 1, fill=LINE, radius=0)
+    add("image", 28, 22, 145, 42, {"objects": {"general": [{"properties": {
         "imageUrl": {"expr": {"ResourcePackageItem": {
             "PackageName": "RegisteredResources", "PackageType": 1,
             "ItemName": "Logo.png"}}}}}]}}, container(title=False))
-    text(152, 14, 420, 22, [("Mines Data Platform", 16, NAVY, True)])
-    text(152, 33, 420, 19, [("Org app  ·  Mining & Critical Minerals", 9, MUTED, False)])
-    button(1164, 16, 92, 26, "Share", color=NAVY, size=10, border=LINE)
+    text(190, 18, 520, [("Mines Data Platform", 17, NAVY, True)])
+    text(190, 50, 520, [("Org app  ·  Mining & Critical Minerals", 9, MUTED, False)])
+    button(W - 148, 26, 118, 32, "Share", color=NAVY, size=10, border=LINE)
     if not show_rail:
         return
     for (label, target), (x, w) in zip(PERSONAS, RAIL_GEOM):
         active = target == active_page
-        button(x, 60, w, 30, label, color=NAVY if active else MUTED, size=10,
+        button(x, 86, w, 30, label, color=NAVY if active else MUTED, size=10,
                bold=active, link_to=target if target and not active else None)
         if active:
-            rect(x + 8, 90, w - 16, 3, fill=NAVY, radius=0)
+            rect(x + 8, 117, w - 16, 3, fill=NAVY, radius=0)
+
+
+INTRO_Y = HEADER_H + 16          # 140
 
 
 def intro_tile(title, body, pill="Hub Data As At", refresh="Hub Next Refresh"):
-    rect(24, 116, 1232, 90, fill=WHITE, border=LINE)
-    text(48, 128, 640, 26, [(title, 17, NAVY, True)])
-    text(48, 156, 800, 42, [(body, 10, INK, False)])
-    measure_card(996, 130, 236, 26, pill, size=10, color=NAVY, bold=True,
-                 bg=PILL_BG, border=PILL_BG, radius=13)
-    measure_card(996, 162, 236, 20, refresh, size=9, color=MUTED, align="right")
+    body_w = min(1040, W - PILL_W - MARGIN - 90)
+    th = tb_height(title, 800, 17, True)
+    bh = tb_height(body, body_w, 10)
+    tile_h = 14 + th + 2 + bh + 14
+    rect(MARGIN, INTRO_Y, CONTENT_W, tile_h, fill=WHITE, border=LINE)
+    text(MARGIN + 26, INTRO_Y + 14, 800, [(title, 17, NAVY, True)])
+    text(MARGIN + 26, INTRO_Y + 14 + th + 2, body_w, [(body, 10, INK, False)])
+    px = W - MARGIN - 26 - PILL_W
+    measure_card(px, INTRO_Y + 14, PILL_W, pill, size=10, color=NAVY, bold=True,
+                 bg=PILL_BG, border=PILL_BG, radius=card_height(1) // 2,
+                 sample=S_ASAT)
+    measure_card(px + PILL_W - REFRESH_W, INTRO_Y + 14 + card_height(1) + 6,
+                 REFRESH_W, refresh, size=9, color=MUTED, align="right",
+                 sample=S_REFRESH)
+    return INTRO_Y + tile_h
 
 
-def report_cards(cards):
-    """cards = [(title, chip, trust_measure, state, updated_measure, question)]"""
+CARDS_TOP = 316
+
+
+def report_cards(cards, top=None):
     n = len(cards)
-    text(24, 214, 104, 20, [("Your reports", 12, INK, True)])
-    text(130, 216, 300, 18, [(f"{n} items in this audience", 9, MUTED, False)])
-    gap = 24
-    cw = (1232 - gap * (n - 1)) // n
-    cy, ch = 240, 166
+    y0 = top if top is not None else CARDS_TOP
+    lh = text(MARGIN, y0 - 42, 150, [("Your reports", 12, INK, True)])
+    text(MARGIN + 150, y0 - 42, 340,
+         [(f"{n} items in this audience", 9, MUTED, False)])
+    gap = 26
+    cw = (CONTENT_W - gap * (n - 1)) // n
+    pad = 24
+    title_size = 13 if n <= 3 else 12
+    title_w = cw - pad - 26 - BADGE_W - 16
+    q_w = cw - pad * 2
+    q_lines = max(wrap_lines(c[5], q_w - TB_HPAD, 10) for c in cards)
+    t_lines = max(wrap_lines(c[0], title_w - TB_HPAD, title_size, True) for c in cards)
+    th = TB_LINE * t_lines + TB_VPAD
+    qh = TB_LINE * q_lines + TB_VPAD
+    ch = (pad - 6) + max(th, card_height(1)) + 6 + TB_LINE + TB_VPAD + 4 + qh \
+         + 14 + 1 + 12 + card_height(1) + pad - 6
     for i, (title, chip, trust_m, state, updated_m, question) in enumerate(cards):
-        x = 24 + i * (cw + gap)
-        rect(x, cy, cw, ch, fill=WHITE, border=LINE)
-        rect(x + 20, cy + 22, 14, 14, fill=chip, radius=3)
-        bw = 96 if n <= 3 else 84
-        text(x + 42, cy + 16, cw - bw - 60, 26,
-             [(title, 13 if n <= 3 else 12, INK, True)])
-        badge(x + cw - bw - 20, cy + 18, bw, 22, trust_m, state)
-        text(x + 20, cy + 50, 200, 17, [("ANSWERS", 8, FAINT, True)])
-        text(x + 20, cy + 68, cw - 40, 62, [(question, 10, INK, False)])
-        rect(x + 20, cy + 134, cw - 40, 1, fill=LINE, radius=0)
-        measure_card(x + 20, cy + 140, cw - 130, 20, updated_m, size=9,
-                     color=MUTED, align="left")
-        button(x + cw - 104, cy + 138, 84, 22, "Open  →", color=NAVY, size=10)
+        x = MARGIN + i * (cw + gap)
+        rect(x, y0, cw, ch, fill=WHITE, border=LINE)
+        cy = y0 + pad - 6
+        rect(x + pad, cy + 8, 16, 16, fill=chip, radius=3)
+        text(x + pad + 26, cy, title_w, [(title, title_size, INK, True)])
+        badge(x + cw - pad - BADGE_W, cy, trust_m, state)
+        cy += max(th, card_height(1)) + 6
+        cy += text(x + pad, cy, 240, [("ANSWERS", 8, FAINT, True)]) + 4
+        text(x + pad, cy, q_w, [(question, 10, INK, False)], lines=q_lines)
+        cy += qh + 14
+        rect(x + pad, cy, cw - pad * 2, 1, fill=LINE, radius=0)
+        cy += 12
+        measure_card(x + pad, cy, cw - pad * 2 - 150, updated_m, size=9,
+                     color=MUTED, align="left", sample=S_UPDATED)
+        button(x + cw - pad - 132, cy + 6, 132, 32, "Open  →", color=NAVY, size=10)
+    return y0 + ch
 
 
-def commentary_panel(heading, subtitle, rows, x=24, y=414, w=796, h=268):
-    """rows = [(label, colour, measure)]"""
+PANEL_GAP = 26
+COMM_W = 1000
+CONT_W = CONTENT_W - COMM_W - PANEL_GAP
+CONT_X = MARGIN + COMM_W + PANEL_GAP
+
+
+def commentary_panel(heading, subtitle, rows, y, h):
+    x, w = MARGIN, COMM_W
     rect(x, y, w, h, fill=WHITE, border=LINE)
-    text(x + 24, y + 16, 460, 22, [(heading, 12, INK, True)])
-    text(x + 24, y + 37, 520, 19, [(subtitle, 9, MUTED, False)])
-    ry = y + 62
+    cy = y + 14
+    cy += text(x + 24, cy, 620, [(heading, 12, INK, True)])
+    cy += text(x + 24, cy, 760, [(subtitle, 9, MUTED, False)]) + 4
+    label_w = 168
+    card_x = x + 24 + 12 + label_w
+    card_w = x + w - 24 - card_x
+    avail = (y + h - 12) - cy
+    pitch = avail // len(rows)
+    n_lines = max(2, min(3, (pitch - CARD_VPAD - 8) // CARD_LINE))
     for label, colour, m in rows:
-        rect(x + 24, ry, 3, 62, fill=colour, radius=0)
-        text(x + 36, ry, 320, 18, [(label, 10, INK, True)])
-        measure_card(x + 36, ry + 18, w - 84, 44, m, size=10, color=INK, align="left")
-        ry += 68
+        rowh = card_height(n_lines)
+        rect(x + 24, cy, 4, rowh, fill=colour, radius=0)
+        text(x + 24 + 14, cy + 2, label_w - 22, [(label, 10, INK, True)])
+        measure_card(card_x, cy, card_w, m, size=10, color=INK, align="left",
+                     lines=n_lines)
+        cy += rowh + (pitch - rowh)
+    return y + h
 
 
-def contacts_panel(contacts, links, x=836, y=414, w=420, h=268):
+def contacts_panel(contacts, links, y, h):
+    x, w = CONT_X, CONT_W
     rect(x, y, w, h, fill=WHITE, border=LINE)
-    text(x + 24, y + 16, 300, 22, [("Contacts & help", 12, INK, True)])
-    cy = y + 48
+    cy = y + 14
+    cy += text(x + 24, cy, 340, [("Contacts & help", 12, INK, True)]) + 6
     for initials, name, sub in contacts:
-        oval(x + 24, cy, 30, 30, NAVY)
-        text(x + 24, cy + 8, 30, 16, [(initials, 9, WHITE, True)], align="center")
-        text(x + 64, cy - 1, 320, 18, [(name, 10, INK, True)])
-        text(x + 64, cy + 14, 330, 19, [(sub, 9, NAVY, False)])
-        cy += 44
-    rect(x + 24, cy + 6, w - 48, 1, fill=LINE, radius=0)
-    ly = cy + 20
+        oval(x + 24, cy + 2, 34, 34, NAVY)
+        text(x + 24, vcy(cy + 2, 34), 34, [(initials, 9, WHITE, True)],
+             align="center")
+        text(x + 70, cy, w - 94, [(name, 10, INK, True)])
+        text(x + 70, cy + 26, w - 94, [(sub, 9, NAVY, False)], lines=1)
+        cy += 62
+    rect(x + 24, cy + 2, w - 48, 1, fill=LINE, radius=0)
+    cy += 14
     for label, sub, target in links:
-        rect(x + 24, ly + 5, 12, 12, fill=NAVY, radius=2)
-        button(x + 42, ly - 2, 300, 22, label, color=NAVY, size=10, align="left",
+        rect(x + 24, cy + 9, 14, 14, fill=NAVY, radius=2)
+        button(x + 46, cy, w - 94, 30, label, color=NAVY, size=10, align="left",
                link_to=target)
-        text(x + 44, ly + 17, 340, 19, [(sub, 9, MUTED, False)])
-        ly += 44
+        text(x + 48, cy + 28, w - 96, [(sub, 9, MUTED, False)], lines=1)
+        cy += 66
+    return y + h
 
 
-def footnote(txt):
-    text(24, 684, 1232, 32, [(txt, 9, FAINT, False)])
+def footnote(txt, y=None):
+    fy = y if y is not None else H - 44
+    text(MARGIN, fy, CONTENT_W, [(txt, 9, FAINT, False)], lines=1)
+
+
+PANELS_Y = 580
+PANELS_H = H - 44 - 12 - PANELS_Y      # leaves the footnote clear
 
 
 def start_page(page_id, display_name):
-    _state.update(page=page_id, n=0, visuals=[])
+    _state.update(page=display_name, n=0, visuals=[])
+    _state["pid"] = page_id
     _state["display"] = display_name
 
 
-def finish_page(tooltip=False):
-    pid, name = _state["page"], _state["display"]
+def finish_page():
+    pid, name = _state["pid"], _state["display"]
     d = os.path.join(PAGES_DIR, pid)
     os.makedirs(os.path.join(d, "visuals"), exist_ok=True)
     page = {"$schema": PG, "name": pid, "displayName": name,
@@ -302,154 +423,150 @@ CONTACTS_STD = [("RG", "Rajneesh Gulati", "Rajneesh.1.Gulati@gov.bc.ca"),
 
 counts = {}
 
-# =============================================================================
-# PAGE 1 — Executive
-# =============================================================================
-start_page(P_EXEC, "Start here — Executive")
-chrome(P_EXEC)
-intro_tile("Start here — Executive view",
-           "You are viewing the Executive audience of the Mines Data Platform app. It "
-           "contains the three monthly corporate reports at summary level. Operational "
-           "detail sits under the Compliance & Enforcement and Permitting & Titles tabs.")
-report_cards([
-    ("Inspections", BLUE, "Hub Trust Inspections", "certified", "Hub Updated Inspections",
-     "How many inspections have we completed this fiscal year, and how does that track "
-     "against the Service Plan target?"),
-    ("Incidents", RED, "Hub Trust Incidents", "provisional", "Hub Updated Incidents",
-     "How many incidents have been reported this fiscal year, how many were dangerous "
-     "occurrences, and how are injuries and fatalities trending?"),
-    ("Notice of Work", GREEN, "Hub Trust NoW", "provisional", "Hub Updated NoW",
-     "How many Notice of Work permits have been issued, split by new, amended and "
-     "administrative amendments?"),
-])
-commentary_panel("What changed this month",
-                 "Curated commentary — 1 short paragraph per report",
-                 [("Inspections", BLUE, "Hub Changed Inspections"),
-                  ("Incidents", RED, "Hub Changed Incidents"),
-                  ("Notice of Work", GREEN, "Hub Changed NoW")])
-contacts_panel(CONTACTS_STD, HELP_LINKS_STD)
-footnote("Each audience tab above shows only the items made visible to that audience "
-         "under Manage audiences. Executive users never see the operational detail pages.")
-counts["Executive"] = finish_page()
+
+def persona_page(pid, display, title, body, cards, comm_head, comm_sub, comm_rows,
+                 contacts, links, note):
+    start_page(pid, display)
+    chrome(pid)
+    intro_tile(title, body)
+    report_cards(cards)
+    commentary_panel(comm_head, comm_sub, comm_rows, PANELS_Y, PANELS_H)
+    contacts_panel(contacts, links, PANELS_Y, PANELS_H)
+    footnote(note)
+    counts[display] = finish_page()
+
+
+def kv_panel(x, y, w, h, heading, sub, rows, label_w=160, size=10, color=INK):
+    """Heading + optional sub, then label-left / measure-right rows."""
+    rect(x, y, w, h, fill=WHITE, border=LINE)
+    cy = y + 14
+    cy += text(x + 24, cy, w - 48, [(heading, 12, INK, True)])
+    if sub:
+        cy += text(x + 24, cy, w - 48, [(sub, 9, MUTED, False)], lines=1)
+    cy += 6
+    card_x = x + 24 + label_w
+    card_w = x + w - 24 - card_x
+    avail = (y + h - 14) - cy
+    pitch = avail // len(rows)
+    n = max(1, min(3, (pitch - CARD_VPAD - 6) // CARD_LINE))
+    for label, m in rows:
+        text(x + 24, cy + 2, label_w - 12, [(label, 9, FAINT, True)], lines=1)
+        measure_card(card_x, cy, card_w, m, size=size, color=color, align="left",
+                     lines=n)
+        cy += pitch
+    return y + h
+
 
 # =============================================================================
-# PAGE 2 — Compliance & Enforcement
+# PAGES 1-4 - the persona pages
 # =============================================================================
-start_page(P_COMP, "Start here — Compliance & Enforcement")
-chrome(P_COMP)
-intro_tile("Start here — Compliance & Enforcement",
-           "You are viewing the Compliance & Enforcement audience, which also serves the "
-           "GIS team. It adds inspection-planning and mine-site lookup content to the "
-           "corporate inspection and incident reports. Notice of Work sits under the "
-           "Permitting & Titles tab.")
-report_cards([
-    ("Inspections", BLUE, "Hub Trust Inspections", "certified", "Hub Updated Inspections",
-     "How many inspections have we completed, by type, region and inspector — and which "
-     "sites are still unvisited this year?"),
-    ("Incidents", RED, "Hub Trust Incidents", "provisional", "Hub Updated Incidents",
-     "What has been reported, how many were dangerous occurrences, and where are injuries "
-     "and fatalities concentrated?"),
-    ("Inspection planning map", PURPLE, "Hub Trust Planning Map", "provisional",
-     "Hub Updated Planning Map",
-     "Which sites should we visit next, given risk criteria, region and time since last "
-     "inspection?"),
-])
-commentary_panel("What changed this month",
-                 "Curated commentary — written for field and planning use",
-                 [("Inspections", BLUE, "Hub Changed Inspections Ops"),
-                  ("Incidents", RED, "Hub Changed Incidents"),
-                  ("Inspection planning map", PURPLE, "Hub Changed Planning Map")])
-contacts_panel(CONTACTS_STD, HELP_LINKS_OPS)
-footnote("The GIS team is folded into this audience rather than given its own tab — their "
-         "work here is inspection planning, and they consume curated data through APIs "
-         "rather than through app navigation.")
-counts["Compliance & Enforcement"] = finish_page()
+persona_page(
+    P_EXEC, "Start here — Executive", "Start here — Executive view",
+    "You are viewing the Executive audience of the Mines Data Platform app. It contains "
+    "the three monthly corporate reports at summary level. Operational detail sits under "
+    "the Compliance & Enforcement and Permitting & Titles tabs.",
+    [("Inspections", BLUE, "Hub Trust Inspections", "certified", "Hub Updated Inspections",
+      "How many inspections have we completed this fiscal year, and how does that track "
+      "against the Service Plan target?"),
+     ("Incidents", RED, "Hub Trust Incidents", "provisional", "Hub Updated Incidents",
+      "How many incidents have been reported this fiscal year, how many were dangerous "
+      "occurrences, and how are injuries and fatalities trending?"),
+     ("Notice of Work", GREEN, "Hub Trust NoW", "provisional", "Hub Updated NoW",
+      "How many Notice of Work permits have been issued, split by new, amended and "
+      "administrative amendments?")],
+    "What changed this month", "Curated commentary — one short paragraph per report",
+    [("Inspections", BLUE, "Hub Changed Inspections"),
+     ("Incidents", RED, "Hub Changed Incidents"),
+     ("Notice of Work", GREEN, "Hub Changed NoW")],
+    CONTACTS_STD, HELP_LINKS_STD,
+    "Each audience tab above shows only the items made visible to that audience under "
+    "Manage audiences. Executive users never see the operational detail pages.")
+
+persona_page(
+    P_COMP, "Start here — Compliance & Enforcement", "Start here — Compliance & Enforcement",
+    "You are viewing the Compliance & Enforcement audience, which also serves the GIS "
+    "team. It adds inspection-planning and mine-site lookup content to the corporate "
+    "inspection and incident reports. Notice of Work sits under Permitting & Titles.",
+    [("Inspections", BLUE, "Hub Trust Inspections", "certified", "Hub Updated Inspections",
+      "How many inspections have we completed, by type, region and inspector — and which "
+      "sites are still unvisited this year?"),
+     ("Incidents", RED, "Hub Trust Incidents", "provisional", "Hub Updated Incidents",
+      "What has been reported, how many were dangerous occurrences, and where are injuries "
+      "and fatalities concentrated?"),
+     ("Inspection planning map", PURPLE, "Hub Trust Planning Map", "provisional",
+      "Hub Updated Planning Map",
+      "Which sites should we visit next, given risk criteria, region and time since last "
+      "inspection?")],
+    "What changed this month", "Curated commentary — written for field and planning use",
+    [("Inspections", BLUE, "Hub Changed Inspections Ops"),
+     ("Incidents", RED, "Hub Changed Incidents"),
+     ("Inspection planning map", PURPLE, "Hub Changed Planning Map")],
+    CONTACTS_STD, HELP_LINKS_OPS,
+    "The GIS team is folded into this audience rather than given its own tab — their work "
+    "here is inspection planning, and they consume curated data through APIs.")
+
+persona_page(
+    P_PERM, "Start here — Permitting & Titles", "Start here — Permitting & Titles",
+    "You are viewing the Permitting & Titles audience: Notice of Work permitting, "
+    "turnaround performance, and Mineral Titles. Inspection and incident reporting sits "
+    "under the Compliance & Enforcement tab.",
+    [("Notice of Work", GREEN, "Hub Trust NoW", "provisional", "Hub Updated NoW",
+      "How many NoW permits have been issued, split by new, amended and amalgamated, and "
+      "administrative amendments?"),
+     ("Permit turnaround", BLUE, "Hub Trust Permit Turnaround", "provisional",
+      "Hub Updated Permit Turnaround",
+      "How long are permits taking from application to decision, and where is the backlog "
+      "concentrated?"),
+     ("Mineral Titles extract", PURPLE, "Hub Trust Mineral Titles", "provisional",
+      "Hub Updated Mineral Titles",
+      "What titles, parcels and authorisations are currently active, and how do they "
+      "relate to permitted sites?")],
+    "What changed this month", "Curated commentary — written for permitting staff",
+    [("Notice of Work", GREEN, "Hub Changed NoW Permitting"),
+     ("Administrative amendments", BLUE, "Hub Changed Admin Amendments"),
+     ("Mineral Titles extract", PURPLE, "Hub Changed Mineral Titles")],
+    CONTACTS_STD, HELP_LINKS_OPS,
+    "Notice of Work counts exclude administrative amendments in the headline measure, but "
+    "include them as a separate series — a definition worth stating on the landing page.")
+
+persona_page(
+    P_AUDIT, "Start here — Audit & Analysis", "Start here — Audit & Analysis",
+    "You are viewing the Audit & Analysis audience: all three corporate reports, plus "
+    "saved time-window presets, exports with context, and the definition and lineage "
+    "panel. Every figure here can be traced to source without writing a query.",
+    [("Inspections", BLUE, "Hub Trust Inspections", "certified", "Hub Updated Inspections",
+      "Inspection counts by type, region and period, with export."),
+     ("Incidents", RED, "Hub Trust Incidents", "provisional", "Hub Updated Incidents",
+      "Incidents, dangerous occurrences, injuries and fatalities by period."),
+     ("Notice of Work", GREEN, "Hub Trust NoW", "provisional", "Hub Updated NoW",
+      "Permits issued by type and period, amendments separated."),
+     ("Dictionary & lineage", PURPLE, "Hub Trust Dictionary", "provisional",
+      "Hub Updated Dictionary",
+      "Where each measure comes from, how it is calculated, and when it was validated.")],
+    "Saved audit windows", "Shared filter presets — the recurring windows this team asks for",
+    [("Current fiscal year to date", BLUE, "Hub Window FYTD"),
+     ("Same period last fiscal year", RED, "Hub Window Same Last FY"),
+     ("Rolling 5 fiscal years", GREEN, "Hub Window Rolling 5")],
+    [("R", "Rebecca", "MDS — definitions & semantics owner"),
+     ("SA", "Sarah Alloisio", "Senior Auditor, Mine Audits Unit")],
+    [("How data is certified", "Validation and approval before publication", P_DEFS),
+     ("Report a data issue", "Flag a count that disagrees with source", P_CHANGE)],
+    "Survey evidence: \"trusted / certified data\" ranked #1 capability, and respondents "
+    "wanted source, definition, last refresh and drill-through together.")
 
 # =============================================================================
-# PAGE 3 — Permitting & Titles
-# =============================================================================
-start_page(P_PERM, "Start here — Permitting & Titles")
-chrome(P_PERM)
-intro_tile("Start here — Permitting & Titles",
-           "You are viewing the Permitting & Titles audience: Notice of Work permitting, "
-           "turnaround performance, and Mineral Titles. Inspection and incident reporting "
-           "sits under the Compliance & Enforcement tab.")
-report_cards([
-    ("Notice of Work", GREEN, "Hub Trust NoW", "provisional", "Hub Updated NoW",
-     "How many NoW permits have been issued, split by new, amended and amalgamated, and "
-     "administrative amendments?"),
-    ("Permit turnaround", BLUE, "Hub Trust Permit Turnaround", "provisional",
-     "Hub Updated Permit Turnaround",
-     "How long are permits taking from application to decision, and where is the backlog "
-     "concentrated?"),
-    ("Mineral Titles extract", PURPLE, "Hub Trust Mineral Titles", "provisional",
-     "Hub Updated Mineral Titles",
-     "What titles, parcels and authorisations are currently active, and how do they relate "
-     "to permitted sites?"),
-])
-commentary_panel("What changed this month",
-                 "Curated commentary — written for permitting staff",
-                 [("Notice of Work", GREEN, "Hub Changed NoW Permitting"),
-                  ("Administrative amendments", BLUE, "Hub Changed Admin Amendments"),
-                  ("Mineral Titles extract", PURPLE, "Hub Changed Mineral Titles")])
-contacts_panel(CONTACTS_STD, HELP_LINKS_OPS)
-footnote("Notice of Work counts exclude administrative amendments in the headline measure, "
-         "but include them as a separate series — a definition worth stating on the landing "
-         "page, not buried in the report.")
-counts["Permitting & Titles"] = finish_page()
-
-# =============================================================================
-# PAGE 4 — Audit & Analysis
-# =============================================================================
-start_page(P_AUDIT, "Start here — Audit & Analysis")
-chrome(P_AUDIT)
-intro_tile("Start here — Audit & Analysis",
-           "You are viewing the Audit & Analysis audience: all three corporate reports, "
-           "plus saved time-window presets, exports with context, and the definition and "
-           "lineage panel. Every figure here can be traced to source without writing a query.")
-report_cards([
-    ("Inspections", BLUE, "Hub Trust Inspections", "certified", "Hub Updated Inspections",
-     "Inspection counts by type, region and period, with export."),
-    ("Incidents", RED, "Hub Trust Incidents", "provisional", "Hub Updated Incidents",
-     "Incidents, dangerous occurrences, injuries and fatalities by period."),
-    ("Notice of Work", GREEN, "Hub Trust NoW", "provisional", "Hub Updated NoW",
-     "Permits issued by type and period, amendments separated."),
-    ("Dictionary & lineage", PURPLE, "Hub Trust Dictionary", "provisional",
-     "Hub Updated Dictionary",
-     "Where each measure comes from, how it is calculated, and when it was last validated."),
-])
-commentary_panel("Saved audit windows",
-                 "Shared filter presets — the recurring windows this team asks for",
-                 [("Current fiscal year to date", BLUE, "Hub Window FYTD"),
-                  ("Same period last fiscal year", RED, "Hub Window Same Last FY"),
-                  ("Rolling 5 fiscal years", GREEN, "Hub Window Rolling 5")])
-contacts_panel([("R", "Rebecca", "MDS — definitions & semantics owner"),
-                ("SA", "Sarah Alloisio", "Senior Auditor, Mine Audits Unit")],
-               [("How data is certified",
-                 "Validation and approval before publication", P_DEFS),
-                ("Report a data issue",
-                 "Flag a count that disagrees with source", P_CHANGE)])
-footnote("Survey evidence: \"trusted / certified data\" ranked #1 capability and respondents "
-         "wanted source, definition, last refresh and drill-through together rather than any "
-         "single trust signal — hence the dictionary tile and the export-with-context link.")
-counts["Audit & Analysis"] = finish_page()
-
-# =============================================================================
-# PAGE 5 — How to read these reports (definitions, sources, trust badges)
+# PAGE 5 - How to read these reports
 # =============================================================================
 start_page(P_DEFS, "How to read these reports")
 chrome("")
-intro_tile("How to read these reports",
-           "One page for every definition, so meanings are not scattered across reports. "
-           "Each figure states what it counts, where it comes from, when it last refreshed "
-           "and who validated it. Report a disagreement through Request a change.")
+y = intro_tile("How to read these reports",
+               "One page for every definition, so meanings are not scattered across "
+               "reports. Each figure states what it counts, where it comes from, when it "
+               "last refreshed and who validated it. Report a disagreement through "
+               "Request a change.")
 
-# --- trust badge legend
-rect(24, 214, 1232, 132, fill=WHITE, border=LINE)
-text(48, 226, 500, 22, [("Trust badges — four states", 12, INK, True)])
-text(48, 247, 700, 19,
-     [("Shown on every report card and, once the validation layer lands, on every KPI.", 9,
-       MUTED, False)])
+# trust badge legend
+LEG_Y = y + 16
 BADGE_DOC = [
     ("Hub Badge Certified", "certified",
      "Validated and approved by MDS. Used on the corporate reports and every measure "
@@ -464,61 +581,51 @@ BADGE_DOC = [
      "Ad-hoc or user-built content. Distinct grey styling so it is never mistaken for a "
      "governed figure."),
 ]
+col_w = CONTENT_W // 4
+desc_lines = max(wrap_lines(d, col_w - 34 - TB_HPAD, 9) for _, _, d in BADGE_DOC)
+LEG_H = 14 + 33 + 33 + 8 + card_height(1) + 6 + (TB_LINE * desc_lines + TB_VPAD) + 14
+rect(MARGIN, LEG_Y, CONTENT_W, LEG_H, fill=WHITE, border=LINE)
+ly = LEG_Y + 14
+ly += text(MARGIN + 24, ly, 600, [("Trust badges — four states", 12, INK, True)])
+ly += text(MARGIN + 24, ly, 900,
+           [("Shown on every report card and, once the validation layer lands, on every "
+             "KPI.", 9, MUTED, False)], lines=1) + 8
 for i, (m, state, desc) in enumerate(BADGE_DOC):
-    bx = 48 + i * 300
-    badge(bx, 274, 96, 22, m, state)
-    text(bx, 300, 280, 42, [(desc, 9, INK, False)])
+    bx = MARGIN + 24 + i * col_w
+    badge(bx, ly, m, state)
+    text(bx, ly + card_height(1) + 6, col_w - 34, [(desc, 9, INK, False)],
+         lines=desc_lines)
 
-# --- anatomy of a definition
-rect(24, 358, 604, 324, fill=WHITE, border=LINE)
-text(48, 370, 500, 22, [("Anatomy of a definition", 12, INK, True)])
-text(48, 391, 560, 19,
-     [("What every KPI states — the bundle, not a single signal.", 9, MUTED, False)])
-ANATOMY = [("DEFINITION", "Hub Def Inspections FYTD"),
-           ("SOURCE", "Hub Def Source"),
-           ("LAST REFRESH", "Hub Def Last Refresh"),
-           ("VALIDATED BY", "Hub Def Validated By")]
-ay = 414
-for label, m in ANATOMY:
-    text(48, ay, 200, 17, [(label, 8, FAINT, True)])
-    measure_card(48, ay + 16, 556, 38, m, size=10, color=INK, align="left")
-    rect(48, ay + 55, 556, 1, fill=LINE, radius=0)
-    ay += 61
-text(48, ay + 2, 560, 19,
-     [("Worked example: the Inspections FYTD headline on the Executive view.", 9,
-       MUTED, False)])
-
-# --- fiscal calendar + counting rules
-rect(652, 358, 604, 324, fill=WHITE, border=LINE)
-text(676, 370, 500, 22, [("Counting rules and the fiscal calendar", 12, INK, True)])
-text(676, 391, 560, 19,
-     [("The date logic behind every headline figure.", 9, MUTED, False)])
-RULES = [("Fiscal year", "Hub Rule Fiscal Year"),
-         ("Inspections", "Hub Rule Inspections"),
-         ("Notice of Work", "Hub Rule NoW"),
-         ("Service Plan target", "Hub Rule Target")]
-ry = 414
-for label, m in RULES:
-    text(676, ry, 240, 19, [(label, 10, INK, True)])
-    measure_card(676, ry + 18, 556, 40, m, size=9, color=INK, align="left")
-    ry += 62
+# anatomy of a definition + counting rules
+BOT_Y = LEG_Y + LEG_H + 16
+BOT_H = (H - 44 - 12) - BOT_Y
+kv_panel(MARGIN, BOT_Y, COMM_W, BOT_H, "Anatomy of a definition",
+         "What every KPI states — the bundle, not a single signal.",
+         [("DEFINITION", "Hub Def Inspections FYTD"),
+          ("SOURCE", "Hub Def Source"),
+          ("LAST REFRESH", "Hub Def Last Refresh"),
+          ("VALIDATED BY", "Hub Def Validated By")], label_w=140)
+kv_panel(CONT_X, BOT_Y, CONT_W, BOT_H, "Counting rules and the fiscal calendar",
+         "The date logic behind every headline figure.",
+         [("FISCAL YEAR", "Hub Rule Fiscal Year"),
+          ("INSPECTIONS", "Hub Rule Inspections"),
+          ("NOTICE OF WORK", "Hub Rule NoW"),
+          ("SERVICE PLAN", "Hub Rule Target")], label_w=132, size=9)
 footnote("Definitions are maintained here as the single source of truth. Power BI cannot "
-         "auto-sync this page into per-visual tooltips, so any change made here is also "
-         "applied to the report tooltips as part of the same change request.")
+         "auto-sync this page into per-visual tooltips, so any change made here is applied "
+         "to the report tooltips as part of the same change request.")
 counts["How to read"] = finish_page()
 
 # =============================================================================
-# PAGE 6 — Request a change
+# PAGE 6 - Request a change
 # =============================================================================
 start_page(P_CHANGE, "Request a change")
 chrome("")
-intro_tile("Request a change",
-           "Something look wrong, missing, or defined differently from how your team uses "
-           "it? Raise it here. Requests are logged against the report and the named owner, "
-           "so nothing depends on remembering who to email.")
+y = intro_tile("Request a change",
+               "Something look wrong, missing, or defined differently from how your team "
+               "uses it? Raise it here. Requests are logged against the report and the "
+               "named owner, so nothing depends on remembering who to email.")
 
-rect(24, 214, 796, 300, fill=WHITE, border=LINE)
-text(48, 230, 500, 22, [("What happens when you submit", 12, INK, True)])
 STEPS = [("1", "You describe the issue",
           "Report, figure, and what you expected instead. The current filter context and "
           "\"data as at\" date are attached automatically."),
@@ -526,103 +633,149 @@ STEPS = [("1", "You describe the issue",
           "The button writes a work item through Power Automate — no separate form to find "
           "and no email that gets lost."),
          ("3", "The section owner reviews it",
-          "The named owner on the report card is accountable for the answer, not a shared "
-          "inbox."),
+          "The named owner on the report card is accountable for the answer, rather than a "
+          "shared inbox."),
          ("4", "The outcome is published",
           "If a definition changes, it changes on How to read these reports and in the "
           "report tooltip at the same time.")]
-sy = 260
+TOP_Y = y + 16
+step_w = COMM_W - 48 - 46
+step_lines = max(wrap_lines(d, step_w - TB_HPAD, 9) for _, _, d in STEPS)
+step_h = 33 + (TB_LINE * step_lines + TB_VPAD) + 12
+TOP_H = 14 + 33 + 8 + step_h * len(STEPS) + 6
+rect(MARGIN, TOP_Y, COMM_W, TOP_H, fill=WHITE, border=LINE)
+sy = TOP_Y + 14
+sy += text(MARGIN + 24, sy, 600, [("What happens when you submit", 12, INK, True)]) + 8
 for n, title, desc in STEPS:
-    oval(48, sy, 22, 22, NAVY)
-    text(48, sy + 4, 22, 16, [(n, 9, WHITE, True)], align="center")
-    text(80, sy - 1, 500, 18, [(title, 10, INK, True)])
-    text(80, sy + 16, 716, 36, [(desc, 9, MUTED, False)])
-    sy += 60
+    oval(MARGIN + 24, sy + 4, 26, 26, NAVY)
+    text(MARGIN + 24, vcy(sy + 4, 26), 26, [(n, 9, WHITE, True)],
+         align="center")
+    text(MARGIN + 70, sy, 600, [(title, 10, INK, True)], lines=1)
+    text(MARGIN + 70, sy + 30, step_w, [(desc, 9, MUTED, False)], lines=step_lines)
+    sy += step_h
 
-rect(836, 214, 420, 300, fill=WHITE, border=LINE)
-text(860, 230, 300, 22, [("Raise it now", 12, INK, True)])
-text(860, 251, 380, 38,
-     [("Takes about a minute. You will get the ticket reference back on screen.", 9,
-       MUTED, False)])
-button(860, 296, 372, 40, "Submit a change request", color=WHITE, size=11,
-       fill=NAVY, border=NAVY)
-text(860, 344, 380, 19, [("Opens the Power Automate flow in this report.", 9, MUTED, False)])
-rect(860, 376, 372, 1, fill=LINE, radius=0)
-text(860, 390, 380, 19, [("Prefer to ask a person first?", 10, INK, True)])
-cy = 414
+rect(CONT_X, TOP_Y, CONT_W, TOP_H, fill=WHITE, border=LINE)
+ry = TOP_Y + 14
+ry += text(CONT_X + 24, ry, CONT_W - 48, [("Raise it now", 12, INK, True)])
+ry += text(CONT_X + 24, ry, CONT_W - 48,
+           [("Takes about a minute. You will get the ticket reference back on screen.",
+             9, MUTED, False)]) + 10
+button(CONT_X + 24, ry, CONT_W - 48, 44, "Submit a change request", color=WHITE,
+       size=11, fill=NAVY, border=NAVY)
+ry += 44 + 6
+ry += text(CONT_X + 24, ry, CONT_W - 48,
+           [("Opens the Power Automate flow in this report.", 9, MUTED, False)],
+           lines=1) + 8
+rect(CONT_X + 24, ry, CONT_W - 48, 1, fill=LINE, radius=0)
+ry += 12
+ry += text(CONT_X + 24, ry, CONT_W - 48,
+           [("Prefer to ask a person first?", 10, INK, True)]) + 4
 for initials, name, sub in CONTACTS_STD:
-    oval(860, cy, 30, 30, NAVY)
-    text(860, cy + 8, 30, 16, [(initials, 9, WHITE, True)], align="center")
-    text(900, cy - 1, 320, 18, [(name, 10, INK, True)])
-    text(900, cy + 14, 330, 19, [(sub, 9, NAVY, False)])
-    cy += 44
+    oval(CONT_X + 24, ry + 2, 34, 34, NAVY)
+    text(CONT_X + 24, vcy(ry + 2, 34), 34, [(initials, 9, WHITE, True)],
+         align="center")
+    text(CONT_X + 70, ry, CONT_W - 94, [(name, 10, INK, True)], lines=1)
+    text(CONT_X + 70, ry + 26, CONT_W - 94, [(sub, 9, NAVY, False)], lines=1)
+    ry += 62
 
-rect(24, 530, 1232, 148, fill=WHITE, border=LINE)
-text(48, 544, 500, 22, [("Request states", 12, INK, True)])
-text(48, 565, 700, 19,
-     [("The three states the button shows, so a submitted request never looks like nothing "
-       "happened.", 9, MUTED, False)])
-STATES = [("Ready", "certified", "Default state. The button is live and the flow is reachable."),
-          ("Sent", "promoted", "Confirmation with a ticket reference, shown in place."),
+STATES = [("Ready", "certified",
+           "Default state. The button is live and the flow is reachable."),
+          ("Sent", "promoted",
+           "Confirmation with a ticket reference, shown in place."),
           ("Unavailable", "notvalid",
            "Tenant settings block the Power Automate visual — falls back to the named "
            "owner's email.")]
+ST_Y = TOP_Y + TOP_H + 16
+st_col = CONTENT_W // 3
+st_lines = max(wrap_lines(d, st_col - 34 - TB_HPAD, 9) for _, _, d in STATES)
+ST_H = 14 + 33 + 33 + 8 + card_height(1) + 6 + (TB_LINE * st_lines + TB_VPAD) + 14
+rect(MARGIN, ST_Y, CONTENT_W, ST_H, fill=WHITE, border=LINE)
+sy = ST_Y + 14
+sy += text(MARGIN + 24, sy, 600, [("Request states", 12, INK, True)])
+sy += text(MARGIN + 24, sy, 1000,
+           [("The three states the button shows, so a submitted request never looks like "
+             "nothing happened.", 9, MUTED, False)], lines=1) + 8
 for i, (label, state, desc) in enumerate(STATES):
-    bx = 48 + i * 400
-    col, fill, brd = BADGE[state]
-    rect(bx, 594, 96, 22, fill=fill, border=brd, radius=11)
-    text(bx, 599, 96, 17, [(label, 9, col, True)], align="center")
-    text(bx, 622, 370, 42, [(desc, 9, INK, False)])
+    bx = MARGIN + 24 + i * st_col
+    col, fill_c, brd = BADGE[state]
+    rect(bx, sy, BADGE_W, card_height(1), fill=fill_c, border=brd,
+         radius=card_height(1) // 2)
+    text(bx, vcy(sy, card_height(1)), BADGE_W, [(label, 9, col, True)],
+         align="center", lines=1)
+    text(bx, sy + card_height(1) + 6, st_col - 34, [(desc, 9, INK, False)],
+         lines=st_lines)
 footnote("The Power Automate visual is subject to a tenant setting we have not yet "
-         "confirmed — the fallback path is designed for, not bolted on later.")
+         "confirmed — the fallback path is designed for, not bolted on later.",
+         y=ST_Y + ST_H + 10)
 counts["Request a change"] = finish_page()
 
 # =============================================================================
-# PAGE 7 — Access and data states
+# PAGE 7 - Access and data states
 # =============================================================================
 start_page(P_STATES, "Access & data states")
 chrome("")
-intro_tile("Access & data states",
-           "The two screens users hit that are not the happy path. Both are designed rather "
-           "than left to the platform default, because both are moments where trust is won "
-           "or lost.")
+y = intro_tile("Access & data states",
+               "The two screens users hit that are not the happy path. Both are designed "
+               "rather than left to the platform default, because both are moments where "
+               "trust is won or lost.")
 
-text(24, 216, 700, 18,
-     [("STATE 1 — user has no audience membership", 9, ALERT, True)])
-rect(24, 238, 1232, 214, fill=WHITE, border=LINE)
-rect(608, 252, 64, 34, fill=PILL_BG, radius=6)
-rect(630, 261, 20, 16, fill=NAVY, radius=3)
-text(24, 294, 1232, 26, [("You don't have access to this app yet", 16, INK, True)],
-     align="center")
-text(190, 324, 900, 44,
-     [("Mines Data Platform is organised into four audiences — Executive, Compliance & "
-       "Enforcement, Permitting & Titles, and Audit & Analysis. Your account is not yet a "
-       "member of any of them, so there is nothing to display.", 10, MUTED, False)],
-     align="center")
-button(468, 376, 160, 34, "Request access", color=WHITE, size=10, fill=NAVY, border=NAVY)
-button(652, 376, 160, 34, "Who should I ask?", color=NAVY, size=10, border=LINE)
-measure_card(24, 418, 1232, 20, "Hub Access Note", size=9, color=FAINT, align="center")
+y += 16
+y += text(MARGIN, y, 800,
+          [("STATE 1 — user has no audience membership", 9, ALERT, True)], lines=1)
+S1_H = 14 + 40 + 10 + 33 + 6 + 54 + 14 + 36 + 12 + card_height(1) + 14
+rect(MARGIN, y, CONTENT_W, S1_H, fill=WHITE, border=LINE)
+ay = y + 14
+rect(W // 2 - 34, ay, 68, 38, fill=PILL_BG, radius=6)
+rect(W // 2 - 12, ay + 11, 24, 16, fill=NAVY, radius=3)
+ay += 40 + 10
+ay += text(MARGIN, ay, CONTENT_W,
+           [("You don't have access to this app yet", 16, INK, True)],
+           align="center", lines=1) + 6
+ay += text(MARGIN + 220, ay, CONTENT_W - 440,
+           [("Mines Data Platform is organised into four audiences — Executive, "
+             "Compliance & Enforcement, Permitting & Titles, and Audit & Analysis. Your "
+             "account is not yet a member of any of them, so there is nothing to display.",
+             10, MUTED, False)], align="center", lines=2) + 14
+button(W // 2 - 190, ay, 180, 36, "Request access", color=WHITE, size=10, fill=NAVY,
+       border=NAVY)
+button(W // 2 + 10, ay, 180, 36, "Who should I ask?", color=NAVY, size=10, border=LINE)
+ay += 36 + 12
+measure_card(MARGIN, ay, CONTENT_W, "Hub Access Note", size=9, color=FAINT,
+             align="center")
+y += S1_H + 16
 
-text(24, 462, 700, 18, [("STATE 2 — report has not refreshed on schedule", 9, ALERT, True)])
-rect(24, 484, 1232, 190, fill=WHITE, border=LINE)
-rect(24, 484, 4, 190, fill=ALERT, radius=0)
-text(52, 496, 600, 24, [("Start here — Executive view", 14, NAVY, True)])
-measure_card(52, 520, 900, 40, "Hub Stale Warning", size=10, color=INK, align="left")
-rect(1000, 494, 232, 26, fill="#FDF3F0", border=ALERT, radius=13)
-measure_card(1000, 499, 232, 18, "Hub Data As At", size=9, color=ALERT, align="center")
+y += text(MARGIN, y, 800,
+          [("STATE 2 — report has not refreshed on schedule", 9, ALERT, True)], lines=1)
+S2_H = (H - 44 - 12) - y
+rect(MARGIN, y, CONTENT_W, S2_H, fill=WHITE, border=LINE)
+rect(MARGIN, y, 5, S2_H, fill=ALERT, radius=0)
+sy = y + 16
+sy += text(MARGIN + 28, sy, 700, [("Start here — Executive view", 14, NAVY, True)])
+STALE_PILL_W = card_min_width(S_ASAT, 9, pill=True, bold=True) + 8
+rect(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, card_height(1),
+     fill="#FDF3F0", border=ALERT, radius=card_height(1) // 2)
+measure_card(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, "Hub Data As At",
+             size=9, color=ALERT, align="center", sample=S_ASAT)
+measure_card(MARGIN + 28, sy, CONTENT_W - 80 - STALE_PILL_W, "Hub Stale Warning",
+             size=10, color=INK, align="left", lines=2)
+sy += card_height(2) + 18
+mini_w = (CONTENT_W - 56 - 40) // 3
+mini_h = (y + S2_H - 16) - sy
 for i, (label, chip) in enumerate([("Inspections", BLUE), ("Incidents", RED),
                                    ("Notice of Work", GREEN)]):
-    x = 52 + i * 396
-    rect(x, 570, 372, 88, fill="#FAFAFA", border=LINE)
-    rect(x + 20, 590, 12, 12, fill=chip, radius=3)
-    text(x + 40, 584, 240, 22, [(label, 11, MUTED, True)])
-    rect(x + 20, 614, 150, 22, fill="#FDF3F0", border=ALERT, radius=11)
-    measure_card(x + 20, 617, 150, 18, "Hub Data As At", size=8, color=ALERT,
-                 align="center")
-    text(x + 182, 616, 180, 19, [("Not current", 9, MUTED, False)])
-footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for severity, and "
-         "4 of 6 operational respondents verify figures by hand. Never show a stale number "
-         "without saying it is stale — and never hide the tile.")
+    mx = MARGIN + 28 + i * (mini_w + 20)
+    rect(mx, sy, mini_w, mini_h, fill="#FAFAFA", border=LINE)
+    rect(mx + 20, sy + 22, 14, 14, fill=chip, radius=3)
+    text(mx + 42, sy + 14, mini_w - 70, [(label, 11, MUTED, True)], lines=1)
+    measure_card(mx + 20, sy + 54, mini_w - 40, "Hub Data As At", size=9, color=ALERT,
+                 align="center", bg="#FDF3F0", border=ALERT,
+                 radius=card_height(1) // 2, sample=S_ASAT)
+    text(mx + 20, sy + 54 + card_height(1) + 6, mini_w - 40,
+         [("Not current — verify against source before quoting.", 9, MUTED, False)],
+         lines=1)
+footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for severity, "
+         "and 4 of 6 operational respondents verify figures by hand. Never show a stale "
+         "number without saying it is stale — and never hide the tile.")
 counts["Access & data states"] = finish_page()
 
 # --- pages.json --------------------------------------------------------------
@@ -630,7 +783,13 @@ order = [P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_CHANGE, P_STATES]
 with open(os.path.join(PAGES_DIR, "pages.json"), "w", encoding="utf-8") as f:
     json.dump({"$schema": PM, "pageOrder": order, "activePageName": P_EXEC}, f, indent=2)
 
-print(f"navigation links: {'ON' if NAV else 'OFF'}")
+print(f"canvas {W}x{H}   navigation links: {'ON' if NAV else 'OFF'}")
 for k, v in counts.items():
-    print(f"  {k:<26} {v:>3} visuals")
+    print(f"  {k:<30} {v:>3} visuals")
 print("total visuals:", sum(counts.values()))
+if _issues:
+    print(f"\n!! {len(_issues)} layout issues")
+    for i in _issues:
+        print("   ", i)
+else:
+    print("\nlayout clean: nothing clipped, nothing off-canvas")

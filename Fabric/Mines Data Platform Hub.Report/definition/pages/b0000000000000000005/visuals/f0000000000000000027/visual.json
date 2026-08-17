@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000027",
   "position": {
-    "x": 48,
-    "y": 552,
+    "x": 194,
+    "y": 827,
     "z": 3900,
-    "height": 38,
-    "width": 556,
+    "height": 62,
+    "width": 812,
     "tabOrder": 3900
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Def Last Refresh"
+                  "Property": "Hub Def Validated By"
                 }
               },
-              "queryRef": "fact_inspection.Hub Def Last Refresh",
-              "nativeQueryRef": "Hub Def Last Refresh"
+              "queryRef": "fact_inspection.Hub Def Validated By",
+              "nativeQueryRef": "Hub Def Validated By"
             }
           ]
         }

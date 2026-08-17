@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000021",
   "position": {
-    "x": 1000,
-    "y": 499,
+    "x": 58,
+    "y": 660,
     "z": 3300,
-    "height": 18,
-    "width": 232,
+    "height": 62,
+    "width": 1196,
     "tabOrder": 3300
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Data As At"
+                  "Property": "Hub Stale Warning"
                 }
               },
-              "queryRef": "fact_inspection.Hub Data As At",
-              "nativeQueryRef": "Hub Data As At"
+              "queryRef": "fact_inspection.Hub Stale Warning",
+              "nativeQueryRef": "Hub Stale Warning"
             }
           ]
         }
@@ -56,14 +56,14 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "10D"
                 }
               }
             },
             "horizontalAlignment": {
               "expr": {
                 "Literal": {
-                  "Value": "'center'"
+                  "Value": "'left'"
                 }
               }
             },
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#D83B01'"
+                      "Value": "'#252423'"
                     }
                   }
                 }

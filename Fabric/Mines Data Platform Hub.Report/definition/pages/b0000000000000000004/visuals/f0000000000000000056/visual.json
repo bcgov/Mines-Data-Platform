@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000056",
   "position": {
-    "x": 24,
-    "y": 684,
+    "x": 30,
+    "y": 936,
     "z": 8600,
-    "height": 32,
-    "width": 1232,
+    "height": 33,
+    "width": 1540,
     "tabOrder": 8600
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Survey evidence: \"trusted / certified data\" ranked #1 capability and respondents wanted source, definition, last refresh and drill-through together rather than any single trust signal \u2014 hence the dictionary tile and the export-with-context link.",
+                    "value": "Survey evidence: \"trusted / certified data\" ranked #1 capability, and respondents wanted source, definition, last refresh and drill-through together.",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#8A8886"

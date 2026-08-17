@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000030",
   "position": {
-    "x": 884,
-    "y": 584,
+    "x": 1080,
+    "y": 844,
     "z": 4800,
-    "height": 22,
-    "width": 240,
+    "height": 33,
+    "width": 441,
     "tabOrder": 4800
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Notice of Work",
+                    "value": "Not current \u2014 verify against source before quoting.",
                     "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#605E5C",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

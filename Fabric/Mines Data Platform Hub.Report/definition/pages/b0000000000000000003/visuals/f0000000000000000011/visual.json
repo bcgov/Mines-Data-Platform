@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000011",
   "position": {
-    "x": 996,
-    "y": 130,
+    "x": 1260,
+    "y": 154,
     "z": 1700,
-    "height": 26,
-    "width": 236,
+    "height": 44,
+    "width": 284,
     "tabOrder": 1700
   },
   "visual": {
@@ -142,7 +142,7 @@
             "radius": {
               "expr": {
                 "Literal": {
-                  "Value": "13D"
+                  "Value": "22D"
                 }
               }
             }

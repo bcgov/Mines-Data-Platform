@@ -117,7 +117,7 @@ def vcy(y, h):
     return y + (h - TB_LINE) // 2 - TB_VPAD // 2
 
 
-def text(x, y, w, runs, align="left", lines=None):
+def text(x, y, w, runs, align="left", lines=None, bg=None):
     joined = " ".join(r[0] for r in runs)
     size = max(r[1] for r in runs)
     bold = any(r[3] for r in runs)
@@ -128,7 +128,7 @@ def text(x, y, w, runs, align="left", lines=None):
     add("textbox", x, y, w, h,
         {"objects": {"general": [{"properties": {
             "paragraphs": [{"textRuns": tr, "horizontalTextAlignment": align}]}}]}},
-        container())
+        container(bg=bg))
     return h
 
 
@@ -179,7 +179,7 @@ def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None, bold=
         _issues.append(f"{_state['page']}: button {label!r} too narrow ({w})")
     rect(x, y, w, h, fill=fill, border=border, radius=4)
     text(x + 8, vcy(y, h), w - 16, [(label, int(round(pt_to_px(size))), color, bold)],
-         align="center", lines=1)
+         align="center", lines=1, bg=fill)
 
 
 def start(pid, name):
@@ -325,8 +325,8 @@ with region(MARGIN, y, CONTENT_W, DM_H, "derived metrics panel"):
             rect(kx + 16, ky, 40, 3, fill=colour, radius=0)
             ky += 9
             ky += text(kx + 16, ky, kw - 32, [(label, 10, MUTED, True)], lines=1)
-            card(kx + 16, ky, kw - 32, val_m, size=13, color=NAVY, bold=True)
-            ky += card_height(13) + 4
+            card(kx + 16, ky, kw - 32, val_m, size=11, color=NAVY, bold=True)
+            ky += card_height(11) + 4
             pill(kx + 16, ky, TRUST_W, trust_m, size=9, color=NAVY,
                  fill=PILL_BG, border="#B4D6F0")
             ky += card_height(9) + 6

@@ -157,7 +157,7 @@ def vcy(y, h):
     return y + (h - TB_LINE) // 2 - TB_VPAD // 2
 
 
-def text(x, y, w, runs, align="left", lines=None):
+def text(x, y, w, runs, align="left", lines=None, bg=None):
     """Auto-heights to the Service's 21px line box. Returns the height used."""
     joined = " ".join(r[0] for r in runs)
     size = max(r[1] for r in runs)
@@ -172,7 +172,7 @@ def text(x, y, w, runs, align="left", lines=None):
     add("textbox", x, y, w, h,
         {"objects": {"general": [{"properties": {
             "paragraphs": [{"textRuns": tr, "horizontalTextAlignment": align}]}}]}},
-        container(title=False))
+        container(bg=bg, title=False))
     return h
 
 
@@ -260,7 +260,7 @@ def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
         _issues.append(f"{_state['page']}: button {label!r} w={w} needs {int(need)}")
     rect(x, y, w, h, fill=fill, border=border, radius=4)
     text(x + 8, vcy(y, h), w - 16, [(label, int(round(pt_to_px(size))), color, bold)],
-         align=align, lines=1)
+         align=align, lines=1, bg=fill)
     return h
 
 # The widest string each measure actually returns, read back from the live model.

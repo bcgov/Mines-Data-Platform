@@ -90,3 +90,18 @@ def card_min_width(sample_text, size_pt, pill=False, bold=False):
 def card_lines(txt, box_w, size_pt, pill=False, bold=False):
     chrome = CARD_HPAD_PILL if pill else CARD_HPAD_PLAIN
     return wrap_lines(txt, box_w - chrome, pt_to_px(size_pt), bold)
+
+
+def fit_size(sample, box_w, pill=False, bold=False, sizes=(10, 9, 8)):
+    """Largest point size at which `sample` renders on ONE line inside box_w.
+
+    cardVisual does NOT word-wrap - it renders a single line and ellipsises the
+    overflow (confirmed in the Service 2026-08-17: a card 714px wide reported
+    scrollWidth 1083 and clientHeight 18). So the only levers are box width and
+    font size; giving the box more HEIGHT achieves nothing.
+    """
+    chrome = CARD_HPAD_PILL if pill else CARD_HPAD_PLAIN
+    for pt in sizes:
+        if text_width(sample, pt_to_px(pt), bold) + chrome <= box_w:
+            return pt
+    return sizes[-1]

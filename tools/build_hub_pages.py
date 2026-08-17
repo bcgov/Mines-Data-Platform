@@ -17,7 +17,7 @@ import json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from metrics import (TB_LINE, TB_VPAD, TB_HPAD, CARD_LINE, CARD_VPAD,
                      tb_height, card_height, card_min_width, card_lines,
-                     wrap_lines, text_width, pt_to_px)
+                     wrap_lines, text_width, pt_to_px, fit_size)
 
 ROOT = sys.argv[1]
 NAV = "--nav" in sys.argv
@@ -43,10 +43,12 @@ BADGE = {
     "notvalid":    (MUTED,     "#F3F2F1", "#D2D0CE"),
 }
 
-# 1600x980 (1.63:1). The 21px line box is fixed in canvas units, so a larger
-# canvas is the only way to buy vertical room without shrinking type below the
-# Service's floor. 1.63 letterboxes ~8% against 16:9 - acceptable, and nothing scrolls.
-W, H = 1600, 980
+# 1920x1080 - true 16:9, no letterboxing. Text metrics are fixed in CANVAS units
+# (a 21px line box, ~40px of card chrome), so a larger canvas is the only lever
+# that makes type relatively smaller and fits more content. It also gives the
+# commentary cards the width they need: cardVisual does NOT wrap, so a long
+# sentence has to fit on one line or it is ellipsised.
+W, H = 1920, 1080
 MARGIN = 30
 CONTENT_W = W - MARGIN * 2          # 1540
 
@@ -173,15 +175,20 @@ def oval(x, y, w, h, fill):
 
 def measure_card(x, y, w, measure, size=10, color=INK, align="center", bold=False,
                  bg=None, border=None, radius=4, lines=1, sample=None):
-    """Auto-heights from the card line box. `sample` is the widest string the
-    measure can return - used to warn when the box is too narrow to render it."""
+    """Always ONE line - cardVisual does not word-wrap, it ellipsises. The point
+    size is stepped down if the measure's widest real value would not fit, and
+    an issue is recorded if even the smallest size overflows."""
+    lines = 1
     h = card_height(lines)
     pill = bool(bg or border)
+    sample = sample or SAMPLES.get(measure)
     if sample:
-        need = card_min_width(sample, size, pill, bold)
-        if lines == 1 and need > w:
-            _issues.append(f"{_state['page']}: card '{measure}' w={w} needs {need} "
-                           f"for {sample!r}")
+        fitted = fit_size(sample, w, pill, bold, tuple(
+            n for n in (size, size - 1, size - 2) if n >= 8))
+        if card_min_width(sample, fitted, pill, bold) > w:
+            _issues.append(f"{_state['page']}: card '{measure}' w={w} needs "
+                           f"{card_min_width(sample, fitted, pill, bold)} at {fitted}pt")
+        size = fitted
     props = {"fontSize": num(size), "horizontalAlignment": s(align), "color": solid(color)}
     if bold:
         props["bold"] = lit("true")
@@ -221,6 +228,78 @@ def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
         container(border=border, radius=4), link_to=link_to)
     return h
 
+
+# The widest string each measure actually returns, read back from the live model.
+# cardVisual does not wrap, so every one of these has to fit on ONE line.
+SAMPLES = {
+    "Hub Data As At": "Data as at 30 September 2026",
+    "Hub Next Refresh": "Next refresh: 30 September 2026",
+    "Hub Updated Inspections": "Source extract stale",
+    "Hub Updated Incidents": "Not yet published",
+    "Hub Updated NoW": "Source extract stale",
+    "Hub Updated Planning Map": "Source extract stale",
+    "Hub Updated Permit Turnaround": "Source extract stale",
+    "Hub Updated Mineral Titles": "Source extract stale",
+    "Hub Updated Dictionary": "Source extract stale",
+    "Hub Trust Inspections": "Not validated",
+    "Hub Trust Incidents": "Not validated",
+    "Hub Trust NoW": "Not validated",
+    "Hub Trust Planning Map": "Not validated",
+    "Hub Trust Permit Turnaround": "Not validated",
+    "Hub Trust Mineral Titles": "Not validated",
+    "Hub Trust Dictionary": "Not validated",
+    "Hub Badge Certified": "Certified",
+    "Hub Badge Promoted": "Promoted",
+    "Hub Badge Provisional": "Provisional",
+    "Hub Badge Not Validated": "Not validated",
+    "Hub Changed Inspections":
+        "511 completed FYTD, down from 747 at the same point last year. July "
+        "contributed 17. FY2025/26 finished at 1,519, below the 1,600 Service Plan "
+        "target.",
+    "Hub Changed Inspections Ops":
+        "511 completed so far this fiscal year against 747 at the same point last "
+        "year. July contributed 17 - plan coverage accordingly.",
+    "Hub Changed Incidents":
+        "Report not yet built. Commentary lands with the Incidents build - no figures "
+        "are shown until they can be validated.",
+    "Hub Changed NoW":
+        "Permitting logic is built and matches the corporate report, but the "
+        "now_application source extract has not landed since April 2025. Figures "
+        "publish once the extract is refreshed.",
+    "Hub Changed NoW Permitting":
+        "Permitting logic matches the corporate report. The now_application extract "
+        "is behind, so counts are withheld rather than shown provisionally.",
+    "Hub Changed Planning Map":
+        "Risk criteria are not yet agreed, so the tile is visible and labelled rather "
+        "than hidden - the openness matters more than the polish here.",
+    "Hub Changed Admin Amendments":
+        "Administrative amendments are tracked as a separate series and excluded from "
+        "the headline permit count.",
+    "Hub Changed Mineral Titles":
+        "Mineral Titles extract is stale pending the refreshed feed; no counts are "
+        "published until it lands.",
+    "Hub Window FYTD": "1 April 2026 to 30 September 2026",
+    "Hub Window Same Last FY": "1 April 2025 to 30 September 2025",
+    "Hub Window Rolling 5": "1 April 2021 to 31 March 2026",
+    "Hub Def Inspections FYTD":
+        "Distinct count of inspection_id where inspection_date falls in the current "
+        "BC fiscal year to today.",
+    "Hub Def Source": "lh_gold.fact_inspection, built from CORE and NRIS.",
+    "Hub Def Last Refresh": "Gold data last landed 30 September 2026.",
+    "Hub Def Validated By": "Mines Digital Services - certified 30 September 2026.",
+    "Hub Rule Fiscal Year":
+        "FY runs 1 April to 31 March. FY2026/27 began 1 April 2026.",
+    "Hub Rule Inspections":
+        "Counted on inspection_date, distinct inspection_id, all types included.",
+    "Hub Rule NoW":
+        "Counted on issue date; administrative amendments held separately.",
+    "Hub Rule Target": "Service Plan target is 1,600 inspections per fiscal year.",
+    "Hub Access Note":
+        "Access is granted per audience by the app owner - not per report.",
+    "Hub Stale Warning":
+        "Gold data last landed 30 September 2026 and the next scheduled refresh was "
+        "1 October 2026. Figures below are 41 days old.",
+}
 
 # Widest string each measure family can return, for width checks.
 S_BADGE = "Not validated"
@@ -269,7 +348,7 @@ INTRO_Y = HEADER_H + 16          # 140
 
 
 def intro_tile(title, body, pill="Hub Data As At", refresh="Hub Next Refresh"):
-    body_w = min(1040, W - PILL_W - MARGIN - 90)
+    body_w = min(1240, W - PILL_W - MARGIN - 90)
     th = tb_height(title, 800, 17, True)
     bh = tb_height(body, body_w, 10)
     tile_h = 14 + th + 2 + bh + 14
@@ -327,7 +406,7 @@ def report_cards(cards, top=None):
 
 
 PANEL_GAP = 26
-COMM_W = 1000
+COMM_W = 1440
 CONT_W = CONTENT_W - COMM_W - PANEL_GAP
 CONT_X = MARGIN + COMM_W + PANEL_GAP
 
@@ -338,19 +417,16 @@ def commentary_panel(heading, subtitle, rows, y, h):
     cy = y + 14
     cy += text(x + 24, cy, 620, [(heading, 12, INK, True)])
     cy += text(x + 24, cy, 760, [(subtitle, 9, MUTED, False)]) + 4
-    label_w = 168
-    card_x = x + 24 + 12 + label_w
-    card_w = x + w - 24 - card_x
-    avail = (y + h - 12) - cy
-    pitch = avail // len(rows)
-    n_lines = max(2, min(3, (pitch - CARD_VPAD - 8) // CARD_LINE))
+    # cardVisual does not wrap, so the label sits ABOVE and the card gets the
+    # panel's full width - the widest commentary sentence needs ~1260px.
+    rowh = TB_LINE + TB_VPAD + card_height(1)
     for label, colour, m in rows:
-        rowh = card_height(n_lines)
         rect(x + 24, cy, 4, rowh, fill=colour, radius=0)
-        text(x + 24 + 14, cy + 2, label_w - 22, [(label, 10, INK, True)])
-        measure_card(card_x, cy, card_w, m, size=10, color=INK, align="left",
-                     lines=n_lines)
-        cy += rowh + (pitch - rowh)
+        text(x + 24 + 14, cy, w - 24 - 14 - 24, [(label, 10, INK, True)],
+             lines=1)
+        measure_card(x + 24 + 14, cy + TB_LINE + TB_VPAD, w - 24 - 14 - 24, m,
+                     size=10, color=INK, align="left")
+        cy += rowh + 12
     return y + h
 
 
@@ -444,15 +520,13 @@ def kv_panel(x, y, w, h, heading, sub, rows, label_w=160, size=10, color=INK):
     if sub:
         cy += text(x + 24, cy, w - 48, [(sub, 9, MUTED, False)], lines=1)
     cy += 6
-    card_x = x + 24 + label_w
-    card_w = x + w - 24 - card_x
+    rowh = TB_LINE + TB_VPAD + card_height(1)
     avail = (y + h - 14) - cy
-    pitch = avail // len(rows)
-    n = max(1, min(3, (pitch - CARD_VPAD - 6) // CARD_LINE))
+    pitch = max(rowh + 6, avail // len(rows))
     for label, m in rows:
-        text(x + 24, cy + 2, label_w - 12, [(label, 9, FAINT, True)], lines=1)
-        measure_card(card_x, cy, card_w, m, size=size, color=color, align="left",
-                     lines=n)
+        text(x + 24, cy, w - 48, [(label, 8, FAINT, True)], lines=1)
+        measure_card(x + 24, cy + TB_LINE + TB_VPAD, w - 48, m, size=size,
+                     color=color, align="left")
         cy += pitch
     return y + h
 
@@ -599,13 +673,16 @@ for i, (m, state, desc) in enumerate(BADGE_DOC):
 # anatomy of a definition + counting rules
 BOT_Y = LEG_Y + LEG_H + 16
 BOT_H = (H - 44 - 12) - BOT_Y
-kv_panel(MARGIN, BOT_Y, COMM_W, BOT_H, "Anatomy of a definition",
+DEFS_L_W = 1100
+DEFS_R_X = MARGIN + DEFS_L_W + PANEL_GAP
+DEFS_R_W = CONTENT_W - DEFS_L_W - PANEL_GAP
+kv_panel(MARGIN, BOT_Y, DEFS_L_W, BOT_H, "Anatomy of a definition",
          "What every KPI states — the bundle, not a single signal.",
          [("DEFINITION", "Hub Def Inspections FYTD"),
           ("SOURCE", "Hub Def Source"),
           ("LAST REFRESH", "Hub Def Last Refresh"),
           ("VALIDATED BY", "Hub Def Validated By")], label_w=140)
-kv_panel(CONT_X, BOT_Y, CONT_W, BOT_H, "Counting rules and the fiscal calendar",
+kv_panel(DEFS_R_X, BOT_Y, DEFS_R_W, BOT_H, "Counting rules and the fiscal calendar",
          "The date logic behind every headline figure.",
          [("FISCAL YEAR", "Hub Rule Fiscal Year"),
           ("INSPECTIONS", "Hub Rule Inspections"),
@@ -756,9 +833,9 @@ rect(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, card_height(1),
      fill="#FDF3F0", border=ALERT, radius=card_height(1) // 2)
 measure_card(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, "Hub Data As At",
              size=9, color=ALERT, align="center", sample=S_ASAT)
-measure_card(MARGIN + 28, sy, CONTENT_W - 80 - STALE_PILL_W, "Hub Stale Warning",
-             size=10, color=INK, align="left", lines=2)
-sy += card_height(2) + 18
+measure_card(MARGIN + 28, sy, CONTENT_W - 80, "Hub Stale Warning",
+             size=10, color=INK, align="left")
+sy += card_height(1) + 18
 mini_w = (CONTENT_W - 56 - 40) // 3
 mini_h = (y + S2_H - 16) - sy
 for i, (label, chip) in enumerate([("Inspections", BLUE), ("Incidents", RED),

@@ -3,84 +3,32 @@
   "name": "f000000000000000001c",
   "position": {
     "x": 54,
-    "y": 501,
+    "y": 445,
     "z": 2800,
-    "height": 44,
-    "width": 404,
+    "height": 54,
+    "width": 554,
     "tabOrder": 2800
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_inspection"
-                    }
-                  },
-                  "Property": "Hub Updated Inspections"
-                }
-              },
-              "queryRef": "fact_inspection.Hub Updated Inspections",
-              "nativeQueryRef": "Hub Updated Inspections"
-            }
-          ]
-        }
-      }
-    },
+    "visualType": "textbox",
     "objects": {
-      "label": [
+      "general": [
         {
           "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
-      "value": [
-        {
-          "properties": {
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "9D"
-                }
-              }
-            },
-            "horizontalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'left'"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#605E5C'"
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "How many inspections have we completed, by type, region and inspector \u2014 and which sites are still unvisited this year?",
+                    "textStyle": {
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
-                }
+                ],
+                "horizontalTextAlignment": "left"
               }
-            }
-          },
-          "selector": {
-            "id": "default"
+            ]
           }
         }
       ]

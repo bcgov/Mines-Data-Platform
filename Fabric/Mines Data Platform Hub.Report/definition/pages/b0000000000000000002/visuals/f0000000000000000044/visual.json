@@ -3,7 +3,7 @@
   "name": "f0000000000000000044",
   "position": {
     "x": 1566,
-    "y": 695,
+    "y": 680,
     "z": 6800,
     "height": 33,
     "width": 300,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Nhung Nguyen",
+                    "value": "Rajneesh Gulati",
                     "textStyle": {
                       "fontSize": "10px",
                       "color": "#252423",

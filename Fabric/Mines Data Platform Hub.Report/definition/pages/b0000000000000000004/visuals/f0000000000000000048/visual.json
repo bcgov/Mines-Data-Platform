@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000048",
   "position": {
-    "x": 1520,
-    "y": 635,
+    "x": 68,
+    "y": 921,
     "z": 7200,
     "height": 33,
-    "width": 34,
+    "width": 1378,
     "tabOrder": 7200
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "R",
+                    "value": "Rolling 5 fiscal years",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#FFFFFF",
+                      "fontSize": "10px",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

@@ -6,7 +6,7 @@
     "y": 779,
     "z": 6200,
     "height": 33,
-    "width": 586,
+    "width": 148,
     "tabOrder": 6200
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Tenant settings block the Power Automate visual \u2014 falls back to the named owner's email.",
+                    "value": "Unavailable",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#252423"
+                      "color": "#605E5C",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

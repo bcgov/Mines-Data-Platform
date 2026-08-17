@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002d",
   "position": {
-    "x": 1566,
-    "y": 482,
+    "x": 1520,
+    "y": 529,
     "z": 4500,
     "height": 33,
-    "width": 300,
+    "width": 34,
     "tabOrder": 4500
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Rajneesh Gulati",
+                    "value": "RG",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
+                      "fontSize": "9px",
+                      "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

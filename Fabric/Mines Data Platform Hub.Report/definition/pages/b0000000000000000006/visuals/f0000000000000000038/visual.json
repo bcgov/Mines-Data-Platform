@@ -6,7 +6,7 @@
     "y": 779,
     "z": 5600,
     "height": 33,
-    "width": 586,
+    "width": 148,
     "tabOrder": 5600
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Default state. The button is live and the flow is reachable.",
+                    "value": "Ready",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#252423"
+                      "color": "#0F6CBD",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

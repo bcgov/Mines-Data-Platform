@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002c",
   "position": {
-    "x": 1180,
-    "y": 593,
+    "x": 54,
+    "y": 950,
     "z": 4400,
-    "height": 44,
-    "width": 686,
+    "height": 65,
+    "width": 1052,
     "tabOrder": 4400
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Rule Fiscal Year"
+                  "Property": "Hub Def Validated By"
                 }
               },
-              "queryRef": "fact_inspection.Hub Rule Fiscal Year",
-              "nativeQueryRef": "Hub Rule Fiscal Year"
+              "queryRef": "fact_inspection.Hub Def Validated By",
+              "nativeQueryRef": "Hub Def Validated By"
             }
           ]
         }
@@ -56,7 +56,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "10D"
                 }
               }
             },

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000049",
   "position": {
-    "x": 1544,
-    "y": 799,
+    "x": 1566,
+    "y": 768,
     "z": 7300,
     "height": 33,
-    "width": 298,
+    "width": 300,
     "tabOrder": 7300
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definitions, sources and the fiscal calendar",
+                    "value": "Nhung.Nguyen@gov.bc.ca",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#605E5C"
+                      "color": "#013366"
                     }
                   }
                 ],

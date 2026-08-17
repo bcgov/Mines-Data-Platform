@@ -1,49 +1,53 @@
-"""Power BI Service text metrics, measured empirically from the live report on
-2026-08-17 by reading the rendered DOM in app.powerbi.com.
+"""Power BI Service text metrics, measured from the rendered DOM of the live
+report in app.powerbi.com. Every number here was read off a real element, not
+estimated - the first two attempts at this layout failed because they were
+estimated.
 
-Findings that drive every number below:
-
-  textbox
+textbox
     * fontSize is honoured verbatim as CSS px ("10px" renders 10px).
-    * BUT every paragraph line occupies a FIXED 21px line box, whatever the
-      font size (verified at 8, 9, 10, 12, 13, 16 and 17px - all reported a
-      21px content height for one line, 43px for two).
-    * the visual reserves ~10px of vertical chrome (customPadding) and ~8px
-      horizontal, so usable height = boxH - 10.
-    * font family resolves to Segoe UI - BC Sans does NOT render in the
-      Service. This settles the 7 Aug feasibility question.
+    * every paragraph line occupies a FIXED 21px line box whatever the font
+      size (verified at 8, 9, 10, 12, 13, 16 and 17px: 21px for one line,
+      43px for two).
+    * ~10px vertical chrome, ~8px horizontal.
+    * font resolves to Segoe UI - BC Sans does NOT render in the Service.
 
-  cardVisual
-    * fontSize is in POINTS, not px: size 10 renders 13.333px, size 9 -> 12px.
-      (This is the opposite of textbox and was the source of the collapsed
-      trust badges.)
-    * line box ~18px; vertical chrome ~26px.
-    * horizontal chrome ~40px plain, ~72px once a background + border +
-      radius are applied - which is why a 96px-wide badge truncated
-      "Certified" down to an ellipsis.
+cardVisual
+    * fontSize is in POINTS (size 10 -> 13.333px, size 9 -> 12px) - the
+      opposite of textbox.
+    * does NOT word-wrap: one line, overflow ellipsised.
+    * chrome is UNIFORM on both axes:
+          plain                     34px
+          with background/border    49px
+      Measured: a plain card 404x44 reported clientWidth 370 / clientHeight 10
+      (404-34, 44-34). A pill card 165x44 reported clientWidth 116 /
+      clientHeight 0 (165-49, 44-49 clamped to zero) - which is exactly why
+      every trust badge rendered empty.
+    * the value line needs ~1.95x the font px: 12px -> 21, 13.333px -> 26.
 
-Everything here is deliberately a little generous: clipping is visible and
-embarrassing, a few px of slack is not.
+Segoe UI advance width, measured from rendered strings:
+    "Certified"          9 chars, 12px bold      -> 47px  (0.435/char/px)
+    "Updated 7 Jul 2026" 18 chars, 12px bold     -> 105px (0.486)
+    "Data as at 7 July 2026" 22 chars, 13.33px b -> 131px (0.447)
+The constants below sit deliberately above the worst observed value.
 """
 import math
 
-TB_LINE = 21          # fixed paragraph line box
+# --- textbox -----------------------------------------------------------------
+TB_LINE = 21          # fixed paragraph line box, any font size
 TB_VPAD = 12          # vertical chrome + 2px slack
-TB_HPAD = 8           # horizontal chrome
+TB_HPAD = 8
 
-CARD_LINE = 18
-CARD_VPAD = 26
-CARD_HPAD_PLAIN = 40
-CARD_HPAD_PILL = 72   # background + border + radius
+# --- cardVisual --------------------------------------------------------------
+CARD_PAD_PLAIN = 34   # uniform, both axes
+CARD_PAD_PILL = 49    # once a background/border is applied
+CARD_SLACK = 4        # never sit exactly on the boundary
 
-# Segoe UI advance width as a fraction of font px, measured across the
-# rendered strings on the Executive page.
-ADV_REG = 0.515
-ADV_BOLD = 0.545
+# --- type --------------------------------------------------------------------
+ADV_REG = 0.50
+ADV_BOLD = 0.52
 
 
 def pt_to_px(pt):
-    """cardVisual font sizes are points."""
     return pt * 4.0 / 3.0
 
 
@@ -56,7 +60,6 @@ def text_width(txt, font_px, bold=False):
 
 
 def wrap_lines(txt, usable_w, font_px, bold=False):
-    """Greedy word wrap, matching how the browser breaks the paragraph."""
     if usable_w <= 0:
         return 1
     cw = adv(font_px, bold)
@@ -77,31 +80,29 @@ def tb_height(txt, box_w, font_px, bold=False, lines=None):
     return TB_LINE * n + TB_VPAD
 
 
-def card_height(lines=1):
-    return CARD_LINE * lines + CARD_VPAD
+# --- card sizing -------------------------------------------------------------
+def card_line_h(size_pt):
+    """Height the value line occupies inside the card's content area."""
+    return int(math.ceil(pt_to_px(size_pt) * 1.95)) + 1
+
+
+def card_pad(pill=False):
+    return CARD_PAD_PILL if pill else CARD_PAD_PLAIN
+
+
+def card_height(size_pt=10, pill=False):
+    """Smallest box height that actually renders the value."""
+    return card_line_h(size_pt) + card_pad(pill) + CARD_SLACK
 
 
 def card_min_width(sample_text, size_pt, pill=False, bold=False):
-    """Narrowest box that will render sample_text on one line."""
-    chrome = CARD_HPAD_PILL if pill else CARD_HPAD_PLAIN
-    return int(math.ceil(text_width(sample_text, pt_to_px(size_pt), bold) + chrome))
-
-
-def card_lines(txt, box_w, size_pt, pill=False, bold=False):
-    chrome = CARD_HPAD_PILL if pill else CARD_HPAD_PLAIN
-    return wrap_lines(txt, box_w - chrome, pt_to_px(size_pt), bold)
+    return int(math.ceil(text_width(sample_text, pt_to_px(size_pt), bold)
+                         + card_pad(pill) + CARD_SLACK))
 
 
 def fit_size(sample, box_w, pill=False, bold=False, sizes=(10, 9, 8)):
-    """Largest point size at which `sample` renders on ONE line inside box_w.
-
-    cardVisual does NOT word-wrap - it renders a single line and ellipsises the
-    overflow (confirmed in the Service 2026-08-17: a card 714px wide reported
-    scrollWidth 1083 and clientHeight 18). So the only levers are box width and
-    font size; giving the box more HEIGHT achieves nothing.
-    """
-    chrome = CARD_HPAD_PILL if pill else CARD_HPAD_PLAIN
+    """Largest point size at which `sample` renders on ONE line inside box_w."""
     for pt in sizes:
-        if text_width(sample, pt_to_px(pt), bold) + chrome <= box_w:
+        if card_min_width(sample, pt, pill, bold) <= box_w:
             return pt
     return sizes[-1]

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003a",
   "position": {
-    "x": 54,
-    "y": 594,
+    "x": 1467,
+    "y": 445,
     "z": 5800,
-    "height": 33,
-    "width": 620,
+    "height": 54,
+    "width": 397,
     "tabOrder": 5800
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Saved audit windows",
+                    "value": "Where each measure comes from, how it is calculated, and when it was validated.",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],

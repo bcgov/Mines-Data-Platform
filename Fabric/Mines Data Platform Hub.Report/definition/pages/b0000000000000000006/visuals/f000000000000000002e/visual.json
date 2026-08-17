@@ -3,7 +3,7 @@
   "name": "f000000000000000002e",
   "position": {
     "x": 1566,
-    "y": 508,
+    "y": 527,
     "z": 4600,
     "height": 33,
     "width": 300,
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
+                    "value": "Rajneesh Gulati",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

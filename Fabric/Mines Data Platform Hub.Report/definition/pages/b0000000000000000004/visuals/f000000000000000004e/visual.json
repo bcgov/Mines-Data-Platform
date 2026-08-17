@@ -3,7 +3,7 @@
   "name": "f000000000000000004e",
   "position": {
     "x": 1566,
-    "y": 721,
+    "y": 680,
     "z": 7800,
     "height": 33,
     "width": 300,
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Senior Auditor, Mine Audits Unit",
+                    "value": "Rebecca",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

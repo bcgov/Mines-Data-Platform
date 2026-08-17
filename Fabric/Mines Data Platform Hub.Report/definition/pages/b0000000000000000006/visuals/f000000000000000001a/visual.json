@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001a",
   "position": {
-    "x": 100,
-    "y": 385,
+    "x": 54,
+    "y": 430,
     "z": 2600,
     "height": 33,
-    "width": 600,
+    "width": 26,
     "tabOrder": 2600
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "A ticket is raised",
+                    "value": "2",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
+                      "fontSize": "9px",
+                      "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

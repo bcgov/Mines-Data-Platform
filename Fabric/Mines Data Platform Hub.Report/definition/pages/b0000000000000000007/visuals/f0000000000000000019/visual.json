@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000019",
   "position": {
-    "x": 970,
-    "y": 456,
+    "x": 770,
+    "y": 501,
     "z": 2500,
     "height": 36,
     "width": 180,
@@ -52,7 +52,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Who should I ask?'"
+                  "Value": "'Request access'"
                 }
               }
             },
@@ -61,7 +61,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#013366'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
                 }
@@ -113,10 +113,28 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }
+          }
+        },
+        {
+          "properties": {
+            "fillColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]
@@ -138,7 +156,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E1DFDD'"
+                      "Value": "'#013366'"
                     }
                   }
                 }

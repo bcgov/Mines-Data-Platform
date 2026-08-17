@@ -3,7 +3,7 @@
   "name": "f0000000000000000032",
   "position": {
     "x": 1566,
-    "y": 570,
+    "y": 589,
     "z": 5000,
     "height": 33,
     "width": 300,
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Nhung.Nguyen@gov.bc.ca",
+                    "value": "Nhung Nguyen",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

@@ -3,10 +3,10 @@
   "name": "f000000000000000004a",
   "position": {
     "x": 1520,
-    "y": 846,
+    "y": 785,
     "z": 7400,
-    "height": 14,
-    "width": 14,
+    "height": 1,
+    "width": 346,
     "tabOrder": 7400
   },
   "visual": {
@@ -69,7 +69,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#013366'"
+                      "Value": "'#E1DFDD'"
                     }
                   }
                 }

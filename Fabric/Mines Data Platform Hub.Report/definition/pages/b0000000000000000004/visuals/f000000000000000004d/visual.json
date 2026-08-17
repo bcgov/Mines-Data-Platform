@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004d",
   "position": {
-    "x": 1566,
-    "y": 695,
+    "x": 1520,
+    "y": 682,
     "z": 7700,
     "height": 33,
-    "width": 300,
+    "width": 34,
     "tabOrder": 7700
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Sarah Alloisio",
+                    "value": "R",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
+                      "fontSize": "9px",
+                      "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

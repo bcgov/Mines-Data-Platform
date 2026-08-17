@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000017",
   "position": {
-    "x": 519,
-    "y": 340,
+    "x": 54,
+    "y": 375,
     "z": 2300,
-    "height": 44,
-    "width": 166,
+    "height": 63,
+    "width": 148,
     "tabOrder": 2300
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Badge Promoted"
+                  "Property": "Hub Badge Certified"
                 }
               },
-              "queryRef": "fact_inspection.Hub Badge Promoted",
-              "nativeQueryRef": "Hub Badge Promoted"
+              "queryRef": "fact_inspection.Hub Badge Certified",
+              "nativeQueryRef": "Hub Badge Certified"
             }
           ]
         }
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#107C41'"
+                      "Value": "'#0F6CBD'"
                     }
                   }
                 }
@@ -94,61 +94,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#F1FAF1'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "border": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#9FD5A0'"
-                    }
-                  }
-                }
-              }
-            },
-            "radius": {
-              "expr": {
-                "Literal": {
-                  "Value": "22D"
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

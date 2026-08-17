@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004d",
   "position": {
-    "x": 30,
-    "y": 1036,
+    "x": 1544,
+    "y": 846,
     "z": 7700,
     "height": 33,
-    "width": 1860,
+    "width": 298,
     "tabOrder": 7700
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "The GIS team is folded into this audience rather than given its own tab \u2014 their work here is inspection planning, and they consume curated data through APIs.",
+                    "value": "Inspection types, CORE and NRIS lineage",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#8A8886"
+                      "color": "#605E5C"
                     }
                   }
                 ],

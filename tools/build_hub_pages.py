@@ -15,8 +15,9 @@ Page-navigation links are OFF by default: Fabric's report import schema rejects 
 import json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from metrics import (TB_LINE, TB_VPAD, TB_HPAD, CARD_LINE, CARD_VPAD,
-                     tb_height, card_height, card_min_width, card_lines,
+from contextlib import contextmanager
+from metrics import (TB_LINE, TB_VPAD, TB_HPAD, CARD_PAD_PLAIN, CARD_PAD_PILL,
+                     tb_height, card_height, card_line_h, card_min_width,
                      wrap_lines, text_width, pt_to_px, fit_size)
 
 ROOT = sys.argv[1]
@@ -77,6 +78,19 @@ RAIL_GEOM = _rail_geom()
 
 _state = {"page": None, "n": 0, "visuals": []}
 _issues = []
+_regions = []
+
+
+@contextmanager
+def region(x, y, w, h, label):
+    """Everything drawn inside must stay inside. This is the check that was
+    missing: the canvas-bounds test passed happily while the 'Next refresh'
+    card hung out of the bottom of the intro tile."""
+    _regions.append((x, y, w, h, label))
+    try:
+        yield
+    finally:
+        _regions.pop()
 
 
 # --- PBIR primitives ---------------------------------------------------------
@@ -113,6 +127,12 @@ def add(vtype, x, y, w, h, visual_body, vc_objects=None, link_to=None):
     if x < 0 or y < 0 or x + w > W or y + h > H:
         _issues.append(f"{_state['page']}: {vtype} out of canvas "
                        f"({x},{y},{w},{h})")
+    if _regions:
+        rx, ry, rw, rh, lbl = _regions[-1]
+        if x < rx or y < ry or x + w > rx + rw or y + h > ry + rh:
+            _issues.append(
+                f"{_state['page']}: {vtype} escapes {lbl} - "
+                f"child({x},{y},{x+w},{y+h}) vs box({rx},{ry},{rx+rw},{ry+rh})")
     _state["n"] += 1
     z = _state["n"] * 100
     vid = "f" + format(_state["n"], "019x")
@@ -174,25 +194,23 @@ def oval(x, y, w, h, fill):
 
 
 def measure_card(x, y, w, measure, size=10, color=INK, align="center", bold=False,
-                 bg=None, border=None, radius=4, lines=1, sample=None):
-    """Always ONE line - cardVisual does not word-wrap, it ellipsises. The point
-    size is stepped down if the measure's widest real value would not fit, and
-    an issue is recorded if even the smallest size overflows."""
-    lines = 1
-    h = card_height(lines)
-    pill = bool(bg or border)
+                 sample=None, h=None):
+    """A PLAIN card - no background, no border, so the chrome is 34px on both
+    axes rather than 49. One line always: cardVisual does not wrap. Height is
+    derived from the point size; pass h only to override for centring."""
     sample = sample or SAMPLES.get(measure)
     if sample:
-        fitted = fit_size(sample, w, pill, bold, tuple(
-            n for n in (size, size - 1, size - 2) if n >= 8))
-        if card_min_width(sample, fitted, pill, bold) > w:
+        fitted = fit_size(sample, w, False, bold,
+                          tuple(n for n in (size, size - 1, size - 2) if n >= 8))
+        if card_min_width(sample, fitted, False, bold) > w:
             _issues.append(f"{_state['page']}: card '{measure}' w={w} needs "
-                           f"{card_min_width(sample, fitted, pill, bold)} at {fitted}pt")
+                           f"{card_min_width(sample, fitted, False, bold)} at {fitted}pt")
         size = fitted
+    box_h = h if h is not None else card_height(size)
     props = {"fontSize": num(size), "horizontalAlignment": s(align), "color": solid(color)}
     if bold:
         props["bold"] = lit("true")
-    add("cardVisual", x, y, w, h, {
+    add("cardVisual", x, y, w, box_h, {
         "query": {"queryState": {"Data": {"projections": [{
             "field": {"Measure": {"Expression": {"SourceRef": {"Entity": ENTITY}},
                                   "Property": measure}},
@@ -200,8 +218,28 @@ def measure_card(x, y, w, measure, size=10, color=INK, align="center", bold=Fals
         "objects": {
             "label": [{"properties": {"show": lit("false")}, "selector": {"id": "default"}}],
             "value": [{"properties": props, "selector": {"id": "default"}}]}},
-        container(bg=bg, border=border, radius=radius))
-    return h
+        container())
+    return box_h
+
+
+PILL_H = 44
+
+
+def pill_card(x, y, w, measure, size=9, color=INK, fill=None, border=None,
+              bold=True, sample=None, pill_h=PILL_H):
+    """A rounded pill drawn as a SHAPE with a transparent card centred on it.
+
+    Putting the background on the card itself pushes its chrome to 49px per
+    axis, which left a 44px badge with zero usable height - every trust badge
+    rendered blank. The shape carries the styling; the card carries only text,
+    so it keeps the cheaper 34px chrome and can overhang the pill invisibly.
+    Returns the pill's visual height, which is what the layout should reserve.
+    """
+    rect(x, y, w, pill_h, fill=fill, border=border, radius=pill_h // 2)
+    ch = card_height(size)
+    measure_card(x, y + (pill_h - ch) // 2, w, measure, size=size, color=color,
+                 align="center", bold=bold, sample=sample)
+    return pill_h
 
 
 def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
@@ -307,16 +345,15 @@ S_ASAT = "Data as at 30 September 2026"
 S_REFRESH = "Next refresh: 30 September 2026"
 S_UPDATED = "Source extract stale"
 
-BADGE_W = card_min_width(S_BADGE, 9, pill=True, bold=True) + 8
-PILL_W = card_min_width(S_ASAT, 10, pill=True, bold=True) + 8
-REFRESH_W = card_min_width(S_REFRESH, 9, pill=False) + 8
+BADGE_W = card_min_width(S_BADGE, 9, pill=False, bold=True) + 28
+PILL_W = card_min_width(S_ASAT, 10, pill=False, bold=True) + 28
+REFRESH_W = card_min_width(S_REFRESH, 9, pill=False) + 12
 
 
 def badge(x, y, measure, state, w=None):
     col, fill, brd = BADGE[state]
-    return measure_card(x, y, w or BADGE_W, measure, size=9, color=col, bold=True,
-                        bg=fill, border=brd, radius=card_height(1) // 2,
-                        sample=S_BADGE)
+    return pill_card(x, y, w or BADGE_W, measure, size=9, color=col,
+                     fill=fill, border=brd, sample=S_BADGE)
 
 
 # --- shared page chrome ------------------------------------------------------
@@ -351,17 +388,19 @@ def intro_tile(title, body, pill="Hub Data As At", refresh="Hub Next Refresh"):
     body_w = min(1240, W - PILL_W - MARGIN - 90)
     th = tb_height(title, 800, 17, True)
     bh = tb_height(body, body_w, 10)
-    tile_h = 14 + th + 2 + bh + 14
+    refresh_h = card_height(9)
+    stack_h = PILL_H + 6 + refresh_h              # pill + the refresh line
+    tile_h = 14 + max(th + 2 + bh, stack_h) + 14
     rect(MARGIN, INTRO_Y, CONTENT_W, tile_h, fill=WHITE, border=LINE)
-    text(MARGIN + 26, INTRO_Y + 14, 800, [(title, 17, NAVY, True)])
-    text(MARGIN + 26, INTRO_Y + 14 + th + 2, body_w, [(body, 10, INK, False)])
-    px = W - MARGIN - 26 - PILL_W
-    measure_card(px, INTRO_Y + 14, PILL_W, pill, size=10, color=NAVY, bold=True,
-                 bg=PILL_BG, border=PILL_BG, radius=card_height(1) // 2,
-                 sample=S_ASAT)
-    measure_card(px + PILL_W - REFRESH_W, INTRO_Y + 14 + card_height(1) + 6,
-                 REFRESH_W, refresh, size=9, color=MUTED, align="right",
-                 sample=S_REFRESH)
+    with region(MARGIN, INTRO_Y, CONTENT_W, tile_h, "intro tile"):
+        text(MARGIN + 26, INTRO_Y + 14, 800, [(title, 17, NAVY, True)])
+        text(MARGIN + 26, INTRO_Y + 14 + th + 2, body_w, [(body, 10, INK, False)])
+        px = W - MARGIN - 26 - PILL_W
+        pill_card(px, INTRO_Y + 14, PILL_W, pill, size=10, color=NAVY,
+                  fill=PILL_BG, border=PILL_BG, sample=S_ASAT)
+        measure_card(px + PILL_W - REFRESH_W, INTRO_Y + 14 + PILL_H + 6,
+                     REFRESH_W, refresh, size=9, color=MUTED, align="right",
+                     sample=S_REFRESH)
     return INTRO_Y + tile_h
 
 
@@ -384,24 +423,30 @@ def report_cards(cards, top=None):
     t_lines = max(wrap_lines(c[0], title_w - TB_HPAD, title_size, True) for c in cards)
     th = TB_LINE * t_lines + TB_VPAD
     qh = TB_LINE * q_lines + TB_VPAD
-    ch = (pad - 6) + max(th, card_height(1)) + 6 + TB_LINE + TB_VPAD + 4 + qh \
-         + 14 + 1 + 12 + card_height(1) + pad - 6
+    upd_h = card_height(9)
+    head_h = max(th, PILL_H)
+    ch = 22 + head_h + 8 + (TB_LINE + TB_VPAD) + 4 + qh + 14 + 1 + 12 + upd_h + 22
     for i, (title, chip, trust_m, state, updated_m, question) in enumerate(cards):
         x = MARGIN + i * (cw + gap)
         rect(x, y0, cw, ch, fill=WHITE, border=LINE)
-        cy = y0 + pad - 6
-        rect(x + pad, cy + 8, 16, 16, fill=chip, radius=3)
-        text(x + pad + 26, cy, title_w, [(title, title_size, INK, True)])
-        badge(x + cw - pad - BADGE_W, cy, trust_m, state)
-        cy += max(th, card_height(1)) + 6
-        cy += text(x + pad, cy, 240, [("ANSWERS", 8, FAINT, True)]) + 4
-        text(x + pad, cy, q_w, [(question, 10, INK, False)], lines=q_lines)
-        cy += qh + 14
-        rect(x + pad, cy, cw - pad * 2, 1, fill=LINE, radius=0)
-        cy += 12
-        measure_card(x + pad, cy, cw - pad * 2 - 150, updated_m, size=9,
-                     color=MUTED, align="left", sample=S_UPDATED)
-        button(x + cw - pad - 132, cy + 6, 132, 32, "Open  →", color=NAVY, size=10)
+        with region(x, y0, cw, ch, f"report card {title!r}"):
+            cy = y0 + 22
+            rect(x + pad, cy + (head_h - 16) // 2, 16, 16, fill=chip, radius=3)
+            text(x + pad + 26, cy + (head_h - th) // 2, title_w,
+                 [(title, title_size, INK, True)], lines=t_lines)
+            badge(x + cw - pad - BADGE_W, cy + (head_h - PILL_H) // 2,
+                  trust_m, state)
+            cy += head_h + 8
+            cy += text(x + pad, cy, 240, [("ANSWERS", 8, FAINT, True)],
+                       lines=1) + 4
+            text(x + pad, cy, q_w, [(question, 10, INK, False)], lines=q_lines)
+            cy += qh + 14
+            rect(x + pad, cy, cw - pad * 2, 1, fill=LINE, radius=0)
+            cy += 12
+            measure_card(x + pad, cy, cw - pad * 2 - 150, updated_m, size=9,
+                         color=MUTED, align="left", sample=S_UPDATED)
+            button(x + cw - pad - 132, cy + (upd_h - 32) // 2, 132, 32,
+                   "Open  →", color=NAVY, size=10)
     return y0 + ch
 
 
@@ -414,25 +459,29 @@ CONT_X = MARGIN + COMM_W + PANEL_GAP
 def commentary_panel(heading, subtitle, rows, y, h):
     x, w = MARGIN, COMM_W
     rect(x, y, w, h, fill=WHITE, border=LINE)
+    _regions.append((x, y, w, h, "commentary panel"))
     cy = y + 14
     cy += text(x + 24, cy, 620, [(heading, 12, INK, True)])
-    cy += text(x + 24, cy, 760, [(subtitle, 9, MUTED, False)]) + 4
+    cy += text(x + 24, cy, 760, [(subtitle, 9, MUTED, False)]) + 2
     # cardVisual does not wrap, so the label sits ABOVE and the card gets the
     # panel's full width - the widest commentary sentence needs ~1260px.
-    rowh = TB_LINE + TB_VPAD + card_height(1)
+    card_h = card_height(9)
+    rowh = TB_LINE + TB_VPAD + card_h
     for label, colour, m in rows:
         rect(x + 24, cy, 4, rowh, fill=colour, radius=0)
         text(x + 24 + 14, cy, w - 24 - 14 - 24, [(label, 10, INK, True)],
              lines=1)
         measure_card(x + 24 + 14, cy + TB_LINE + TB_VPAD, w - 24 - 14 - 24, m,
-                     size=10, color=INK, align="left")
-        cy += rowh + 12
+                     size=9, color=INK, align="left")
+        cy += rowh + 10
+    _regions.pop()
     return y + h
 
 
 def contacts_panel(contacts, links, y, h):
     x, w = CONT_X, CONT_W
     rect(x, y, w, h, fill=WHITE, border=LINE)
+    _regions.append((x, y, w, h, "contacts panel"))
     cy = y + 14
     cy += text(x + 24, cy, 340, [("Contacts & help", 12, INK, True)]) + 6
     for initials, name, sub in contacts:
@@ -450,6 +499,7 @@ def contacts_panel(contacts, links, y, h):
                link_to=target)
         text(x + 48, cy + 28, w - 96, [(sub, 9, MUTED, False)], lines=1)
         cy += 66
+    _regions.pop()
     return y + h
 
 
@@ -504,10 +554,12 @@ def persona_page(pid, display, title, body, cards, comm_head, comm_sub, comm_row
                  contacts, links, note):
     start_page(pid, display)
     chrome(pid)
-    intro_tile(title, body)
-    report_cards(cards)
-    commentary_panel(comm_head, comm_sub, comm_rows, PANELS_Y, PANELS_H)
-    contacts_panel(contacts, links, PANELS_Y, PANELS_H)
+    intro_bottom = intro_tile(title, body)
+    cards_bottom = report_cards(cards, top=intro_bottom + 12 + 33 + 8)
+    py = cards_bottom + 16
+    ph = (H - 44 - 12) - py
+    commentary_panel(comm_head, comm_sub, comm_rows, py, ph)
+    contacts_panel(contacts, links, py, ph)
     footnote(note)
     counts[display] = finish_page()
 
@@ -515,12 +567,13 @@ def persona_page(pid, display, title, body, cards, comm_head, comm_sub, comm_row
 def kv_panel(x, y, w, h, heading, sub, rows, label_w=160, size=10, color=INK):
     """Heading + optional sub, then label-left / measure-right rows."""
     rect(x, y, w, h, fill=WHITE, border=LINE)
+    _regions.append((x, y, w, h, "kv panel"))
     cy = y + 14
     cy += text(x + 24, cy, w - 48, [(heading, 12, INK, True)])
     if sub:
         cy += text(x + 24, cy, w - 48, [(sub, 9, MUTED, False)], lines=1)
     cy += 6
-    rowh = TB_LINE + TB_VPAD + card_height(1)
+    rowh = TB_LINE + TB_VPAD + card_height(size)
     avail = (y + h - 14) - cy
     pitch = max(rowh + 6, avail // len(rows))
     for label, m in rows:
@@ -528,6 +581,7 @@ def kv_panel(x, y, w, h, heading, sub, rows, label_w=160, size=10, color=INK):
         measure_card(x + 24, cy + TB_LINE + TB_VPAD, w - 48, m, size=size,
                      color=color, align="left")
         cy += pitch
+    _regions.pop()
     return y + h
 
 
@@ -657,7 +711,7 @@ BADGE_DOC = [
 ]
 col_w = CONTENT_W // 4
 desc_lines = max(wrap_lines(d, col_w - 34 - TB_HPAD, 9) for _, _, d in BADGE_DOC)
-LEG_H = 14 + 33 + 33 + 8 + card_height(1) + 6 + (TB_LINE * desc_lines + TB_VPAD) + 14
+LEG_H = 14 + 33 + 33 + 8 + PILL_H + 6 + (TB_LINE * desc_lines + TB_VPAD) + 14
 rect(MARGIN, LEG_Y, CONTENT_W, LEG_H, fill=WHITE, border=LINE)
 ly = LEG_Y + 14
 ly += text(MARGIN + 24, ly, 600, [("Trust badges — four states", 12, INK, True)])
@@ -667,7 +721,7 @@ ly += text(MARGIN + 24, ly, 900,
 for i, (m, state, desc) in enumerate(BADGE_DOC):
     bx = MARGIN + 24 + i * col_w
     badge(bx, ly, m, state)
-    text(bx, ly + card_height(1) + 6, col_w - 34, [(desc, 9, INK, False)],
+    text(bx, ly + PILL_H + 6, col_w - 34, [(desc, 9, INK, False)],
          lines=desc_lines)
 
 # anatomy of a definition + counting rules
@@ -765,7 +819,7 @@ STATES = [("Ready", "certified",
 ST_Y = TOP_Y + TOP_H + 16
 st_col = CONTENT_W // 3
 st_lines = max(wrap_lines(d, st_col - 34 - TB_HPAD, 9) for _, _, d in STATES)
-ST_H = 14 + 33 + 33 + 8 + card_height(1) + 6 + (TB_LINE * st_lines + TB_VPAD) + 14
+ST_H = 14 + 33 + 33 + 8 + PILL_H + 6 + (TB_LINE * st_lines + TB_VPAD) + 14
 rect(MARGIN, ST_Y, CONTENT_W, ST_H, fill=WHITE, border=LINE)
 sy = ST_Y + 14
 sy += text(MARGIN + 24, sy, 600, [("Request states", 12, INK, True)])
@@ -775,11 +829,10 @@ sy += text(MARGIN + 24, sy, 1000,
 for i, (label, state, desc) in enumerate(STATES):
     bx = MARGIN + 24 + i * st_col
     col, fill_c, brd = BADGE[state]
-    rect(bx, sy, BADGE_W, card_height(1), fill=fill_c, border=brd,
-         radius=card_height(1) // 2)
-    text(bx, vcy(sy, card_height(1)), BADGE_W, [(label, 9, col, True)],
+    rect(bx, sy, BADGE_W, PILL_H, fill=fill_c, border=brd, radius=PILL_H // 2)
+    text(bx, vcy(sy, PILL_H), BADGE_W, [(label, 9, col, True)],
          align="center", lines=1)
-    text(bx, sy + card_height(1) + 6, st_col - 34, [(desc, 9, INK, False)],
+    text(bx, sy + PILL_H + 6, st_col - 34, [(desc, 9, INK, False)],
          lines=st_lines)
 footnote("The Power Automate visual is subject to a tenant setting we have not yet "
          "confirmed — the fallback path is designed for, not bolted on later.",
@@ -799,7 +852,7 @@ y = intro_tile("Access & data states",
 y += 16
 y += text(MARGIN, y, 800,
           [("STATE 1 — user has no audience membership", 9, ALERT, True)], lines=1)
-S1_H = 14 + 40 + 10 + 33 + 6 + 54 + 14 + 36 + 12 + card_height(1) + 14
+S1_H = 14 + 40 + 10 + 33 + 6 + 54 + 14 + 36 + 12 + card_height(9) + 14
 rect(MARGIN, y, CONTENT_W, S1_H, fill=WHITE, border=LINE)
 ay = y + 14
 rect(W // 2 - 34, ay, 68, 38, fill=PILL_BG, radius=6)
@@ -828,14 +881,12 @@ rect(MARGIN, y, CONTENT_W, S2_H, fill=WHITE, border=LINE)
 rect(MARGIN, y, 5, S2_H, fill=ALERT, radius=0)
 sy = y + 16
 sy += text(MARGIN + 28, sy, 700, [("Start here — Executive view", 14, NAVY, True)])
-STALE_PILL_W = card_min_width(S_ASAT, 9, pill=True, bold=True) + 8
-rect(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, card_height(1),
-     fill="#FDF3F0", border=ALERT, radius=card_height(1) // 2)
-measure_card(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, "Hub Data As At",
-             size=9, color=ALERT, align="center", sample=S_ASAT)
+STALE_PILL_W = card_min_width(S_ASAT, 9, pill=False, bold=True) + 28
+pill_card(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, "Hub Data As At",
+          size=9, color=ALERT, fill="#FDF3F0", border=ALERT, sample=S_ASAT)
 measure_card(MARGIN + 28, sy, CONTENT_W - 80, "Hub Stale Warning",
              size=10, color=INK, align="left")
-sy += card_height(1) + 18
+sy += card_height(10) + 18
 mini_w = (CONTENT_W - 56 - 40) // 3
 mini_h = (y + S2_H - 16) - sy
 for i, (label, chip) in enumerate([("Inspections", BLUE), ("Incidents", RED),
@@ -844,10 +895,9 @@ for i, (label, chip) in enumerate([("Inspections", BLUE), ("Incidents", RED),
     rect(mx, sy, mini_w, mini_h, fill="#FAFAFA", border=LINE)
     rect(mx + 20, sy + 22, 14, 14, fill=chip, radius=3)
     text(mx + 42, sy + 14, mini_w - 70, [(label, 11, MUTED, True)], lines=1)
-    measure_card(mx + 20, sy + 54, mini_w - 40, "Hub Data As At", size=9, color=ALERT,
-                 align="center", bg="#FDF3F0", border=ALERT,
-                 radius=card_height(1) // 2, sample=S_ASAT)
-    text(mx + 20, sy + 54 + card_height(1) + 6, mini_w - 40,
+    pill_card(mx + 20, sy + 54, mini_w - 40, "Hub Data As At", size=9,
+              color=ALERT, fill="#FDF3F0", border=ALERT, sample=S_ASAT)
+    text(mx + 20, sy + 54 + PILL_H + 6, mini_w - 40,
          [("Not current — verify against source before quoting.", 9, MUTED, False)],
          lines=1)
 footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for severity, "

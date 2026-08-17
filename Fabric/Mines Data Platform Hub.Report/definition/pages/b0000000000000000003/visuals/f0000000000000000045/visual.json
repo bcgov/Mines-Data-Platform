@@ -3,7 +3,7 @@
   "name": "f0000000000000000045",
   "position": {
     "x": 1566,
-    "y": 721,
+    "y": 685,
     "z": 6900,
     "height": 33,
     "width": 300,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Nhung.Nguyen@gov.bc.ca",
+                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#013366"

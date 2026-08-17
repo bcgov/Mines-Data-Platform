@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002b",
   "position": {
-    "x": 1180,
-    "y": 560,
+    "x": 54,
+    "y": 917,
     "z": 4300,
     "height": 33,
-    "width": 686,
+    "width": 1052,
     "tabOrder": 4300
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "FISCAL YEAR",
+                    "value": "VALIDATED BY",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#8A8886",

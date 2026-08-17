@@ -3,10 +3,10 @@
   "name": "f0000000000000000017",
   "position": {
     "x": 100,
-    "y": 337,
+    "y": 352,
     "z": 2300,
     "height": 33,
-    "width": 1346,
+    "width": 600,
     "tabOrder": 2300
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Report, figure, and what you expected instead. The current filter context and \"data as at\" date are attached automatically.",
+                    "value": "You describe the issue",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

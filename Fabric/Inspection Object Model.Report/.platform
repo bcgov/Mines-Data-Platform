@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Inspection Object Model"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "7c41d0a2-3b6e-4f18-9a55-1d2e8f430b91"
+  }
+}

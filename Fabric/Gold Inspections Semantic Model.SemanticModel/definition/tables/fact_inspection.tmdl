@@ -293,6 +293,141 @@ table fact_inspection
 		displayFolder: Hub
 		lineageTag: c13ea8f3-7406-423c-8b8c-b64d4ab6ccb4
 
+	/// Object page - DEFINITION line for Inspections Total.
+	measure 'Obj Def Total' = "Every inspection ever recorded. Distinct count of inspection_id, all types, no date filter."
+		displayFolder: Object
+		lineageTag: 0b1e0000-0000-4000-8000-000000000000
+
+	/// Object page - DEFINITION line for Inspections FYTD.
+	measure 'Obj Def FYTD' = "Inspections whose inspection_date falls in the current BC fiscal year, up to and including today. Distinct inspection_id, all types."
+		displayFolder: Object
+		lineageTag: 0b1e0001-0000-4000-8000-000000000001
+
+	/// Object page - DEFINITION line for Inspections Same Time Last FY.
+	measure 'Obj Def Same Last FY' = "The same window one year earlier, so the comparison is like-for-like: 1 April of last fiscal year to this date last year."
+		displayFolder: Object
+		lineageTag: 0b1e0002-0000-4000-8000-000000000002
+
+	/// Object page - DEFINITION line for Inspections Last Month.
+	measure 'Obj Def Last Month' = "Inspections in the rolling previous 30 days. Matches the Metabase ""Inspection Date Previous 30 Days"" filter - it is NOT last calendar month."
+		displayFolder: Object
+		lineageTag: 0b1e0003-0000-4000-8000-000000000003
+
+	/// Object page - DEFINITION line for Inspections Prev FY Total.
+	measure 'Obj Def Prev FY' = "Every inspection in the last completed fiscal year, 1 April to 31 March."
+		displayFolder: Object
+		lineageTag: 0b1e0004-0000-4000-8000-000000000004
+
+	/// Object page - the actual date window behind Inspections Total.
+	measure 'Obj Win Total' = VAR a = MIN ( fact_inspection[inspection_date] ) VAR b = MAX ( fact_inspection[inspection_date] ) RETURN IF ( ISBLANK ( a ), "No inspection dates present", FORMAT ( a, "d MMMM yyyy" ) & " to " & FORMAT ( b, "d MMMM yyyy" ) & "  (all data)" )
+		displayFolder: Object
+		lineageTag: 0b1e0005-0000-4000-8000-000000000005
+
+	/// Object page - the exact date window behind Inspections FYTD. Recalculates daily.
+	measure 'Obj Win FYTD' = VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN FORMAT ( DATE ( fy, 4, 1 ), "d MMMM yyyy" ) & " to " & FORMAT ( d, "d MMMM yyyy" ) & "  (inclusive)"
+		displayFolder: Object
+		lineageTag: 0b1e0006-0000-4000-8000-000000000006
+
+	/// Object page - the exact date window behind Inspections Same Time Last FY.
+	measure 'Obj Win Same Last FY' = VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN FORMAT ( DATE ( fy - 1, 4, 1 ), "d MMMM yyyy" ) & " to " & FORMAT ( EDATE ( d, -12 ), "d MMMM yyyy" ) & "  (inclusive)"
+		displayFolder: Object
+		lineageTag: 0b1e0007-0000-4000-8000-000000000007
+
+	/// Object page - the exact date window behind Inspections Last Month.
+	measure 'Obj Win Last Month' = VAR d = TODAY () RETURN FORMAT ( d - 30, "d MMMM yyyy" ) & " to " & FORMAT ( d - 1, "d MMMM yyyy" ) & "  (rolling 30 days)"
+		displayFolder: Object
+		lineageTag: 0b1e0008-0000-4000-8000-000000000008
+
+	/// Object page - the exact date window behind Inspections Prev FY Total.
+	measure 'Obj Win Prev FY' = VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN FORMAT ( DATE ( fy - 1, 4, 1 ), "d MMMM yyyy" ) & " to " & FORMAT ( DATE ( fy, 3, 31 ), "d MMMM yyyy" )
+		displayFolder: Object
+		lineageTag: 0b1e0009-0000-4000-8000-000000000009
+
+	/// Object page - trust tag for Inspections Total. All-time count needs no window coverage.
+	measure 'Obj Trust Total' = "Certified"
+		displayFolder: Object
+		lineageTag: 0b1e0010-0000-4000-8000-000000000010
+
+	/// Object page - trust tag for Inspections FYTD. Drops to Provisional when gold does not cover the whole window - the automated check the 21 Jul 'blue tick' discussion asked for, in its simplest form.
+	measure 'Obj Trust FYTD' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR needed = d RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0011-0000-4000-8000-000000000011
+
+	/// Object page - trust tag for Inspections Same Time Last FY.
+	measure 'Obj Trust Same Last FY' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR needed = EDATE ( TODAY (), -12 ) RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0012-0000-4000-8000-000000000012
+
+	/// Object page - trust tag for Inspections Last Month. Reads Provisional today because gold ends 7 July.
+	measure 'Obj Trust Last Month' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR needed = TODAY () - 1 RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0013-0000-4000-8000-000000000013
+
+	/// Object page - trust tag for Inspections Prev FY Total.
+	measure 'Obj Trust Prev FY' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR needed = DATE ( fy, 3, 31 ) RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0014-0000-4000-8000-000000000014
+
+	/// Object page - plain-language statement of what the data does and does not cover.
+	measure 'Obj Coverage Note' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fyStart = DATE ( fy, 4, 1 ) VAR d = TODAY () RETURN IF ( ISBLANK ( mx ), "No inspection data is present in gold.", IF ( mx >= d, "Gold covers the full fiscal year to date - every window on this page is complete.", "Gold ends " & FORMAT ( mx, "d MMMM yyyy" ) & ", so windows running past that date are incomplete. Figures are shown and labelled rather than hidden." ) )
+		displayFolder: Object
+		lineageTag: 0b1e0015-0000-4000-8000-000000000015
+
+	/// Object page - where this object sits in the bronze / silver / gold medallion, per the 5 Aug ask.
+	measure 'Obj Layer' = "Gold  ·  lh_gold.fact_inspection  ·  built from CORE and NRIS via the bronze and silver layers"
+		displayFolder: Object
+		lineageTag: 0b1e0016-0000-4000-8000-000000000016
+
+	/// Object page - the object's shape in one line, straight from the data.
+	measure 'Obj Record Count' = VAR n = DISTINCTCOUNT ( fact_inspection[inspection_id] ) VAR m = DISTINCTCOUNT ( fact_inspection[mine_guid] ) VAR t = DISTINCTCOUNT ( fact_inspection[inspection_type_id] ) RETURN FORMAT ( n, "#,0" ) & " inspections  ·  " & FORMAT ( m, "#,0" ) & " mines  ·  " & FORMAT ( t, "#,0" ) & " inspection types"
+		displayFolder: Object
+		lineageTag: 0b1e0017-0000-4000-8000-000000000017
+
+	/// Object page - RELATIONSHIP line, Inspection to Mine.
+	measure 'Obj Rel Mine' = VAR m = DISTINCTCOUNT ( fact_inspection[mine_guid] ) RETURN "Mine  —  " & FORMAT ( m, "#,0" ) & " related mines  ·  via mine_guid"
+		displayFolder: Object
+		lineageTag: 0b1e0018-0000-4000-8000-000000000018
+
+	/// Object page - RELATIONSHIP line, Inspection to Inspection Type.
+	measure 'Obj Rel Type' = VAR t = DISTINCTCOUNT ( fact_inspection[inspection_type_id] ) RETURN "Inspection Type  —  " & FORMAT ( t, "#,0" ) & " types  ·  via inspection_type_id"
+		displayFolder: Object
+		lineageTag: 0b1e0019-0000-4000-8000-000000000019
+
+	/// Object page - RELATIONSHIP line, Inspection to Date.
+	measure 'Obj Rel Date' = VAR a = MIN ( fact_inspection[inspection_date] ) VAR b = MAX ( fact_inspection[inspection_date] ) RETURN IF ( ISBLANK ( a ), "Date  —  no dates present", "Date  —  " & FORMAT ( a, "MMM yyyy" ) & " to " & FORMAT ( b, "MMM yyyy" ) & "  ·  via inspection_date_key" )
+		displayFolder: Object
+		lineageTag: 0b1e0020-0000-4000-8000-000000000020
+
+	/// Object page - IDENTITY line. inspector_idir is the field Inspection carries that Notice of Work does not.
+	measure 'Obj Identity Note' = VAR ins = DISTINCTCOUNT ( fact_inspection[inspector_idir] ) RETURN "Keyed on inspection_id  ·  " & FORMAT ( ins, "#,0" ) & " distinct inspectors recorded in inspector_idir"
+		displayFolder: Object
+		lineageTag: 0b1e0021-0000-4000-8000-000000000021
+
+	/// Object page - display value for Inspections Total. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Total' = VAR v = [Inspections Total] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0022-0000-4000-8000-000000000022
+
+	/// Object page - display value for Inspections FYTD. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val FYTD' = VAR v = [Inspections FYTD] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0023-0000-4000-8000-000000000023
+
+	/// Object page - display value for Inspections Same Time Last FY. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Same Last FY' = VAR v = [Inspections Same Time Last FY] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0024-0000-4000-8000-000000000024
+
+	/// Object page - display value for Inspections Last Month. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Last Month' = VAR v = [Inspections Last Month] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0025-0000-4000-8000-000000000025
+
+	/// Object page - display value for Inspections Prev FY Total. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Prev FY' = VAR v = [Inspections Prev FY Total] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0026-0000-4000-8000-000000000026
+
 	column inspection_id
 		dataType: int64
 		formatString: 0

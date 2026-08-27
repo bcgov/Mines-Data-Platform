@@ -3,10 +3,10 @@
   "name": "f000000000000000002d",
   "position": {
     "x": 682,
-    "y": 452,
+    "y": 415,
     "z": 4500,
-    "height": 54,
-    "width": 554,
+    "height": 33,
+    "width": 240,
     "tabOrder": 4500
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "What has been reported, how many were dangerous occurrences, and where are injuries and fatalities concentrated?",
+                    "value": "ANSWERS",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "8px",
+                      "color": "#8A8886",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

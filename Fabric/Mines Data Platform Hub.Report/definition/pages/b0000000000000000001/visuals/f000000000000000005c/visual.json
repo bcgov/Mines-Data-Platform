@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000005c",
   "position": {
-    "x": 30,
-    "y": 1036,
+    "x": 1544,
+    "y": 938,
     "z": 9200,
     "height": 33,
-    "width": 1860,
+    "width": 298,
     "tabOrder": 9200
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Each audience tab above shows only the items made visible to that audience under Manage audiences. Executive users never see the operational detail pages.",
+                    "value": "Submit a data or report change request",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#8A8886"
+                      "color": "#605E5C"
                     }
                   }
                 ],

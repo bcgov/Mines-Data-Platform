@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000025",
   "position": {
-    "x": 100,
+    "x": 54,
     "y": 477,
     "z": 3700,
     "height": 33,
-    "width": 600,
+    "width": 26,
     "tabOrder": 3700
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "The section owner reviews it",
+                    "value": "3",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
+                      "fontSize": "9px",
+                      "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

@@ -61,13 +61,21 @@ P_AUDIT = "b0000000000000000004"
 P_DEFS = "b0000000000000000005"
 P_CHANGE = "b0000000000000000006"
 P_STATES = "b0000000000000000007"
+P_RULES = "b0000000000000000008"
 
 PERSONAS = [("All", None), ("Executive", P_EXEC), ("Compliance & Enforcement", P_COMP),
             ("Permitting & Titles", P_PERM), ("Audit & Analysis", P_AUDIT)]
 
 # Rail geometry derived from the rendered label width (button fonts are points).
+RAIL_CAPTION = "YOU ARE VIEWING"
+RAIL_CAP_W = int(text_width(RAIL_CAPTION, pt_to_px(8), True)) + 22
+
+
 def _rail_geom():
-    x, geom = MARGIN, []
+    """The rail is a LOCATION INDICATOR, not navigation (Romil, 24 Aug 2026:
+    the app's left nav does the navigating). Geometry starts after the
+    'YOU ARE VIEWING' caption so the row reads as a label, not a tab strip."""
+    x, geom = MARGIN + RAIL_CAP_W, []
     for label, _ in PERSONAS:
         w = int(text_width(label, pt_to_px(10), True) * 1.10) + 36
         geom.append((x, w))
@@ -207,7 +215,11 @@ def measure_card(x, y, w, measure, size=10, color=INK, align="center", bold=Fals
                            f"{card_min_width(sample, fitted, False, bold)} at {fitted}pt")
         size = fitted
     box_h = h if h is not None else card_height(size)
-    props = {"fontSize": num(size), "horizontalAlignment": s(align), "color": solid(color)}
+    # The Service IGNORES value.color on cardVisual (measured 2026-08-24: every
+    # card rendered #252423 whatever colour was set). fontColor is the property
+    # that paints. Both are emitted; the ignored one is harmless.
+    props = {"fontSize": num(size), "horizontalAlignment": s(align),
+             "color": solid(color), "fontColor": solid(color)}
     if bold:
         props["bold"] = lit("true")
     add("cardVisual", x, y, w, box_h, {
@@ -316,18 +328,32 @@ SAMPLES = {
     "Hub Window Same Last FY": "1 April 2025 to 30 September 2025",
     "Hub Window Rolling 5": "1 April 2021 to 31 March 2026",
     "Hub Def Inspections FYTD":
-        "Distinct count of inspection_id where inspection_date falls in the current "
-        "BC fiscal year to today.",
-    "Hub Def Source": "lh_gold.fact_inspection, built from CORE and NRIS.",
-    "Hub Def Last Refresh": "Gold data last landed 30 September 2026.",
-    "Hub Def Validated By": "Mines Digital Services - certified 30 September 2026.",
+        "Inspections FYTD 26/27: count of distinct inspection records with a completed "
+        "date falling in the current fiscal year to date. Includes Site Visit, "
+        "Compliance Review, Inspection, Desktop and Meeting types.",
+    "Hub Def Source":
+        "CORE and NRIS to bronze to silver to gold.fact_inspection, served through the "
+        "Gold Inspections Semantic Model in Direct Lake mode.",
+    "Hub Def Last Refresh":
+        "Data current through 30 September 2026. Refresh cadence is monthly until the "
+        "pipeline runs daily.",
+    "Hub Def Validated By":
+        "Reconciled against the Ministry corporate report before publication. Fabric "
+        "Certify is admin-gated, so Promoted is the highest endorsement we can set "
+        "today.",
     "Hub Rule Fiscal Year":
-        "FY runs 1 April to 31 March. FY2026/27 began 1 April 2026.",
+        "April to March. FY26/27 runs 1 April 2026 to 31 March 2027. Every FYTD figure "
+        "is measured to today within that window.",
     "Hub Rule Inspections":
-        "Counted on inspection_date, distinct inspection_id, all types included.",
+        "Distinct inspection_id counted on inspection_date. No de-duplication by mine "
+        "or inspector - one inspection record is one inspection.",
     "Hub Rule NoW":
-        "Counted on issue date; administrative amendments held separately.",
-    "Hub Rule Target": "Service Plan target is 1,600 inspections per fiscal year.",
+        "Distinct permit_id counted on issue_date, filtered to permit-side ACT status. "
+        "Administrative amendments are excluded from the headline and reported as a "
+        "separate series.",
+    "Hub Rule Target":
+        "Service Plan target of 1,600 inspections per fiscal year, drawn as a reference "
+        "line rather than a data series so it never enters a count.",
     "Hub Access Note":
         "Access is granted per audience by the app owner - not per report.",
     "Hub Stale Warning":
@@ -369,10 +395,14 @@ def chrome(active_page, show_rail=True):
     button(W - 148, 26, 118, 32, "Share", color=NAVY, size=10, border=LINE)
     if not show_rail:
         return
+    text(MARGIN, vcy(86, 30), RAIL_CAP_W - 12,
+         [(RAIL_CAPTION, 8, FAINT, True)], lines=1)
     for (label, target), (x, w) in zip(PERSONAS, RAIL_GEOM):
         active = target == active_page
-        button(x, 86, w, 30, label, color=NAVY if active else MUTED, size=10,
-               bold=active, link_to=target if target and not active else None)
+        # Inactive audiences are FAINT, not MUTED, and carry no link: they are
+        # context. Navigation lives in the Org app's left pane.
+        button(x, 86, w, 30, label, color=NAVY if active else FAINT, size=10,
+               bold=active)
         if active:
             rect(x + 8, 117, w - 16, 3, fill=NAVY, radius=0)
 
@@ -722,27 +752,47 @@ for i, (m, state, desc) in enumerate(BADGE_DOC):
          lines=desc_lines)
 
 # anatomy of a definition + counting rules
+# The two panels are STACKED, not side by side. Side by side gave the definition
+# rows 912 and 414 canvas px; a cardVisual does not wrap, so every definition on
+# the definitions page ellipsised (measured on the live report 2026-08-24 - the
+# 205-character DEFINITION needs ~1270px at 9pt). Full width gives each row
+# ~1310px of usable card, which fits the longest string the model returns.
 BOT_Y = LEG_Y + LEG_H + 16
 BOT_H = (H - 44 - 12) - BOT_Y
-DEFS_L_W = 1100
-DEFS_R_X = MARGIN + DEFS_L_W + PANEL_GAP
-DEFS_R_W = CONTENT_W - DEFS_L_W - PANEL_GAP
-kv_panel(MARGIN, BOT_Y, DEFS_L_W, BOT_H, "Anatomy of a definition",
+kv_panel(MARGIN, BOT_Y, CONTENT_W, BOT_H, "Anatomy of a definition",
          "What every KPI states — the bundle, not a single signal.",
          [("DEFINITION", "Hub Def Inspections FYTD"),
           ("SOURCE", "Hub Def Source"),
           ("LAST REFRESH", "Hub Def Last Refresh"),
-          ("VALIDATED BY", "Hub Def Validated By")], label_w=140)
-kv_panel(DEFS_R_X, BOT_Y, DEFS_R_W, BOT_H, "Counting rules and the fiscal calendar",
-         "The date logic behind every headline figure.",
+          ("VALIDATED BY", "Hub Def Validated By")], label_w=150, size=9)
+footnote("Definitions are maintained here as the single source of truth. Counting rules "
+         "and the fiscal calendar are on the next page.")
+counts["How to read"] = finish_page()
+
+# =============================================================================
+# PAGE 8 - Counting rules and the fiscal calendar
+# -----------------------------------------------------------------------------
+# Split off page 5 on 2026-08-24. Both panels shared one screen side by side,
+# which left the definition rows 912 and 414 canvas px wide; a cardVisual does
+# not wrap, so every rule and definition ellipsised on the one page that must
+# never be ambiguous. Full width fits the longest string the model returns.
+# =============================================================================
+start_page(P_RULES, "Counting rules")
+chrome("")
+y = intro_tile("Counting rules and the fiscal calendar",
+               "The date logic behind every headline figure. Read with How to read "
+               "these reports, which carries the trust badges and the anatomy of a "
+               "definition.")
+RULES_Y = y + 16
+kv_panel(MARGIN, RULES_Y, CONTENT_W, (H - 44 - 12) - RULES_Y,
+         "Counting rules", "What each headline figure counts, and over which window.",
          [("FISCAL YEAR", "Hub Rule Fiscal Year"),
           ("INSPECTIONS", "Hub Rule Inspections"),
           ("NOTICE OF WORK", "Hub Rule NoW"),
-          ("SERVICE PLAN", "Hub Rule Target")], label_w=132, size=9)
-footnote("Definitions are maintained here as the single source of truth. Power BI cannot "
-         "auto-sync this page into per-visual tooltips, so any change made here is applied "
-         "to the report tooltips as part of the same change request.")
-counts["How to read"] = finish_page()
+          ("SERVICE PLAN", "Hub Rule Target")], label_w=150, size=9)
+footnote("Change a rule through Request a change so the definition, the report tooltip "
+         "and this page stay in step.")
+counts["Counting rules"] = finish_page()
 
 # =============================================================================
 # PAGE 6 - Request a change
@@ -903,7 +953,7 @@ footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for s
 counts["Access & data states"] = finish_page()
 
 # --- pages.json --------------------------------------------------------------
-order = [P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_CHANGE, P_STATES]
+order = [P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES, P_CHANGE, P_STATES]
 with open(os.path.join(PAGES_DIR, "pages.json"), "w", encoding="utf-8") as f:
     json.dump({"$schema": PM, "pageOrder": order, "activePageName": P_EXEC}, f, indent=2)
 

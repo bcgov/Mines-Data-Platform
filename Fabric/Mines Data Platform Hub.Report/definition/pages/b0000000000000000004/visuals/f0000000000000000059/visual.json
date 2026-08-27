@@ -3,7 +3,7 @@
   "name": "f0000000000000000059",
   "position": {
     "x": 1566,
-    "y": 732,
+    "y": 706,
     "z": 8900,
     "height": 33,
     "width": 300,
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "MDS \u2014 definitions & semantics owner",
+                    "value": "Rebecca",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

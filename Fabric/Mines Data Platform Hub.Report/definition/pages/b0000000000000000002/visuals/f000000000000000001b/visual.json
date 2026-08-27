@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001b",
   "position": {
-    "x": 180,
+    "x": 30,
     "y": 261,
     "z": 2700,
     "height": 33,
-    "width": 340,
+    "width": 150,
     "tabOrder": 2700
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "3 items in this audience",
+                    "value": "Your reports",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "12px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

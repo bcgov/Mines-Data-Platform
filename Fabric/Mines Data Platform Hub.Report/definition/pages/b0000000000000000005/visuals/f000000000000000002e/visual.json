@@ -2,85 +2,34 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002e",
   "position": {
-    "x": 194,
-    "y": 711,
+    "x": 54,
+    "y": 735,
     "z": 4600,
-    "height": 82,
-    "width": 912,
+    "height": 33,
+    "width": 136,
     "tabOrder": 4600
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_inspection"
-                    }
-                  },
-                  "Property": "Hub Def Source"
-                }
-              },
-              "queryRef": "fact_inspection.Hub Def Source",
-              "nativeQueryRef": "Hub Def Source"
-            }
-          ]
-        }
-      }
-    },
+    "visualType": "textbox",
     "objects": {
-      "label": [
+      "general": [
         {
           "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
-      "value": [
-        {
-          "properties": {
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "10D"
-                }
-              }
-            },
-            "horizontalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'left'"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#252423'"
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "SOURCE",
+                    "textStyle": {
+                      "fontSize": "8px",
+                      "color": "#8A8886",
+                      "fontWeight": "bold"
                     }
                   }
-                }
+                ],
+                "horizontalTextAlignment": "left"
               }
-            }
-          },
-          "selector": {
-            "id": "default"
+            ]
           }
         }
       ]

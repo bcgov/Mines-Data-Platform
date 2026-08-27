@@ -3,10 +3,10 @@
   "name": "f000000000000000002d",
   "position": {
     "x": 525,
-    "y": 452,
+    "y": 415,
     "z": 4500,
-    "height": 54,
-    "width": 397,
+    "height": 33,
+    "width": 240,
     "tabOrder": 4500
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Incidents, dangerous occurrences, injuries and fatalities by period.",
+                    "value": "ANSWERS",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "8px",
+                      "color": "#8A8886",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

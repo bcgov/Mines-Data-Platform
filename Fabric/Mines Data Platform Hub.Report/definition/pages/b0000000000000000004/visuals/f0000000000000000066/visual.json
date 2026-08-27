@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000066",
   "position": {
-    "x": 1544,
-    "y": 938,
+    "x": 1550,
+    "y": 908,
     "z": 10200,
     "height": 33,
-    "width": 298,
+    "width": 284,
     "tabOrder": 10200
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Flag a count that disagrees with source",
+                    "value": "Report a data issue",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

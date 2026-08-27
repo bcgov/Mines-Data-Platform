@@ -3,10 +3,10 @@
   "name": "f0000000000000000016",
   "position": {
     "x": 56,
-    "y": 189,
+    "y": 154,
     "z": 2200,
     "height": 33,
-    "width": 1240,
+    "width": 800,
     "tabOrder": 2200
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "You are viewing the Executive audience of the Mines Data Platform app. It contains the three monthly corporate reports at summary level. Operational detail sits under the Compliance & Enforcement and Permitting & Titles tabs.",
+                    "value": "Start here \u2014 Executive view",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "17px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

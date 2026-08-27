@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001e",
   "position": {
-    "x": 250,
-    "y": 402,
+    "x": 30,
+    "y": 363,
     "z": 3000,
-    "height": 54,
-    "width": 1420,
+    "height": 33,
+    "width": 1860,
     "tabOrder": 3000
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Mines Data Platform is organised into four audiences \u2014 Executive, Compliance & Enforcement, Permitting & Titles, and Audit & Analysis. Your account is not yet a member of any of them, so there is nothing to display.",
+                    "value": "You don't have access to this app yet",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#605E5C"
+                      "fontSize": "16px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

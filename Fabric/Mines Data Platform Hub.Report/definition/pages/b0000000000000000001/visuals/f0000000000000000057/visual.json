@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000057",
   "position": {
-    "x": 1544,
-    "y": 872,
+    "x": 1550,
+    "y": 842,
     "z": 8700,
     "height": 33,
-    "width": 298,
+    "width": 284,
     "tabOrder": 8700
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definitions, sources and the fiscal calendar",
+                    "value": "How to read these reports",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

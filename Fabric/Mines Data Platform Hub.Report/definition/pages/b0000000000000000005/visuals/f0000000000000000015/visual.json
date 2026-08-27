@@ -3,10 +3,10 @@
   "name": "f0000000000000000015",
   "position": {
     "x": 56,
-    "y": 189,
+    "y": 154,
     "z": 2100,
     "height": 33,
-    "width": 1240,
+    "width": 800,
     "tabOrder": 2100
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "One page for every definition, so meanings are not scattered across reports. Each figure states what it counts, where it comes from, when it last refreshed and who validated it. Report a disagreement through Request a change.",
+                    "value": "How to read these reports",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "17px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

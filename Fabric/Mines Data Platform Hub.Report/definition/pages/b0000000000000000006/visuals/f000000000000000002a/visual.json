@@ -3,10 +3,10 @@
   "name": "f000000000000000002a",
   "position": {
     "x": 100,
-    "y": 585,
+    "y": 555,
     "z": 4200,
     "height": 33,
-    "width": 1346,
+    "width": 600,
     "tabOrder": 4200
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "If a definition changes, it changes on How to read these reports and in the report tooltip at the same time.",
+                    "value": "The outcome is published",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

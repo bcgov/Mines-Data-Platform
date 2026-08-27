@@ -3,10 +3,10 @@
   "name": "f0000000000000000015",
   "position": {
     "x": 56,
-    "y": 189,
+    "y": 154,
     "z": 2100,
     "height": 33,
-    "width": 1240,
+    "width": 800,
     "tabOrder": 2100
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "The two screens users hit that are not the happy path. Both are designed rather than left to the platform default, because both are moments where trust is won or lost.",
+                    "value": "Access & data states",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "17px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

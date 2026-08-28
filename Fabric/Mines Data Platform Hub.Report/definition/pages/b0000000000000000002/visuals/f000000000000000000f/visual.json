@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000000f",
   "position": {
-    "x": 325,
-    "y": 84,
+    "x": 56,
+    "y": 189,
     "z": 1500,
     "height": 33,
-    "width": 203,
+    "width": 1240,
     "tabOrder": 1500
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Compliance & Enforcement",
+                    "value": "You are viewing the Compliance & Enforcement audience, which also serves the GIS team. It adds inspection-planning and mine-site lookup content to the corporate inspection and incident reports. Notice of Work sits under Permitting & Titles.",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

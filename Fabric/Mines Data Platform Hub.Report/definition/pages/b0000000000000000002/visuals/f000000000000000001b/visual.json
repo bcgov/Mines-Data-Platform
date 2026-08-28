@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001b",
   "position": {
-    "x": 30,
-    "y": 261,
+    "x": 54,
+    "y": 452,
     "z": 2700,
-    "height": 33,
-    "width": 150,
+    "height": 54,
+    "width": 554,
     "tabOrder": 2700
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Your reports",
+                    "value": "How many inspections have we completed, by type, region and inspector \u2014 and which sites are still unvisited this year?",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],

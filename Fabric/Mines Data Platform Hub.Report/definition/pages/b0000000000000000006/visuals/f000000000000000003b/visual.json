@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003b",
   "position": {
-    "x": 1566,
-    "y": 584,
+    "x": 1294,
+    "y": 750,
     "z": 5900,
     "height": 33,
-    "width": 300,
+    "width": 148,
     "tabOrder": 5900
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Nhung.Nguyen@gov.bc.ca",
+                    "value": "Unavailable",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#013366"
+                      "color": "#605E5C",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

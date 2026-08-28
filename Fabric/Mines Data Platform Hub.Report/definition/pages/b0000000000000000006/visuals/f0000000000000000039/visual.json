@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000039",
   "position": {
-    "x": 1520,
-    "y": 560,
+    "x": 674,
+    "y": 797,
     "z": 5700,
     "height": 33,
-    "width": 34,
+    "width": 586,
     "tabOrder": 5700
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "NN",
+                    "value": "Confirmation with a ticket reference, shown in place.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000046",
   "position": {
-    "x": 1467,
-    "y": 532,
+    "x": 236,
+    "y": 735,
     "z": 7000,
     "height": 82,
-    "width": 247,
+    "width": 1210,
     "tabOrder": 7000
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Updated Dictionary"
+                  "Property": "Hub Window FYTD"
                 }
               },
-              "queryRef": "fact_inspection.Hub Updated Dictionary",
-              "nativeQueryRef": "Hub Updated Dictionary"
+              "queryRef": "fact_inspection.Hub Window FYTD",
+              "nativeQueryRef": "Hub Window FYTD"
             }
           ]
         }
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#605E5C'"
+                      "Value": "'#252423'"
                     }
                   }
                 }
@@ -83,7 +83,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#605E5C'"
+                      "Value": "'#252423'"
                     }
                   }
                 }

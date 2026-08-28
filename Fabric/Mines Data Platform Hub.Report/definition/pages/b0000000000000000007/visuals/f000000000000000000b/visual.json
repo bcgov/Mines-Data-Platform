@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000000b",
   "position": {
-    "x": 143,
-    "y": 84,
+    "x": 56,
+    "y": 189,
     "z": 1100,
     "height": 33,
-    "width": 42,
+    "width": 1240,
     "tabOrder": 1100
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "All",
+                    "value": "The two screens users hit that are not the happy path. Both are designed rather than left to the platform default, because both are moments where trust is won or lost.",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#8A8886"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

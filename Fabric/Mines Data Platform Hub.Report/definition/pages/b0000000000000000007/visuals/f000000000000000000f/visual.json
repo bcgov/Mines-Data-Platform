@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000000f",
   "position": {
-    "x": 325,
-    "y": 84,
+    "x": 30,
+    "y": 266,
     "z": 1500,
     "height": 33,
-    "width": 203,
+    "width": 800,
     "tabOrder": 1500
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Compliance & Enforcement",
+                    "value": "STATE 1 \u2014 user has no audience membership",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#8A8886"
+                      "fontSize": "9px",
+                      "color": "#D83B01",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

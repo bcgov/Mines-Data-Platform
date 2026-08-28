@@ -6,7 +6,7 @@
     "y": 84,
     "z": 1100,
     "height": 33,
-    "width": 42,
+    "width": 88,
     "tabOrder": 1100
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "All",
+                    "value": "Executive",
                     "textStyle": {
                       "fontSize": "13px",
-                      "color": "#8A8886"
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

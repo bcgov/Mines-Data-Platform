@@ -395,16 +395,21 @@ def chrome(active_page, show_rail=True):
     button(W - 148, 26, 118, 32, "Share", color=NAVY, size=10, border=LINE)
     if not show_rail:
         return
+    # 2026-08-28: the row of audience labels is GONE. It duplicated the Org
+    # app's left pane, cost 40px on every page, and — being unclickable — read
+    # as broken navigation. What is left is a single orientation label saying
+    # which view you are in, which still works when the report is opened
+    # outside the app (direct link or workspace), where there is no left pane.
+    active_label = next((lbl for lbl, tgt in PERSONAS
+                         if tgt and tgt == active_page), None)
+    if active_label is None:
+        return
     text(MARGIN, vcy(86, 30), RAIL_CAP_W - 12,
          [(RAIL_CAPTION, 8, FAINT, True)], lines=1)
-    for (label, target), (x, w) in zip(PERSONAS, RAIL_GEOM):
-        active = target == active_page
-        # Inactive audiences are FAINT, not MUTED, and carry no link: they are
-        # context. Navigation lives in the Org app's left pane.
-        button(x, 86, w, 30, label, color=NAVY if active else FAINT, size=10,
-               bold=active)
-        if active:
-            rect(x + 8, 117, w - 16, 3, fill=NAVY, radius=0)
+    x, w = RAIL_GEOM[[lbl for lbl, _ in PERSONAS].index(active_label)]
+    x = MARGIN + RAIL_CAP_W
+    button(x, 86, w, 30, active_label, color=NAVY, size=10, bold=True)
+    rect(x + 8, 117, w - 16, 3, fill=NAVY, radius=0)
 
 
 INTRO_Y = HEADER_H + 16          # 140

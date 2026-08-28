@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000022",
   "position": {
-    "x": 100,
-    "y": 399,
+    "x": 1520,
+    "y": 280,
     "z": 3400,
     "height": 33,
-    "width": 600,
+    "width": 346,
     "tabOrder": 3400
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "A ticket is raised",
+                    "value": "Raise it now",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "12px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

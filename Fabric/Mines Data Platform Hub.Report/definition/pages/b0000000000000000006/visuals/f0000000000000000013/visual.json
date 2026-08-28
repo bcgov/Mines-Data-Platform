@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000013",
   "position": {
-    "x": 744,
-    "y": 84,
+    "x": 100,
+    "y": 321,
     "z": 1900,
     "height": 33,
-    "width": 142,
+    "width": 600,
     "tabOrder": 1900
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Audit & Analysis",
+                    "value": "You describe the issue",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#8A8886"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

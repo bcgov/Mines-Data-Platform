@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002d",
   "position": {
-    "x": 682,
-    "y": 415,
+    "x": 1336,
+    "y": 349,
     "z": 4500,
     "height": 33,
-    "width": 240,
+    "width": 388,
     "tabOrder": 4500
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "ANSWERS",
+                    "value": "Inspection planning map",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
+                      "fontSize": "13px",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000023",
   "position": {
-    "x": 100,
-    "y": 429,
+    "x": 1520,
+    "y": 313,
     "z": 3500,
     "height": 33,
-    "width": 1346,
+    "width": 346,
     "tabOrder": 3500
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "The button writes a work item through Power Automate \u2014 no separate form to find and no email that gets lost.",
+                    "value": "Takes about a minute. You will get the ticket reference back on screen.",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

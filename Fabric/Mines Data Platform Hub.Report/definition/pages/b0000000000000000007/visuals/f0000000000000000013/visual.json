@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000013",
   "position": {
-    "x": 744,
-    "y": 84,
+    "x": 30,
+    "y": 363,
     "z": 1900,
     "height": 33,
-    "width": 142,
+    "width": 1860,
     "tabOrder": 1900
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Audit & Analysis",
+                    "value": "You don't have access to this app yet",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#8A8886"
+                      "fontSize": "16px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

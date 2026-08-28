@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000040",
   "position": {
-    "x": 54,
-    "y": 679,
+    "x": 68,
+    "y": 922,
     "z": 6400,
     "height": 33,
-    "width": 760,
+    "width": 154,
     "tabOrder": 6400
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Curated commentary \u2014 written for permitting staff",
+                    "value": "Mineral Titles extract",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

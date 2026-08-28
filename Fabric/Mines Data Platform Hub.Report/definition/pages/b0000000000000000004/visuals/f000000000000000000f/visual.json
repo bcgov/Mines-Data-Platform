@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000000f",
   "position": {
-    "x": 325,
-    "y": 84,
+    "x": 56,
+    "y": 189,
     "z": 1500,
     "height": 33,
-    "width": 203,
+    "width": 1240,
     "tabOrder": 1500
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Compliance & Enforcement",
+                    "value": "You are viewing the Audit & Analysis audience: all three corporate reports, plus saved time-window presets, exports with context, and the definition and lineage panel. Every figure here can be traced to source without writing a query.",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#8A8886"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

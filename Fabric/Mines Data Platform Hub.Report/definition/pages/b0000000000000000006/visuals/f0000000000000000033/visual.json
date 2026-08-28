@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000033",
   "position": {
-    "x": 1520,
-    "y": 459,
+    "x": 54,
+    "y": 702,
     "z": 5100,
     "height": 33,
-    "width": 346,
+    "width": 1000,
     "tabOrder": 5100
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Prefer to ask a person first?",
+                    "value": "The three states the button shows, so a submitted request never looks like nothing happened.",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

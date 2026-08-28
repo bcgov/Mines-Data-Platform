@@ -3,7 +3,7 @@
   "name": "f000000000000000001a",
   "position": {
     "x": 30,
-    "y": 266,
+    "y": 630,
     "z": 2600,
     "height": 33,
     "width": 800,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "STATE 1 \u2014 user has no audience membership",
+                    "value": "STATE 2 \u2014 report has not refreshed on schedule",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#D83B01",

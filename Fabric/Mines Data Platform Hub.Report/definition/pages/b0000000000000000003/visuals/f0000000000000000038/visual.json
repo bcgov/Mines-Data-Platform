@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000038",
   "position": {
-    "x": 1310,
-    "y": 415,
+    "x": 54,
+    "y": 679,
     "z": 5600,
     "height": 33,
-    "width": 240,
+    "width": 760,
     "tabOrder": 5600
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "ANSWERS",
+                    "value": "Curated commentary \u2014 written for permitting staff",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

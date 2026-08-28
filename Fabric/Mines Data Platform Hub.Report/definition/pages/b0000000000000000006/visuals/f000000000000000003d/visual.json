@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003d",
   "position": {
-    "x": 54,
-    "y": 669,
+    "x": 30,
+    "y": 854,
     "z": 6100,
     "height": 33,
-    "width": 600,
+    "width": 1860,
     "tabOrder": 6100
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Request states",
+                    "value": "The Power Automate visual is subject to a tenant setting we have not yet confirmed \u2014 the fallback path is designed for, not bolted on later.",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#8A8886"
                     }
                   }
                 ],

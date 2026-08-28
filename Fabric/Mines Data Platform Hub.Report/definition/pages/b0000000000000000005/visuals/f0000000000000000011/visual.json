@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000011",
   "position": {
-    "x": 554,
-    "y": 84,
+    "x": 54,
+    "y": 313,
     "z": 1700,
     "height": 33,
-    "width": 164,
+    "width": 900,
     "tabOrder": 1700
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Permitting & Titles",
+                    "value": "Shown on every report card and, once the validation layer lands, on every KPI.",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#8A8886"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

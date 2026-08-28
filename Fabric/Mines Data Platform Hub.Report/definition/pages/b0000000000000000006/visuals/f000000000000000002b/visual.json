@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002b",
   "position": {
-    "x": 100,
-    "y": 585,
+    "x": 1566,
+    "y": 496,
     "z": 4300,
     "height": 33,
-    "width": 1346,
+    "width": 300,
     "tabOrder": 4300
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "If a definition changes, it changes on How to read these reports and in the report tooltip at the same time.",
+                    "value": "Rajneesh Gulati",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

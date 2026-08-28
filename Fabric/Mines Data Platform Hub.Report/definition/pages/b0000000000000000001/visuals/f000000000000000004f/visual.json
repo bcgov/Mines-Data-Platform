@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004f",
   "position": {
-    "x": 1566,
-    "y": 732,
+    "x": 1550,
+    "y": 842,
     "z": 7900,
     "height": 33,
-    "width": 300,
+    "width": 284,
     "tabOrder": 7900
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
+                    "value": "How to read these reports",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

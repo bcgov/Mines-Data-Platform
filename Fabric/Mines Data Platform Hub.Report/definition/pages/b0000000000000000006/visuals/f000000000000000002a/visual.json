@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002a",
   "position": {
-    "x": 100,
-    "y": 555,
+    "x": 1520,
+    "y": 498,
     "z": 4200,
     "height": 33,
-    "width": 600,
+    "width": 34,
     "tabOrder": 4200
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "The outcome is published",
+                    "value": "RG",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
+                      "fontSize": "9px",
+                      "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

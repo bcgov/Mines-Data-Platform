@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000056",
   "position": {
-    "x": 1520,
-    "y": 667,
+    "x": 1566,
+    "y": 794,
     "z": 8600,
     "height": 33,
-    "width": 340,
+    "width": 300,
     "tabOrder": 8600
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Contacts & help",
+                    "value": "Senior Auditor, Mine Audits Unit",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#013366"
                     }
                   }
                 ],

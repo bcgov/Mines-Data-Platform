@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000022",
   "position": {
-    "x": 54,
-    "y": 415,
+    "x": 708,
+    "y": 349,
     "z": 3400,
     "height": 33,
-    "width": 240,
+    "width": 388,
     "tabOrder": 3400
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "ANSWERS",
+                    "value": "Incidents",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
+                      "fontSize": "13px",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }

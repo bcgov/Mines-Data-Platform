@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000017",
   "position": {
-    "x": 56,
-    "y": 189,
+    "x": 80,
+    "y": 349,
     "z": 2300,
     "height": 33,
-    "width": 1240,
+    "width": 388,
     "tabOrder": 2300
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "You are viewing the Executive audience of the Mines Data Platform app. It contains the three monthly corporate reports at summary level. Operational detail sits under the Compliance & Enforcement and Permitting & Titles tabs.",
+                    "value": "Inspections",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "13px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

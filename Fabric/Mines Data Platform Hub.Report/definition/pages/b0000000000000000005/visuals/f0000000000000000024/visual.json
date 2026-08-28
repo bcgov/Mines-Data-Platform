@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000024",
   "position": {
-    "x": 984,
-    "y": 354,
+    "x": 204,
+    "y": 711,
     "z": 3600,
     "height": 82,
-    "width": 148,
+    "width": 1662,
     "tabOrder": 3600
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Badge Provisional"
+                  "Property": "Hub Def Source"
                 }
               },
-              "queryRef": "fact_inspection.Hub Badge Provisional",
-              "nativeQueryRef": "Hub Badge Provisional"
+              "queryRef": "fact_inspection.Hub Def Source",
+              "nativeQueryRef": "Hub Def Source"
             }
           ]
         }
@@ -63,7 +63,7 @@
             "horizontalAlignment": {
               "expr": {
                 "Literal": {
-                  "Value": "'center'"
+                  "Value": "'left'"
                 }
               }
             },
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8A6100'"
+                      "Value": "'#252423'"
                     }
                   }
                 }
@@ -83,16 +83,9 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8A6100'"
+                      "Value": "'#252423'"
                     }
                   }
-                }
-              }
-            },
-            "bold": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
                 }
               }
             }

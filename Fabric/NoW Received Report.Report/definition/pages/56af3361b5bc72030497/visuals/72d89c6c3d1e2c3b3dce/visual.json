@@ -1,0 +1,180 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "72d89c6c3d1e2c3b3dce",
+  "position": {
+    "x": 24,
+    "y": 118,
+    "z": 0,
+    "height": 120,
+    "width": 606,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "IDENTITY",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#605E5C",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "now_application_id",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  PK  -  unique NoW application received (report grain)",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "notice_of_work_type_code",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  FK -> Notice of Work Type  -  commodity",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "now_application_guid",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  FK  -  application GUID",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "mine_guid",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontFamily": "BC Sans",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "  -  FK -> Mine  -  not surfaced in report",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

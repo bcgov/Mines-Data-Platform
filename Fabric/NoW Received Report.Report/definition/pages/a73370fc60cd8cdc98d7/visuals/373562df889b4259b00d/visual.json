@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "373562df889b4259b00d",
+  "position": { "x": 24, "y": 1300, "z": 5000, "height": 396, "width": 1232, "tabOrder": 5000 },
+  "visual": {
+    "visualType": "columnChart",
+    "query": {
+      "queryState": {
+        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "dim_date" } }, "Property": "fiscal_month_label" } }, "queryRef": "dim_date.fiscal_month_label", "nativeQueryRef": "fiscal_month_label", "active": true } ] },
+        "Series": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "fact_now_application" } }, "Property": "notice_of_work_type_description" } }, "queryRef": "fact_now_application.notice_of_work_type_description", "nativeQueryRef": "notice_of_work_type_description", "active": true } ] },
+        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "fact_now_application" } }, "Property": "NoWs Received Total" } }, "queryRef": "fact_now_application.NoWs Received Total", "nativeQueryRef": "NoWs Received Total" } ] }
+      },
+      "sortDefinition": { "sort": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "dim_date" } }, "Property": "fiscal_month_label" } }, "direction": "Ascending" } ] }
+    },
+    "visualContainerObjects": {
+      "title": [ { "properties": { "text": { "expr": { "Literal": { "Value": "'Number of NoWs received per fiscal month by commodity'" } } } } } ]
+    },
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "categoryAxis": [ { "properties": { "titleText": { "expr": { "Literal": { "Value": "'Month'" } } } } } ],
+      "valueAxis": [ { "properties": { "titleText": { "expr": { "Literal": { "Value": "'NoWs Received'" } } } } } ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      { "name": "commfmnotnull01", "field": { "Column": { "Expression": { "SourceRef": { "Entity": "dim_date" } }, "Property": "fiscal_month_label" } }, "type": "Advanced", "filter": { "Version": 2, "From": [ { "Name": "d", "Entity": "dim_date", "Type": 0 } ], "Where": [ { "Condition": { "Not": { "Expression": { "Comparison": { "ComparisonKind": 0, "Left": { "Column": { "Expression": { "SourceRef": { "Source": "d" } }, "Property": "fiscal_month_label" } }, "Right": { "Literal": { "Value": "null" } } } } } } } ] } },
+      { "name": "commfywindow01", "field": { "Column": { "Expression": { "SourceRef": { "Entity": "dim_date" } }, "Property": "fiscal_year_label" } }, "type": "Categorical", "filter": { "Version": 2, "From": [ { "Name": "d", "Entity": "dim_date", "Type": 0 } ], "Where": [ { "Condition": { "In": { "Expressions": [ { "Column": { "Expression": { "SourceRef": { "Source": "d" } }, "Property": "fiscal_year_label" } } ], "Values": [ [ { "Literal": { "Value": "'FY2020/21'" } } ], [ { "Literal": { "Value": "'FY2021/22'" } } ] ] } } } ] } }
+    ]
+  }
+}

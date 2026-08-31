@@ -23,11 +23,11 @@
                       "Entity": "dim_date"
                     }
                   },
-                  "Property": "fiscal_month_label"
+                  "Property": "fiscal_month_last6"
                 }
               },
-              "queryRef": "dim_date.fiscal_month_label",
-              "nativeQueryRef": "fiscal_month_label",
+              "queryRef": "dim_date.fiscal_month_last6",
+              "nativeQueryRef": "fiscal_month_last6",
               "active": true
             }
           ]
@@ -43,7 +43,7 @@
                     "Entity": "dim_date"
                   }
                 },
-                "Property": "fiscal_month_label"
+                "Property": "fiscal_month_last6"
               }
             },
             "direction": "Descending"
@@ -124,7 +124,7 @@
                 "Entity": "dim_date"
               }
             },
-            "Property": "fiscal_year_last6"
+            "Property": "fiscal_month_last6"
           }
         },
         "type": "Advanced",
@@ -151,7 +151,7 @@
                               "Source": "d"
                             }
                           },
-                          "Property": "fiscal_year_last6"
+                          "Property": "fiscal_month_last6"
                         }
                       },
                       "Right": {

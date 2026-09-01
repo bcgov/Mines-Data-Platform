@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000028",
   "position": {
-    "x": 54,
-    "y": 280,
+    "x": 100,
+    "y": 399,
     "z": 4000,
     "height": 33,
     "width": 600,
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "What happens when you submit",
+                    "value": "A ticket is raised",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "10px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

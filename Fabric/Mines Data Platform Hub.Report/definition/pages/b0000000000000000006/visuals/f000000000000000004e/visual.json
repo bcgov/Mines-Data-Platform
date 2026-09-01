@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004e",
   "position": {
-    "x": 54,
-    "y": 797,
+    "x": 30,
+    "y": 854,
     "z": 7800,
     "height": 33,
-    "width": 586,
+    "width": 1860,
     "tabOrder": 7800
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Default state. The button is live and the flow is reachable.",
+                    "value": "The Power Automate visual is subject to a tenant setting we have not yet confirmed \u2014 the fallback path is designed for, not bolted on later.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#252423"
+                      "color": "#8A8886"
                     }
                   }
                 ],

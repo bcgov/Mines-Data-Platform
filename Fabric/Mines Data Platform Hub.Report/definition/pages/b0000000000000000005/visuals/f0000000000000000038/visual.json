@@ -3,10 +3,10 @@
   "name": "f0000000000000000038",
   "position": {
     "x": 54,
-    "y": 573,
+    "y": 933,
     "z": 5600,
     "height": 33,
-    "width": 1812,
+    "width": 136,
     "tabOrder": 5600
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "What every KPI states \u2014 the bundle, not a single signal.",
+                    "value": "VALIDATED BY",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "8px",
+                      "color": "#8A8886",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

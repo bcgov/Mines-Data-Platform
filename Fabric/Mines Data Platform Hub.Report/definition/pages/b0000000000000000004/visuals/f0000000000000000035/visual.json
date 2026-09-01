@@ -2,31 +2,30 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000035",
   "position": {
-    "x": 319,
-    "y": 557,
+    "x": 525,
+    "y": 520,
     "z": 5300,
-    "height": 32,
-    "width": 132,
+    "height": 1,
+    "width": 397,
     "tabOrder": 5300
   },
   "visual": {
-    "visualType": "actionButton",
+    "visualType": "shape",
     "objects": {
-      "icon": [
+      "shape": [
         {
           "properties": {
-            "shapeType": {
+            "tileShape": {
               "expr": {
                 "Literal": {
-                  "Value": "'blank'"
+                  "Value": "'rectangle'"
                 }
               }
             }
-          },
-          "selector": {
-            "id": "default"
           }
-        },
+        }
+      ],
+      "fill": [
         {
           "properties": {
             "show": {
@@ -51,50 +50,11 @@
             }
           }
         }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "text": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "visualLink": [
+      "background": [
         {
           "properties": {
             "show": {
@@ -104,17 +64,27 @@
                 }
               }
             },
-            "type": {
-              "expr": {
-                "Literal": {
-                  "Value": "'WebUrl'"
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E1DFDD'"
+                    }
+                  }
                 }
               }
-            },
-            "webUrl": {
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'https://app.powerbi.com/groups/8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0/reports/56f2e0c7-ae85-42b0-be82-50d851b8bffb'"
+                  "Value": "false"
                 }
               }
             }

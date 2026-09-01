@@ -3,10 +3,10 @@
   "name": "f000000000000000003b",
   "position": {
     "x": 1520,
-    "y": 313,
+    "y": 498,
     "z": 5900,
     "height": 33,
-    "width": 346,
+    "width": 34,
     "tabOrder": 5900
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Takes about a minute. You will get the ticket reference back on screen.",
+                    "value": "RG",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#605E5C"
+                      "color": "#FFFFFF",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

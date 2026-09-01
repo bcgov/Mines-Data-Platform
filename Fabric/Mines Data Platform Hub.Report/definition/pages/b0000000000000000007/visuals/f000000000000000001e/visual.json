@@ -2,23 +2,45 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001e",
   "position": {
-    "x": 1614,
-    "y": 88,
+    "x": 1603,
+    "y": 154,
     "z": 3000,
-    "height": 26,
-    "width": 127,
+    "height": 82,
+    "width": 261,
     "tabOrder": 3000
   },
   "visual": {
-    "visualType": "actionButton",
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
+                    }
+                  },
+                  "Property": "Hub Data As At"
+                }
+              },
+              "queryRef": "fact_inspection.Hub Data As At",
+              "nativeQueryRef": "Hub Data As At"
+            }
+          ]
+        }
+      }
+    },
     "objects": {
-      "icon": [
+      "label": [
         {
           "properties": {
-            "shapeType": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'blank'"
+                  "Value": "false"
                 }
               }
             }
@@ -26,55 +48,57 @@
           "selector": {
             "id": "default"
           }
-        },
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
         }
       ],
-      "outline": [
+      "value": [
         {
           "properties": {
-            "show": {
+            "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "10D"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
+                    }
+                  }
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
                 }
               }
             }
-          }
-        }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "text": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]
@@ -88,33 +112,6 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "visualLink": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "type": {
-              "expr": {
-                "Literal": {
-                  "Value": "'PageNavigation'"
-                }
-              }
-            },
-            "navigationSection": {
-              "expr": {
-                "Literal": {
-                  "Value": "'b0000000000000000008'"
                 }
               }
             }

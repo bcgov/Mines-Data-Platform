@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004d",
   "position": {
-    "x": 54,
-    "y": 750,
+    "x": 1294,
+    "y": 797,
     "z": 7700,
     "height": 33,
-    "width": 148,
+    "width": 586,
     "tabOrder": 7700
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Ready",
+                    "value": "Tenant settings block the Power Automate visual \u2014 falls back to the named owner's email.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#0F6CBD",
-                      "fontWeight": "bold"
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

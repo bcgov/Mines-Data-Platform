@@ -2,31 +2,30 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000018",
   "position": {
-    "x": 736,
-    "y": 86,
+    "x": 1402,
+    "y": 88,
     "z": 2400,
-    "height": 30,
-    "width": 170,
+    "height": 26,
+    "width": 204,
     "tabOrder": 2400
   },
   "visual": {
-    "visualType": "actionButton",
+    "visualType": "shape",
     "objects": {
-      "icon": [
+      "shape": [
         {
           "properties": {
-            "shapeType": {
+            "tileShape": {
               "expr": {
                 "Literal": {
-                  "Value": "'blank'"
+                  "Value": "'rectangle'"
                 }
               }
             }
-          },
-          "selector": {
-            "id": "default"
           }
-        },
+        }
+      ],
+      "fill": [
         {
           "properties": {
             "show": {
@@ -51,50 +50,11 @@
             }
           }
         }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "text": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "visualLink": [
+      "background": [
         {
           "properties": {
             "show": {
@@ -104,17 +64,58 @@
                 }
               }
             },
-            "type": {
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'PageNavigation'"
+                  "Value": "true"
                 }
               }
             },
-            "navigationSection": {
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E1DFDD'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
               "expr": {
                 "Literal": {
-                  "Value": "'b0000000000000000004'"
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

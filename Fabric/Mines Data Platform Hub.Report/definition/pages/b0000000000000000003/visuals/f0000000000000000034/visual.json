@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000034",
   "position": {
-    "x": 484,
-    "y": 535,
+    "x": 682,
+    "y": 452,
     "z": 5200,
     "height": 33,
-    "width": 116,
+    "width": 554,
     "tabOrder": 5200
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Open  \u2192",
+                    "value": "How long are permits taking from application to decision, and where is the backlog concentrated?",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

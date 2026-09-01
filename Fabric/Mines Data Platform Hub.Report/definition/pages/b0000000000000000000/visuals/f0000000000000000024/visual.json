@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000024",
   "position": {
-    "x": 56,
-    "y": 189,
+    "x": 50,
+    "y": 323,
     "z": 3600,
     "height": 33,
-    "width": 1240,
+    "width": 407,
     "tabOrder": 3600
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Pick the view for your work, or go straight to a report. Every view has the same shape, so nothing has to be relearned when you move between them.",
+                    "value": "Executive",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

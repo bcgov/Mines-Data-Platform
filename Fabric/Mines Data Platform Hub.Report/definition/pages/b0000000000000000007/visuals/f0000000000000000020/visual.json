@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000020",
   "position": {
-    "x": 1410,
-    "y": 84,
+    "x": 30,
+    "y": 266,
     "z": 3200,
     "height": 33,
-    "width": 188,
+    "width": 800,
     "tabOrder": 3200
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "How to read these reports",
+                    "value": "STATE 1 \u2014 user has no audience membership",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#013366"
+                      "fontSize": "9px",
+                      "color": "#D83B01",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }
@@ -35,30 +36,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#FFFFFF'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

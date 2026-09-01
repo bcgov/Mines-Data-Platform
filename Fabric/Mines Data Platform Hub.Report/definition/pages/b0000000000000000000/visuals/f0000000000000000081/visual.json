@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000081",
   "position": {
-    "x": 1489,
-    "y": 657,
+    "x": 1078,
+    "y": 964,
     "z": 12900,
     "height": 33,
-    "width": 373,
+    "width": 286,
     "tabOrder": 12900
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Dictionary & lineage  \u2192",
+                    "value": "What you see with no access, or stale data",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

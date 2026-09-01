@@ -2,31 +2,30 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000012",
   "position": {
-    "x": 291,
-    "y": 86,
+    "x": 541,
+    "y": 117,
     "z": 1800,
-    "height": 30,
-    "width": 232,
+    "height": 3,
+    "width": 177,
     "tabOrder": 1800
   },
   "visual": {
-    "visualType": "actionButton",
+    "visualType": "shape",
     "objects": {
-      "icon": [
+      "shape": [
         {
           "properties": {
-            "shapeType": {
+            "tileShape": {
               "expr": {
                 "Literal": {
-                  "Value": "'blank'"
+                  "Value": "'rectangle'"
                 }
               }
             }
-          },
-          "selector": {
-            "id": "default"
           }
-        },
+        }
+      ],
+      "fill": [
         {
           "properties": {
             "show": {
@@ -51,50 +50,11 @@
             }
           }
         }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "text": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "visualLink": [
+      "background": [
         {
           "properties": {
             "show": {
@@ -104,17 +64,27 @@
                 }
               }
             },
-            "type": {
-              "expr": {
-                "Literal": {
-                  "Value": "'PageNavigation'"
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
+                    }
+                  }
                 }
               }
-            },
-            "navigationSection": {
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'b0000000000000000002'"
+                  "Value": "false"
                 }
               }
             }

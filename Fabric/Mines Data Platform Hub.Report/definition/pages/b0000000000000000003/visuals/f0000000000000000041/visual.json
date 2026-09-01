@@ -3,64 +3,67 @@
   "name": "f0000000000000000041",
   "position": {
     "x": 1310,
-    "y": 358,
+    "y": 511,
     "z": 6500,
-    "height": 16,
-    "width": 16,
+    "height": 82,
+    "width": 404,
     "tabOrder": 6500
   },
   "visual": {
-    "visualType": "shape",
-    "objects": {
-      "shape": [
-        {
-          "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'rectangle'"
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
+                    }
+                  },
+                  "Property": "Hub Updated Mineral Titles"
                 }
-              }
+              },
+              "queryRef": "fact_inspection.Hub Updated Mineral Titles",
+              "nativeQueryRef": "Hub Updated Mineral Titles"
             }
-          }
+          ]
         }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "outline": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ]
+      }
     },
-    "drillFilterOtherVisuals": false,
-    "visualContainerObjects": {
-      "background": [
+    "objects": {
+      "label": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
                 }
               }
             },
@@ -69,15 +72,32 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#5C2D91'"
+                      "Value": "'#605E5C'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#605E5C'"
                     }
                   }
                 }
               }
             }
+          },
+          "selector": {
+            "id": "default"
           }
         }
-      ],
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
       "title": [
         {
           "properties": {

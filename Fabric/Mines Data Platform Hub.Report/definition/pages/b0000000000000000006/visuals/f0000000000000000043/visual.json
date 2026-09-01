@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000043",
   "position": {
-    "x": 1566,
-    "y": 496,
+    "x": 54,
+    "y": 669,
     "z": 6700,
     "height": 33,
-    "width": 300,
+    "width": 600,
     "tabOrder": 6700
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Rajneesh Gulati",
+                    "value": "Request states",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "12px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

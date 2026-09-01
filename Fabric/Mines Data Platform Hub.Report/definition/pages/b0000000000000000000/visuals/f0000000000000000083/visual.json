@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000083",
   "position": {
-    "x": 1481,
-    "y": 687,
+    "x": 1454,
+    "y": 842,
     "z": 13100,
     "height": 33,
-    "width": 389,
+    "width": 412,
     "tabOrder": 13100
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Where each measure comes from, and who validated it",
+                    "value": "Who to ask",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "12px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

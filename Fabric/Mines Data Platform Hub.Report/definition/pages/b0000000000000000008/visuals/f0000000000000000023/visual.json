@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000023",
   "position": {
-    "x": 56,
-    "y": 189,
+    "x": 54,
+    "y": 376,
     "z": 3500,
     "height": 33,
-    "width": 1240,
+    "width": 136,
     "tabOrder": 3500
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "The date logic behind every headline figure. Read with How to read these reports, which carries the trust badges and the anatomy of a definition.",
+                    "value": "FISCAL YEAR",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "8px",
+                      "color": "#8A8886",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

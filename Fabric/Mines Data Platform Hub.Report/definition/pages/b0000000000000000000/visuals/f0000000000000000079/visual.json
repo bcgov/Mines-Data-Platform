@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000079",
   "position": {
-    "x": 1481,
-    "y": 523,
+    "x": 406,
+    "y": 964,
     "z": 12100,
     "height": 33,
-    "width": 389,
+    "width": 286,
     "tabOrder": 12100
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Incidents and outcomes by period",
+                    "value": "Fiscal calendar, and what each figure counts",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

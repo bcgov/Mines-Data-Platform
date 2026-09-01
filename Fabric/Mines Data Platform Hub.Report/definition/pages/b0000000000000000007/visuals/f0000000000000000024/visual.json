@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000024",
   "position": {
-    "x": 56,
-    "y": 189,
+    "x": 30,
+    "y": 363,
     "z": 3600,
     "height": 33,
-    "width": 1240,
+    "width": 1860,
     "tabOrder": 3600
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "The two screens users hit that are not the happy path. Both are designed rather than left to the platform default, because both are moments where trust is won or lost.",
+                    "value": "You don't have access to this app yet",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "16px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

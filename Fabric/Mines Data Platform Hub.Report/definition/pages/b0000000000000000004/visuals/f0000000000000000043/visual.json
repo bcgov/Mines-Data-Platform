@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000043",
   "position": {
-    "x": 1022,
-    "y": 349,
+    "x": 1269,
+    "y": 556,
     "z": 6700,
     "height": 33,
-    "width": 231,
+    "width": 116,
     "tabOrder": 6700
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Notice of Work",
+                    "value": "Open  \u2192",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#252423",
+                      "fontSize": "13px",
+                      "color": "#013366",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

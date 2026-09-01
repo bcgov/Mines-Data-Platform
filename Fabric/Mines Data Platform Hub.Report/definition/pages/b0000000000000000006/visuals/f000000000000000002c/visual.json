@@ -3,10 +3,10 @@
   "name": "f000000000000000002c",
   "position": {
     "x": 100,
-    "y": 351,
+    "y": 477,
     "z": 4400,
     "height": 33,
-    "width": 1346,
+    "width": 600,
     "tabOrder": 4400
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Report, figure, and what you expected instead. The current filter context and \"data as at\" date are attached automatically.",
+                    "value": "The section owner reviews it",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

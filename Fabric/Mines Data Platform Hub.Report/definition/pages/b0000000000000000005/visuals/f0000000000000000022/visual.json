@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000022",
   "position": {
-    "x": 56,
-    "y": 154,
+    "x": 54,
+    "y": 313,
     "z": 3400,
     "height": 33,
-    "width": 800,
+    "width": 900,
     "tabOrder": 3400
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "How to read these reports",
+                    "value": "Shown on every report card and, once the validation layer lands, on every KPI.",
                     "textStyle": {
-                      "fontSize": "17px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

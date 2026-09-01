@@ -3,10 +3,10 @@
   "name": "f0000000000000000065",
   "position": {
     "x": 1520,
-    "y": 708,
+    "y": 832,
     "z": 10100,
-    "height": 34,
-    "width": 34,
+    "height": 1,
+    "width": 346,
     "tabOrder": 10100
   },
   "visual": {
@@ -18,7 +18,7 @@
             "tileShape": {
               "expr": {
                 "Literal": {
-                  "Value": "'oval'"
+                  "Value": "'rectangle'"
                 }
               }
             }
@@ -31,18 +31,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "fillColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -65,6 +54,30 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E1DFDD'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

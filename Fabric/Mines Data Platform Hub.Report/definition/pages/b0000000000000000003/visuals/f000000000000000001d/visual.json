@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001d",
   "position": {
-    "x": 1622,
-    "y": 84,
+    "x": 56,
+    "y": 189,
     "z": 2900,
     "height": 33,
-    "width": 111,
+    "width": 1240,
     "tabOrder": 2900
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Counting rules",
+                    "value": "You are viewing the Permitting & Titles audience: Notice of Work permitting, turnaround performance, and Mineral Titles. Inspection and incident reporting sits under the Compliance & Enforcement tab.",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#013366"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }
@@ -35,30 +35,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#FFFFFF'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

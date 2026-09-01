@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000068",
   "position": {
-    "x": 1566,
-    "y": 732,
+    "x": 1550,
+    "y": 842,
     "z": 10400,
     "height": 33,
-    "width": 300,
+    "width": 284,
     "tabOrder": 10400
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "MDS \u2014 definitions & semantics owner",
+                    "value": "How data is certified",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000022",
   "position": {
-    "x": 56,
-    "y": 154,
+    "x": 54,
+    "y": 313,
     "z": 3400,
     "height": 33,
-    "width": 800,
+    "width": 1812,
     "tabOrder": 3400
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Counting rules and the fiscal calendar",
+                    "value": "What each headline figure counts, and over which window.",
                     "textStyle": {
-                      "fontSize": "17px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

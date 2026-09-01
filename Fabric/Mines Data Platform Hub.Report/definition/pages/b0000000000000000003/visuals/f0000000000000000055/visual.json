@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000055",
   "position": {
-    "x": 68,
-    "y": 922,
+    "x": 1566,
+    "y": 711,
     "z": 8500,
     "height": 33,
-    "width": 154,
+    "width": 300,
     "tabOrder": 8500
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Mineral Titles extract",
+                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#013366"
                     }
                   }
                 ],

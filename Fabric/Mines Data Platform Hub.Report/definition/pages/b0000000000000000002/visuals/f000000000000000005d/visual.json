@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000005d",
   "position": {
-    "x": 1550,
-    "y": 842,
+    "x": 1566,
+    "y": 732,
     "z": 9300,
     "height": 33,
-    "width": 284,
+    "width": 300,
     "tabOrder": 9300
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definitions & data sources",
+                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#013366"
                     }
                   }
                 ],

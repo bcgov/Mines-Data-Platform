@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000011",
   "position": {
-    "x": 541,
+    "x": 299,
     "y": 84,
     "z": 1700,
     "height": 33,
-    "width": 177,
+    "width": 216,
     "tabOrder": 1700
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Permitting & Titles",
+                    "value": "Compliance & Enforcement",
                     "textStyle": {
                       "fontSize": "13px",
                       "color": "#013366",

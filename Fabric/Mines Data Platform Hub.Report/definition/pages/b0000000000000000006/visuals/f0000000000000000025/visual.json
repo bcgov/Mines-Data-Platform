@@ -2,33 +2,103 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000025",
   "position": {
-    "x": 100,
-    "y": 351,
+    "x": 1603,
+    "y": 154,
     "z": 3700,
-    "height": 33,
-    "width": 1346,
+    "height": 82,
+    "width": 261,
     "tabOrder": 3700
   },
   "visual": {
-    "visualType": "textbox",
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
+                    }
+                  },
+                  "Property": "Hub Data As At"
+                }
+              },
+              "queryRef": "fact_inspection.Hub Data As At",
+              "nativeQueryRef": "Hub Data As At"
+            }
+          ]
+        }
+      }
+    },
     "objects": {
-      "general": [
+      "label": [
         {
           "properties": {
-            "paragraphs": [
-              {
-                "textRuns": [
-                  {
-                    "value": "Report, figure, and what you expected instead. The current filter context and \"data as at\" date are attached automatically.",
-                    "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                }
               }
-            ]
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
+                    }
+                  }
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]

@@ -2,52 +2,34 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000037",
   "position": {
-    "x": 1104,
-    "y": 536,
+    "x": 708,
+    "y": 349,
     "z": 5500,
-    "height": 32,
-    "width": 132,
+    "height": 33,
+    "width": 388,
     "tabOrder": 5500
   },
   "visual": {
-    "visualType": "shape",
+    "visualType": "textbox",
     "objects": {
-      "shape": [
+      "general": [
         {
           "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'rectangle'"
-                }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Permit turnaround",
+                    "textStyle": {
+                      "fontSize": "13px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
               }
-            }
-          }
-        }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "outline": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
+            ]
           }
         }
       ]

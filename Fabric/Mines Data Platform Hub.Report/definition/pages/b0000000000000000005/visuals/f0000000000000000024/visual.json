@@ -2,39 +2,30 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000024",
   "position": {
-    "x": 54,
-    "y": 354,
+    "x": 1603,
+    "y": 171,
     "z": 3600,
-    "height": 82,
-    "width": 148,
+    "height": 48,
+    "width": 261,
     "tabOrder": 3600
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_inspection"
-                    }
-                  },
-                  "Property": "Hub Badge Certified"
-                }
-              },
-              "queryRef": "fact_inspection.Hub Badge Certified",
-              "nativeQueryRef": "Hub Badge Certified"
-            }
-          ]
-        }
-      }
-    },
+    "visualType": "shape",
     "objects": {
-      "label": [
+      "shape": [
+        {
+          "properties": {
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'rectangle'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fill": [
         {
           "properties": {
             "show": {
@@ -44,26 +35,32 @@
                 }
               }
             }
-          },
-          "selector": {
-            "id": "default"
           }
         }
       ],
-      "value": [
+      "outline": [
         {
           "properties": {
-            "fontSize": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "false"
                 }
               }
-            },
-            "horizontalAlignment": {
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'center'"
+                  "Value": "true"
                 }
               }
             },
@@ -72,39 +69,46 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#0F6CBD'"
+                      "Value": "'#E9F1F8'"
                     }
                   }
                 }
               }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#0F6CBD'"
-                    }
-                  }
-                }
-              }
-            },
-            "bold": {
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
                   "Value": "true"
                 }
               }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E9F1F8'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "24D"
+                }
+              }
             }
-          },
-          "selector": {
-            "id": "default"
           }
         }
-      ]
-    },
-    "drillFilterOtherVisuals": false,
-    "visualContainerObjects": {
+      ],
       "title": [
         {
           "properties": {

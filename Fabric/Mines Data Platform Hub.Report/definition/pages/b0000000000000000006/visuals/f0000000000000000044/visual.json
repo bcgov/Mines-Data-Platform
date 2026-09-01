@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000044",
   "position": {
-    "x": 54,
-    "y": 702,
+    "x": 1566,
+    "y": 522,
     "z": 6800,
     "height": 33,
-    "width": 1000,
+    "width": 300,
     "tabOrder": 6800
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "The three states the button shows, so a submitted request never looks like nothing happened.",
+                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#605E5C"
+                      "color": "#013366"
                     }
                   }
                 ],

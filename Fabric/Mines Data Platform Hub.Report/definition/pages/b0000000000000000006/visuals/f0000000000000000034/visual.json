@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000034",
   "position": {
-    "x": 1520,
-    "y": 313,
+    "x": 100,
+    "y": 507,
     "z": 5200,
     "height": 33,
-    "width": 346,
+    "width": 1346,
     "tabOrder": 5200
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Takes about a minute. You will get the ticket reference back on screen.",
+                    "value": "The named owner on the report card is accountable for the answer, rather than a shared inbox.",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

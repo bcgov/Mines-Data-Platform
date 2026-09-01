@@ -2,30 +2,39 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000026",
   "position": {
-    "x": 519,
-    "y": 371,
+    "x": 1357,
+    "y": 154,
     "z": 3800,
-    "height": 48,
-    "width": 148,
+    "height": 82,
+    "width": 236,
     "tabOrder": 3800
   },
   "visual": {
-    "visualType": "shape",
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
+                    }
+                  },
+                  "Property": "Hub Next Refresh"
+                }
+              },
+              "queryRef": "fact_inspection.Hub Next Refresh",
+              "nativeQueryRef": "Hub Next Refresh"
+            }
+          ]
+        }
+      }
+    },
     "objects": {
-      "shape": [
-        {
-          "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'rectangle'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "fill": [
+      "label": [
         {
           "properties": {
             "show": {
@@ -35,80 +44,60 @@
                 }
               }
             }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ],
-      "outline": [
+      "value": [
         {
           "properties": {
-            "show": {
+            "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "9D"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'right'"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#605E5C'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#605E5C'"
+                    }
+                  }
                 }
               }
             }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#F1FAF1'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "border": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#9FD5A0'"
-                    }
-                  }
-                }
-              }
-            },
-            "radius": {
-              "expr": {
-                "Literal": {
-                  "Value": "24D"
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

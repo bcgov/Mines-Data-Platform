@@ -2,33 +2,63 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002d",
   "position": {
-    "x": 100,
-    "y": 507,
+    "x": 54,
+    "y": 403,
     "z": 4500,
-    "height": 33,
-    "width": 1346,
+    "height": 26,
+    "width": 26,
     "tabOrder": 4500
   },
   "visual": {
-    "visualType": "textbox",
+    "visualType": "shape",
     "objects": {
-      "general": [
+      "shape": [
         {
           "properties": {
-            "paragraphs": [
-              {
-                "textRuns": [
-                  {
-                    "value": "The named owner on the report card is accountable for the answer, rather than a shared inbox.",
-                    "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'oval'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fill": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fillColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                }
               }
-            ]
+            }
+          }
+        }
+      ],
+      "outline": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
           }
         }
       ]

@@ -2,52 +2,34 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002f",
   "position": {
-    "x": 1625,
-    "y": 696,
+    "x": 778,
+    "y": 471,
     "z": 4700,
-    "height": 48,
-    "width": 241,
+    "height": 33,
+    "width": 164,
     "tabOrder": 4700
   },
   "visual": {
-    "visualType": "shape",
+    "visualType": "textbox",
     "objects": {
-      "shape": [
+      "general": [
         {
           "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'rectangle'"
-                }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Request access",
+                    "textStyle": {
+                      "fontSize": "13px",
+                      "color": "#FFFFFF",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "center"
               }
-            }
-          }
-        }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "outline": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
+            ]
           }
         }
       ]
@@ -69,40 +51,9 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FDF3F0'"
+                      "Value": "'#013366'"
                     }
                   }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "border": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#D83B01'"
-                    }
-                  }
-                }
-              }
-            },
-            "radius": {
-              "expr": {
-                "Literal": {
-                  "Value": "24D"
                 }
               }
             }

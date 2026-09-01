@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000058",
   "position": {
-    "x": 1566,
-    "y": 747,
+    "x": 1520,
+    "y": 646,
     "z": 8800,
     "height": 33,
-    "width": 300,
+    "width": 340,
     "tabOrder": 8800
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Nhung Nguyen",
+                    "value": "Contacts & help",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "12px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

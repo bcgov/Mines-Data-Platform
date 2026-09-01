@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000034",
   "position": {
-    "x": 682,
-    "y": 452,
+    "x": 484,
+    "y": 556,
     "z": 5200,
-    "height": 54,
-    "width": 554,
+    "height": 33,
+    "width": 116,
     "tabOrder": 5200
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "How many incidents have been reported this fiscal year, how many were dangerous occurrences, and how are injuries and fatalities trending?",
+                    "value": "Open  \u2192",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

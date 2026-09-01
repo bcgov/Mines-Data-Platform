@@ -2,30 +2,41 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000085",
   "position": {
-    "x": 1454,
-    "y": 914,
+    "x": 1471,
+    "y": 757,
     "z": 13300,
-    "height": 30,
-    "width": 30,
+    "height": 33,
+    "width": 391,
     "tabOrder": 13300
   },
   "visual": {
-    "visualType": "shape",
+    "visualType": "textbox",
     "objects": {
-      "shape": [
+      "general": [
         {
           "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'oval'"
-                }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Open this view  \u2192",
+                    "textStyle": {
+                      "fontSize": "13px",
+                      "color": "#FFFFFF",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "center"
               }
-            }
+            ]
           }
         }
-      ],
-      "fill": [
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "background": [
         {
           "properties": {
             "show": {
@@ -35,7 +46,7 @@
                 }
               }
             },
-            "fillColor": {
+            "color": {
               "solid": {
                 "color": {
                   "expr": {
@@ -49,22 +60,6 @@
           }
         }
       ],
-      "outline": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    "drillFilterOtherVisuals": false,
-    "visualContainerObjects": {
       "title": [
         {
           "properties": {

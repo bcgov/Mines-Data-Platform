@@ -2,34 +2,96 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000005c",
   "position": {
-    "x": 1520,
-    "y": 667,
+    "x": 236,
+    "y": 735,
     "z": 9200,
-    "height": 33,
-    "width": 340,
+    "height": 82,
+    "width": 1210,
     "tabOrder": 9200
   },
   "visual": {
-    "visualType": "textbox",
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
+                    }
+                  },
+                  "Property": "Hub Window FYTD"
+                }
+              },
+              "queryRef": "fact_inspection.Hub Window FYTD",
+              "nativeQueryRef": "Hub Window FYTD"
+            }
+          ]
+        }
+      }
+    },
     "objects": {
-      "general": [
+      "label": [
         {
           "properties": {
-            "paragraphs": [
-              {
-                "textRuns": [
-                  {
-                    "value": "Contacts & help",
-                    "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#252423'"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                }
               }
-            ]
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#252423'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]

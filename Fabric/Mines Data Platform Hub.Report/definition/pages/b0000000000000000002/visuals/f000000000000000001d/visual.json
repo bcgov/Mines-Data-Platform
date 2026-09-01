@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001d",
   "position": {
-    "x": 56,
-    "y": 189,
+    "x": 1622,
+    "y": 84,
     "z": 2900,
     "height": 33,
-    "width": 1240,
+    "width": 111,
     "tabOrder": 2900
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "You are viewing the Compliance & Enforcement audience, which also serves the GIS team. It adds inspection-planning and mine-site lookup content to the corporate inspection and incident reports. Notice of Work sits under Permitting & Titles.",
+                    "value": "Counting rules",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "12px",
+                      "color": "#013366"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }
@@ -35,6 +35,30 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

@@ -3,38 +3,29 @@
   "name": "f0000000000000000036",
   "position": {
     "x": 682,
-    "y": 511,
+    "y": 358,
     "z": 5400,
-    "height": 82,
-    "width": 404,
+    "height": 16,
+    "width": 16,
     "tabOrder": 5400
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_inspection"
-                    }
-                  },
-                  "Property": "Hub Updated Permit Turnaround"
-                }
-              },
-              "queryRef": "fact_inspection.Hub Updated Permit Turnaround",
-              "nativeQueryRef": "Hub Updated Permit Turnaround"
-            }
-          ]
-        }
-      }
-    },
+    "visualType": "shape",
     "objects": {
-      "label": [
+      "shape": [
+        {
+          "properties": {
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'rectangle'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fill": [
         {
           "properties": {
             "show": {
@@ -44,26 +35,32 @@
                 }
               }
             }
-          },
-          "selector": {
-            "id": "default"
           }
         }
       ],
-      "value": [
+      "outline": [
         {
           "properties": {
-            "fontSize": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "false"
                 }
               }
-            },
-            "horizontalAlignment": {
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'left'"
+                  "Value": "true"
                 }
               }
             },
@@ -72,32 +69,15 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#605E5C'"
-                    }
-                  }
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#605E5C'"
+                      "Value": "'#1F4E9C'"
                     }
                   }
                 }
               }
             }
-          },
-          "selector": {
-            "id": "default"
           }
         }
-      ]
-    },
-    "drillFilterOtherVisuals": false,
-    "visualContainerObjects": {
+      ],
       "title": [
         {
           "properties": {

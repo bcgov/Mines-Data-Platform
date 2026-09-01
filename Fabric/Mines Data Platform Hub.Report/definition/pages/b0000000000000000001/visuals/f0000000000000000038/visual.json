@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000038",
   "position": {
-    "x": 1112,
-    "y": 556,
+    "x": 708,
+    "y": 349,
     "z": 5600,
     "height": 33,
-    "width": 116,
+    "width": 388,
     "tabOrder": 5600
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Open  \u2192",
+                    "value": "Incidents",
                     "textStyle": {
                       "fontSize": "13px",
-                      "color": "#013366",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

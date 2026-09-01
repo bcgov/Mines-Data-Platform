@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000032",
   "position": {
-    "x": 54,
-    "y": 636,
+    "x": 984,
+    "y": 442,
     "z": 5000,
-    "height": 33,
-    "width": 136,
+    "height": 54,
+    "width": 431,
     "tabOrder": 5000
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "DEFINITION",
+                    "value": "Definition not yet agreed, or the source is behind. Visible and labelled \u2014 never hidden.",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#252423"
                     }
                   }
                 ],

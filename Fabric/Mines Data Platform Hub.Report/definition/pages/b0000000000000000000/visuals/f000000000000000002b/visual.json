@@ -3,81 +3,39 @@
   "name": "f000000000000000002b",
   "position": {
     "x": 50,
-    "y": 515,
+    "y": 323,
     "z": 4300,
-    "height": 12,
-    "width": 12,
+    "height": 33,
+    "width": 407,
     "tabOrder": 4300
   },
   "visual": {
-    "visualType": "shape",
+    "visualType": "textbox",
     "objects": {
-      "shape": [
+      "general": [
         {
           "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'rectangle'"
-                }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Executive",
+                    "textStyle": {
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
               }
-            }
-          }
-        }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "outline": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
+            ]
           }
         }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#C8102E'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

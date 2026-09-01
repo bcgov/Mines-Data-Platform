@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000029",
   "position": {
-    "x": 76,
-    "y": 411,
+    "x": 240,
+    "y": 264,
     "z": 4100,
     "height": 33,
-    "width": 373,
+    "width": 700,
     "tabOrder": 4100
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Inspections  \u2192",
+                    "value": "Four audiences. Same layout, different content.",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

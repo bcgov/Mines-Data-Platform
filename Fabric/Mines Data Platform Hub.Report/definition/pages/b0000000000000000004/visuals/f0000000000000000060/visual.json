@@ -2,39 +2,82 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000060",
   "position": {
-    "x": 1566,
-    "y": 732,
+    "x": 54,
+    "y": 919,
     "z": 9600,
-    "height": 33,
-    "width": 300,
+    "height": 82,
+    "width": 4,
     "tabOrder": 9600
   },
   "visual": {
-    "visualType": "textbox",
+    "visualType": "shape",
     "objects": {
-      "general": [
+      "shape": [
         {
           "properties": {
-            "paragraphs": [
-              {
-                "textRuns": [
-                  {
-                    "value": "MDS \u2014 definitions & semantics owner",
-                    "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
-                    }
-                  }
-                ],
-                "horizontalTextAlignment": "left"
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'rectangle'"
+                }
               }
-            ]
+            }
+          }
+        }
+      ],
+      "fill": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "outline": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
           }
         }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#2E8540'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

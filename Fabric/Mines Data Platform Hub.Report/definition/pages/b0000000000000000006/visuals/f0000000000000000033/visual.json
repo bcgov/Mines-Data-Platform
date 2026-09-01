@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000033",
   "position": {
-    "x": 1520,
-    "y": 280,
+    "x": 100,
+    "y": 477,
     "z": 5100,
     "height": 33,
-    "width": 346,
+    "width": 600,
     "tabOrder": 5100
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Raise it now",
+                    "value": "The section owner reviews it",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "10px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

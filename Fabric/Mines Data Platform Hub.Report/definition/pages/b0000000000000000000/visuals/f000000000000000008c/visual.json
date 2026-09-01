@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000008c",
   "position": {
-    "x": 1496,
-    "y": 988,
+    "x": 70,
+    "y": 940,
     "z": 14000,
     "height": 33,
-    "width": 370,
+    "width": 286,
     "tabOrder": 14000
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Nhung.Nguyen@gov.bc.ca",
+                    "value": "How to read these reports",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

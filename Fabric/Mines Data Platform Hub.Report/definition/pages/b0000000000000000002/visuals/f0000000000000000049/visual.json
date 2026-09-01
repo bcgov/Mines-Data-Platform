@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000049",
   "position": {
-    "x": 236,
-    "y": 735,
+    "x": 1310,
+    "y": 532,
     "z": 7300,
     "height": 82,
-    "width": 1210,
+    "width": 404,
     "tabOrder": 7300
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Changed Inspections Ops"
+                  "Property": "Hub Updated Planning Map"
                 }
               },
-              "queryRef": "fact_inspection.Hub Changed Inspections Ops",
-              "nativeQueryRef": "Hub Changed Inspections Ops"
+              "queryRef": "fact_inspection.Hub Updated Planning Map",
+              "nativeQueryRef": "Hub Updated Planning Map"
             }
           ]
         }
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#252423'"
+                      "Value": "'#605E5C'"
                     }
                   }
                 }
@@ -83,7 +83,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#252423'"
+                      "Value": "'#605E5C'"
                     }
                   }
                 }

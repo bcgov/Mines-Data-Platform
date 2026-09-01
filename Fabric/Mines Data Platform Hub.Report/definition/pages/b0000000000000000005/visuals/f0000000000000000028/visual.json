@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000028",
   "position": {
-    "x": 519,
-    "y": 442,
+    "x": 54,
+    "y": 280,
     "z": 4000,
-    "height": 54,
-    "width": 431,
+    "height": 33,
+    "width": 600,
     "tabOrder": 4000
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "The owner recommends it, but it has not been through certification. For reports awaiting MDS sign-off.",
+                    "value": "Trust badges \u2014 four states",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#252423"
+                      "fontSize": "12px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

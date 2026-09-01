@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000036",
   "position": {
-    "x": 1528,
-    "y": 361,
+    "x": 54,
+    "y": 555,
     "z": 5400,
     "height": 33,
-    "width": 330,
+    "width": 26,
     "tabOrder": 5400
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Submit a change request",
+                    "value": "4",
                     "textStyle": {
-                      "fontSize": "15px",
+                      "fontSize": "9px",
                       "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }
@@ -36,30 +36,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

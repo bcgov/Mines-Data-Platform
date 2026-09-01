@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003d",
   "position": {
-    "x": 1716,
-    "y": 325,
+    "x": 682,
+    "y": 511,
     "z": 6100,
     "height": 82,
-    "width": 148,
+    "width": 404,
     "tabOrder": 6100
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Trust Mineral Titles"
+                  "Property": "Hub Updated Permit Turnaround"
                 }
               },
-              "queryRef": "fact_inspection.Hub Trust Mineral Titles",
-              "nativeQueryRef": "Hub Trust Mineral Titles"
+              "queryRef": "fact_inspection.Hub Updated Permit Turnaround",
+              "nativeQueryRef": "Hub Updated Permit Turnaround"
             }
           ]
         }
@@ -63,7 +63,7 @@
             "horizontalAlignment": {
               "expr": {
                 "Literal": {
-                  "Value": "'center'"
+                  "Value": "'left'"
                 }
               }
             },
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8A6100'"
+                      "Value": "'#605E5C'"
                     }
                   }
                 }
@@ -83,16 +83,9 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8A6100'"
+                      "Value": "'#605E5C'"
                     }
                   }
-                }
-              }
-            },
-            "bold": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
                 }
               }
             }

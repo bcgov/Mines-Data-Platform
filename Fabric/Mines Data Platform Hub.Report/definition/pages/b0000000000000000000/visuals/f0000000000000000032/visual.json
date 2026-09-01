@@ -3,7 +3,7 @@
   "name": "f0000000000000000032",
   "position": {
     "x": 68,
-    "y": 625,
+    "y": 441,
     "z": 5000,
     "height": 33,
     "width": 389,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Permits issued - new, amended, administrative",
+                    "value": "Completed inspections against the Service Plan target",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000059",
   "position": {
-    "x": 1566,
-    "y": 794,
+    "x": 1520,
+    "y": 667,
     "z": 8900,
     "height": 33,
-    "width": 300,
+    "width": 340,
     "tabOrder": 8900
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Nhung.Nguyen@gov.bc.ca",
+                    "value": "Contacts & help",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "12px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

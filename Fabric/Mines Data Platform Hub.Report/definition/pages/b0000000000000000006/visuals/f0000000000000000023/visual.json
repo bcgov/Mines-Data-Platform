@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000023",
   "position": {
-    "x": 54,
-    "y": 321,
+    "x": 56,
+    "y": 189,
     "z": 3500,
     "height": 33,
-    "width": 26,
+    "width": 1240,
     "tabOrder": 3500
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "1",
+                    "value": "Something look wrong, missing, or defined differently from how your team uses it? Raise it here. Requests are logged against the report and the named owner, so nothing depends on remembering who to email.",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

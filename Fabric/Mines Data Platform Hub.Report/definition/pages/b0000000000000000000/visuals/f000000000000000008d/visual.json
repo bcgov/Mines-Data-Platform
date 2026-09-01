@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000008d",
   "position": {
-    "x": 30,
-    "y": 1036,
+    "x": 70,
+    "y": 964,
     "z": 14100,
     "height": 33,
-    "width": 1860,
+    "width": 286,
     "tabOrder": 14100
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Every tile on this page is a link. What each audience actually sees is set under Manage audiences on the app \u2014 this page is the map; the audience decides which parts of it open.",
+                    "value": "Definitions, trust badges and sources",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#8A8886"
+                      "color": "#605E5C"
                     }
                   }
                 ],

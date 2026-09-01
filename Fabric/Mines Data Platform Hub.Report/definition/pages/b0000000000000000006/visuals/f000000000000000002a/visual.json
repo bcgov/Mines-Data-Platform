@@ -3,62 +3,33 @@
   "name": "f000000000000000002a",
   "position": {
     "x": 54,
-    "y": 481,
+    "y": 321,
     "z": 4200,
-    "height": 26,
+    "height": 33,
     "width": 26,
     "tabOrder": 4200
   },
   "visual": {
-    "visualType": "shape",
+    "visualType": "textbox",
     "objects": {
-      "shape": [
+      "general": [
         {
           "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'oval'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "fill": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "fillColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "1",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#FFFFFF",
+                      "fontWeight": "bold"
                     }
                   }
-                }
+                ],
+                "horizontalTextAlignment": "center"
               }
-            }
-          }
-        }
-      ],
-      "outline": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
+            ]
           }
         }
       ]

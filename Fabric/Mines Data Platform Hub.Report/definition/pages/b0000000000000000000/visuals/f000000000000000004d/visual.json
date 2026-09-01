@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004d",
   "position": {
-    "x": 1018,
-    "y": 411,
+    "x": 539,
+    "y": 533,
     "z": 7700,
     "height": 33,
-    "width": 373,
+    "width": 389,
     "tabOrder": 7700
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Notice of Work  \u2192",
+                    "value": "Where injuries and dangerous occurrences concentrate",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

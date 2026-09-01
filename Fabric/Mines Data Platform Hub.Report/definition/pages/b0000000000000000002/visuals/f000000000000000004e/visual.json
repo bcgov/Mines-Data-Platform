@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004e",
   "position": {
-    "x": 68,
-    "y": 943,
+    "x": 54,
+    "y": 700,
     "z": 7800,
     "height": 33,
-    "width": 154,
+    "width": 760,
     "tabOrder": 7800
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Inspection planning map",
+                    "value": "Curated commentary \u2014 written for field and planning use",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

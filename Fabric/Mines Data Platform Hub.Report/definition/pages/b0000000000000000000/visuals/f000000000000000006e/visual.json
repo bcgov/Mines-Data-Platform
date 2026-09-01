@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000006e",
   "position": {
-    "x": 1471,
-    "y": 757,
+    "x": 1463,
+    "y": 358,
     "z": 11000,
     "height": 33,
-    "width": 391,
+    "width": 407,
     "tabOrder": 11000
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Open this view  \u2192",
+                    "value": "All three reports, with lineage and export",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }
@@ -36,30 +35,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

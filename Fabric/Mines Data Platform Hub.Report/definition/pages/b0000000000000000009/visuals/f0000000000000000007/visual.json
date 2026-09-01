@@ -1,32 +1,31 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
-  "name": "f000000000000000000f",
+  "name": "f0000000000000000007",
   "position": {
-    "x": 166,
-    "y": 86,
-    "z": 1500,
-    "height": 30,
-    "width": 115,
-    "tabOrder": 1500
+    "x": 1772,
+    "y": 26,
+    "z": 700,
+    "height": 32,
+    "width": 118,
+    "tabOrder": 700
   },
   "visual": {
-    "visualType": "actionButton",
+    "visualType": "shape",
     "objects": {
-      "icon": [
+      "shape": [
         {
           "properties": {
-            "shapeType": {
+            "tileShape": {
               "expr": {
                 "Literal": {
-                  "Value": "'blank'"
+                  "Value": "'rectangle'"
                 }
               }
             }
-          },
-          "selector": {
-            "id": "default"
           }
-        },
+        }
+      ],
+      "fill": [
         {
           "properties": {
             "show": {
@@ -51,8 +50,11 @@
             }
           }
         }
-      ],
-      "fill": [
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "border": [
         {
           "properties": {
             "show": {
@@ -61,44 +63,28 @@
                   "Value": "true"
                 }
               }
-            }
-          }
-        },
-        {
-          "properties": {
-            "fillColor": {
+            },
+            "color": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FCBA19'"
+                      "Value": "'#E1DFDD'"
                     }
                   }
                 }
               }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
-      "text": [
-        {
-          "properties": {
-            "show": {
+            },
+            "radius": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "4D"
                 }
               }
             }
           }
         }
-      ]
-    },
-    "drillFilterOtherVisuals": false,
-    "visualContainerObjects": {
+      ],
       "title": [
         {
           "properties": {
@@ -106,33 +92,6 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "visualLink": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "type": {
-              "expr": {
-                "Literal": {
-                  "Value": "'PageNavigation'"
-                }
-              }
-            },
-            "navigationSection": {
-              "expr": {
-                "Literal": {
-                  "Value": "'b0000000000000000001'"
                 }
               }
             }

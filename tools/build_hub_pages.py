@@ -72,6 +72,7 @@ P_CHANGE = "b0000000000000000006"
 P_STATES = "b0000000000000000007"
 P_RULES = "b0000000000000000008"
 P_HOME = "b0000000000000000000"
+P_HOME_L = "b0000000000000000009"   # Home, left-navigation variant
 
 # Cross-report deep links. In-report page navigation cannot reach another
 # report, so the one report that IS published is linked by URL - Romil,
@@ -221,13 +222,22 @@ def hit_target(x, y, w, h, link):
         return
     vc = container(title=False)
     vc.update(link_objects(link))
+    # In --nav-test the button is painted GOLD instead of transparent. The
+    # first live test (b2f3687) imported cleanly but did not navigate, and a
+    # fully transparent actionButton may simply have no hit area - a visible
+    # one separates that from the property being inert.
+    visible = NAV_TEST
+    fill = ([{"properties": {"show": lit("true")}},
+             {"properties": {"fillColor": solid(GOLD)},
+              "selector": {"id": "default"}}]
+            if visible else [{"properties": {"show": lit("false")}}])
     add("actionButton", x, y, w, h,
         {"objects": {
             "icon": [{"properties": {"shapeType": s("blank")},
                       "selector": {"id": "default"}},
                      {"properties": {"show": lit("false")}}],
             "outline": [{"properties": {"show": lit("false")}}],
-            "fill": [{"properties": {"show": lit("false")}}],
+            "fill": fill,
             "text": [{"properties": {"show": lit("false")}}]}},
         vc)
 
@@ -833,6 +843,113 @@ footnote("Every tile on this page is a link. What each audience actually sees is
 counts["Home"] = finish_page()
 
 # =============================================================================
+# PAGE 9 - HOME, LEFT-NAVIGATION VARIANT
+# -----------------------------------------------------------------------------
+# Same content as Home, different frame. Romil's own Option C mockup put the
+# in-page navigation down the LEFT ("this is kind of on the left side right now
+# ... this itself is a complete page"); the top rail came out of the tab
+# conversation on the same call. Both exist so he can choose rather than be
+# told, and so the answer to "did you follow my design?" is a side by side.
+# =============================================================================
+LNAV_W = 268
+LX = MARGIN + LNAV_W + 20
+LCW = W - MARGIN - LX
+
+start_page(P_HOME_L, "Home (left nav)")
+chrome(P_HOME_L, show_rail=False)
+
+NAV_Y = HEADER_H + 16
+NAV_H = (H - 44 - 12) - NAV_Y
+rect(MARGIN, NAV_Y, LNAV_W, NAV_H, fill=WHITE, border=LINE)
+with region(MARGIN, NAV_Y, LNAV_W, NAV_H, "left nav"):
+    ny = NAV_Y + 16
+    ny += text(MARGIN + 20, ny, LNAV_W - 40, [("GO TO", 8, FAINT, True)],
+               lines=1) + 4
+    for lbl, tgt in PERSONAS:
+        on = tgt == P_HOME_L or (lbl == "Home" and tgt == P_HOME)
+        button(MARGIN + 16, ny, LNAV_W - 32, 34, lbl,
+               color=WHITE if on else NAVY, size=10, align="left",
+               fill=NAVY if on else WHITE, border=NAVY if on else LINE,
+               link_to=None if on else tgt)
+        ny += 40
+    ny += 6
+    rect(MARGIN + 20, ny, LNAV_W - 40, 1, fill=LINE, radius=0)
+    ny += 14
+    ny += text(MARGIN + 20, ny, LNAV_W - 40, [("HELP", 8, FAINT, True)],
+               lines=1) + 4
+    for lbl, tgt in SUPPORT_LINKS + [("Access & data states", P_STATES)]:
+        button(MARGIN + 16, ny, LNAV_W - 32, 30, lbl, color=NAVY, size=9,
+               bold=False, align="left", fill=WHITE, border=LINE, link_to=tgt)
+        ny += 36
+
+# intro tile, sized to the narrower content column
+ltitle = "Mines Data Platform \u2014 start here"
+lbody = ("Pick the view for your work, or go straight to a report. Every view "
+         "has the same shape, so nothing has to be relearned.")
+lth = tb_height(ltitle, 700, 17, True)
+lbh = tb_height(lbody, LCW - 52 - PILL_W - 40, 10)
+ltile_h = 14 + max(lth + 2 + lbh, card_height(10)) + 14
+rect(LX, NAV_Y, LCW, ltile_h, fill=WHITE, border=LINE)
+with region(LX, NAV_Y, LCW, ltile_h, "intro tile (left nav)"):
+    text(LX + 26, NAV_Y + 14, 700, [(ltitle, 17, NAVY, True)])
+    text(LX + 26, NAV_Y + 14 + lth + 2, LCW - 52 - PILL_W - 40,
+         [(lbody, 10, INK, False)])
+    lpx = LX + LCW - 26 - PILL_W
+    pill_card(lpx, NAV_Y + 14, PILL_W, "Hub Data As At", size=10, color=NAVY,
+              fill=PILL_BG, border=PILL_BG, sample=S_ASAT)
+
+ly = NAV_Y + ltile_h + 14
+_lh = text(LX, ly, 210, [("Choose your view", 12, INK, True)])
+ly += _lh + 8
+
+LBAND_H = 196
+LBAND_Y = (H - 44 - 12) - LBAND_H
+LA_GAP = 20
+LA_W = (LCW - LA_GAP * 3) // 4
+LA_H = (LBAND_Y - 18) - ly
+
+for i, (a_name, a_target, a_who, a_reports) in enumerate(AUDIENCES):
+    ax = LX + i * (LA_W + LA_GAP)
+    rect(ax, ly, LA_W, LA_H, fill=WHITE, border=LINE)
+    with region(ax, ly, LA_W, LA_H, f"L audience {a_name!r}"):
+        cy = ly + 16
+        cy += text(ax + 16, cy, LA_W - 32, [(a_name, 12, NAVY, True)], lines=1) + 2
+        cy += text(ax + 16, cy, LA_W - 32, [(a_who, 9, MUTED, False)], lines=1) + 8
+        rect(ax + 16, cy, LA_W - 32, 1, fill=LINE, radius=0)
+        cy += 12
+        lbtn_y = ly + LA_H - 16 - 34
+        lavail = (lbtn_y - 12) - cy
+        lpitch = min(92, max(52, lavail // len(a_reports)))
+        for r_label, r_chip, r_sub in a_reports:
+            rect(ax + 16, cy + 9, 10, 10, fill=r_chip, radius=2)
+            button(ax + 32, cy, LA_W - 48, 28, r_label + "  \u2192", color=INK,
+                   size=10, bold=False, align="left",
+                   link_to=report_link(r_label, a_target))
+            text(ax + 32, cy + 26, LA_W - 48, [(r_sub, 9, MUTED, False)], lines=1)
+            cy += lpitch
+        button(ax + 16, lbtn_y, LA_W - 32, 34, "Open this view  \u2192",
+               color=WHITE, size=10, fill=NAVY, border=NAVY, link_to=a_target)
+
+rect(LX, LBAND_Y, LCW, LBAND_H, fill=WHITE, border=LINE)
+with region(LX, LBAND_Y, LCW, LBAND_H, "L band"):
+    by = LBAND_Y + 14
+    by += text(LX + 24, by, 620, [("Who to ask", 12, INK, True)])
+    by += text(LX + 24, by, 900,
+               [("Named owners, not a shared inbox. Help and definitions are "
+                 "in the left pane.", 9, MUTED, False)], lines=1) + 8
+    for j, (initials, name, sub) in enumerate(CONTACTS_STD):
+        cx = LX + 24 + j * 420
+        oval(cx, by + 2, 30, 30, NAVY)
+        text(cx, vcy(by + 2, 30), 30, [(initials, 9, WHITE, True)], align="center")
+        text(cx + 42, by, 360, [(name, 10, INK, True)], lines=1)
+        text(cx + 42, by + 24, 360, [(sub, 9, NAVY, False)], lines=1)
+
+footnote("Draft variant: same content as Home, navigation moved to the left as "
+         "in the Option C mockup. Home keeps the top rail \u2014 pick one and the "
+         "other goes.")
+counts["Home (left nav)"] = finish_page()
+
+# =============================================================================
 # PAGES 1-4 - the persona pages
 # =============================================================================
 persona_page(
@@ -1173,8 +1290,8 @@ footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for s
 counts["Access & data states"] = finish_page()
 
 # --- pages.json --------------------------------------------------------------
-order = [P_HOME, P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES, P_CHANGE,
-         P_STATES]
+order = [P_HOME, P_HOME_L, P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES,
+         P_CHANGE, P_STATES]
 with open(os.path.join(PAGES_DIR, "pages.json"), "w", encoding="utf-8") as f:
     json.dump({"$schema": PM, "pageOrder": order, "activePageName": P_HOME}, f, indent=2)
 

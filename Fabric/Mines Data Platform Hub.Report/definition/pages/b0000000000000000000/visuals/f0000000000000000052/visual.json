@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000052",
   "position": {
-    "x": 1010,
-    "y": 533,
+    "x": 1018,
+    "y": 503,
     "z": 8200,
     "height": 33,
-    "width": 389,
+    "width": 373,
     "tabOrder": 8200
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Application to decision, and where the backlog sits",
+                    "value": "Permit turnaround  \u2192",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#252423"
                     }
                   }
                 ],

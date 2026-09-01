@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000060",
   "position": {
-    "x": 1481,
-    "y": 441,
+    "x": 1489,
+    "y": 411,
     "z": 9600,
     "height": 33,
-    "width": 389,
+    "width": 373,
     "tabOrder": 9600
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Counts by type, region and period, with export",
+                    "value": "Inspections  \u2192",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#252423"
                     }
                   }
                 ],

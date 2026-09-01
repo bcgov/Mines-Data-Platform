@@ -3,10 +3,10 @@
   "name": "f000000000000000001d",
   "position": {
     "x": 56,
-    "y": 189,
+    "y": 154,
     "z": 2900,
     "height": 33,
-    "width": 1240,
+    "width": 800,
     "tabOrder": 2900
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Pick the view for your work, or go straight to a report. Every view has the same shape, so nothing has to be relearned when you move between them.",
+                    "value": "Mines Data Platform \u2014 start here",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "17px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000032",
   "position": {
-    "x": 68,
-    "y": 625,
+    "x": 76,
+    "y": 595,
     "z": 5000,
     "height": 33,
-    "width": 389,
+    "width": 373,
     "tabOrder": 5000
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Permits issued - new, amended, administrative",
+                    "value": "Notice of Work  \u2192",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#252423"
                     }
                   }
                 ],

@@ -3,7 +3,7 @@
   "name": "f0000000000000000049",
   "position": {
     "x": 992,
-    "y": 358,
+    "y": 323,
     "z": 7300,
     "height": 33,
     "width": 407,
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Permitting, turnaround and Mineral Titles",
+                    "value": "Permitting & Titles",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

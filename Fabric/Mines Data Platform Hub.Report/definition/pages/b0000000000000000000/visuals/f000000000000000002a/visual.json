@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002a",
   "position": {
-    "x": 68,
-    "y": 441,
+    "x": 76,
+    "y": 411,
     "z": 4200,
     "height": 33,
-    "width": 389,
+    "width": 373,
     "tabOrder": 4200
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Completed inspections against the Service Plan target",
+                    "value": "Inspections  \u2192",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#252423"
                     }
                   }
                 ],

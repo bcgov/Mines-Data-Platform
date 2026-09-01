@@ -25,6 +25,10 @@ from metrics import (TB_LINE, TB_VPAD, TB_HPAD, CARD_PAD_PLAIN, CARD_PAD_PILL,
                      wrap_lines, text_width, pt_to_px, fit_size)
 
 ROOT = sys.argv[1]
+# --nav-test puts ONE navigating button in the whole report (the Home rail's
+# Executive chip), so a Fabric import either accepts the visualLink shape or
+# rejects it while only one visual is at stake.
+NAV_TEST = "--nav-test" in sys.argv
 NAV = "--no-nav" not in sys.argv
 LINK_REPORTS = "--no-report-links" not in sys.argv
 PAGES_DIR = os.path.join(ROOT, "definition", "pages")
@@ -206,7 +210,14 @@ def hit_target(x, y, w, h, link):
     actionButton labels do not paint in the Service (verified on the live
     report), so the visible button stays shape+textbox and this transparent
     button - drawn last, therefore on top - carries the action."""
-    if not (NAV and link):
+    if not link:
+        return
+    if NAV_TEST:
+        if (_state.get("pid") != P_HOME or link != P_EXEC
+                or _state.get("navtest_done")):
+            return
+        _state["navtest_done"] = True
+    elif not NAV:
         return
     vc = container(title=False)
     vc.update(link_objects(link))
@@ -1167,7 +1178,8 @@ order = [P_HOME, P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES, P_CHANGE,
 with open(os.path.join(PAGES_DIR, "pages.json"), "w", encoding="utf-8") as f:
     json.dump({"$schema": PM, "pageOrder": order, "activePageName": P_HOME}, f, indent=2)
 
-print(f"canvas {W}x{H}   navigation links: {'ON' if NAV else 'OFF'}")
+mode = "ONE TEST BUTTON" if NAV_TEST else ("ON" if NAV else "OFF")
+print(f"canvas {W}x{H}   navigation links: {mode}")
 for k, v in counts.items():
     print(f"  {k:<30} {v:>3} visuals")
 print("total visuals:", sum(counts.values()))

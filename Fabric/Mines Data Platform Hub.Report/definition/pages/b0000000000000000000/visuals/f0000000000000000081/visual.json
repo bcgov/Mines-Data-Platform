@@ -3,7 +3,7 @@
   "name": "f0000000000000000081",
   "position": {
     "x": 1078,
-    "y": 964,
+    "y": 940,
     "z": 12900,
     "height": 33,
     "width": 286,
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "What you see with no access, or stale data",
+                    "value": "Access & data states",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

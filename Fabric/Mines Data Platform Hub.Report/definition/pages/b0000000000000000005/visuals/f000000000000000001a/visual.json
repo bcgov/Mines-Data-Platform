@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001a",
   "position": {
-    "x": 984,
-    "y": 442,
+    "x": 1757,
+    "y": 84,
     "z": 2600,
-    "height": 54,
-    "width": 431,
+    "height": 33,
+    "width": 125,
     "tabOrder": 2600
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definition not yet agreed, or the source is behind. Visible and labelled \u2014 never hidden.",
+                    "value": "Request a change",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#252423"
+                      "fontSize": "12px",
+                      "color": "#013366"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }
@@ -35,6 +35,30 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003c",
   "position": {
-    "x": 1467,
+    "x": 525,
     "y": 452,
     "z": 6000,
     "height": 54,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Where each measure comes from, how it is calculated, and when it was validated.",
+                    "value": "Incidents, dangerous occurrences, injuries and fatalities by period.",
                     "textStyle": {
                       "fontSize": "10px",
                       "color": "#252423"

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002c",
   "position": {
-    "x": 686,
-    "y": 954,
+    "x": 30,
+    "y": 363,
     "z": 4400,
     "height": 33,
-    "width": 548,
+    "width": 1860,
     "tabOrder": 4400
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Not current \u2014 verify against source before quoting.",
+                    "value": "You don't have access to this app yet",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "16px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

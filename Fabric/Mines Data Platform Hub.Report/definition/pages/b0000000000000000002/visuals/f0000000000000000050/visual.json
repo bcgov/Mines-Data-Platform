@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000050",
   "position": {
-    "x": 1544,
-    "y": 872,
+    "x": 68,
+    "y": 759,
     "z": 8000,
     "height": 33,
-    "width": 298,
+    "width": 154,
     "tabOrder": 8000
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Inspection types, CORE and NRIS lineage",
+                    "value": "Inspections",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "10px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

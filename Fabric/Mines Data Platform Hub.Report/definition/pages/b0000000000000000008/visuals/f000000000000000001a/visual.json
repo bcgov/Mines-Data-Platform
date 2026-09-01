@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001a",
   "position": {
-    "x": 30,
-    "y": 1036,
+    "x": 1757,
+    "y": 84,
     "z": 2600,
     "height": 33,
-    "width": 1860,
+    "width": 125,
     "tabOrder": 2600
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Change a rule through Request a change so the definition, the report tooltip and this page stay in step.",
+                    "value": "Request a change",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#8A8886"
+                      "fontSize": "12px",
+                      "color": "#013366"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }
@@ -35,6 +35,30 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

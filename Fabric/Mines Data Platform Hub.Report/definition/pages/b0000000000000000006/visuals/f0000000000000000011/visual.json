@@ -2,30 +2,41 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000011",
   "position": {
-    "x": 54,
-    "y": 325,
+    "x": 299,
+    "y": 84,
     "z": 1700,
-    "height": 26,
-    "width": 26,
+    "height": 33,
+    "width": 216,
     "tabOrder": 1700
   },
   "visual": {
-    "visualType": "shape",
+    "visualType": "textbox",
     "objects": {
-      "shape": [
+      "general": [
         {
           "properties": {
-            "tileShape": {
-              "expr": {
-                "Literal": {
-                  "Value": "'oval'"
-                }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Compliance & Enforcement",
+                    "textStyle": {
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "center"
               }
-            }
+            ]
           }
         }
-      ],
-      "fill": [
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
+      "background": [
         {
           "properties": {
             "show": {
@@ -35,12 +46,12 @@
                 }
               }
             },
-            "fillColor": {
+            "color": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#013366'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
                 }
@@ -49,22 +60,6 @@
           }
         }
       ],
-      "outline": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    "drillFilterOtherVisuals": false,
-    "visualContainerObjects": {
       "title": [
         {
           "properties": {

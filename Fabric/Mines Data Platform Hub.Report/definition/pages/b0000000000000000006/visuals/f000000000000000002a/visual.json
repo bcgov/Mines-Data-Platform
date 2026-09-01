@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002a",
   "position": {
-    "x": 1520,
-    "y": 498,
+    "x": 54,
+    "y": 321,
     "z": 4200,
     "height": 33,
-    "width": 34,
+    "width": 26,
     "tabOrder": 4200
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "RG",
+                    "value": "1",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#FFFFFF",

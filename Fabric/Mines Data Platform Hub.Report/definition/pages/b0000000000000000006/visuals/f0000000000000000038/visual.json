@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000038",
   "position": {
-    "x": 674,
-    "y": 750,
+    "x": 100,
+    "y": 585,
     "z": 5600,
     "height": 33,
-    "width": 148,
+    "width": 1346,
     "tabOrder": 5600
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Sent",
+                    "value": "If a definition changes, it changes on How to read these reports and in the report tooltip at the same time.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#107C41",
-                      "fontWeight": "bold"
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

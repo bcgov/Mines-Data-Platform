@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003a",
   "position": {
-    "x": 1716,
+    "x": 774,
     "y": 325,
     "z": 5800,
     "height": 82,
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Trust Dictionary"
+                  "Property": "Hub Trust Incidents"
                 }
               },
-              "queryRef": "fact_inspection.Hub Trust Dictionary",
-              "nativeQueryRef": "Hub Trust Dictionary"
+              "queryRef": "fact_inspection.Hub Trust Incidents",
+              "nativeQueryRef": "Hub Trust Incidents"
             }
           ]
         }

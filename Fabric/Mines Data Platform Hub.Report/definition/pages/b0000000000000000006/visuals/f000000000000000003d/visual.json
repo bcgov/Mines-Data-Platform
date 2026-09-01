@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003d",
   "position": {
-    "x": 30,
-    "y": 854,
+    "x": 1528,
+    "y": 361,
     "z": 6100,
     "height": 33,
-    "width": 1860,
+    "width": 330,
     "tabOrder": 6100
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "The Power Automate visual is subject to a tenant setting we have not yet confirmed \u2014 the fallback path is designed for, not bolted on later.",
+                    "value": "Submit a change request",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#8A8886"
+                      "fontSize": "15px",
+                      "color": "#FFFFFF",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }
@@ -35,6 +36,30 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

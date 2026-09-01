@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000056",
   "position": {
-    "x": 1566,
-    "y": 794,
+    "x": 1740,
+    "y": 556,
     "z": 8600,
     "height": 33,
-    "width": 300,
+    "width": 116,
     "tabOrder": 8600
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Senior Auditor, Mine Audits Unit",
+                    "value": "Open  \u2192",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#013366"
+                      "fontSize": "13px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

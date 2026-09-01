@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002b",
   "position": {
-    "x": 1566,
-    "y": 496,
+    "x": 100,
+    "y": 321,
     "z": 4300,
     "height": 33,
-    "width": 300,
+    "width": 600,
     "tabOrder": 4300
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Rajneesh Gulati",
+                    "value": "You describe the issue",
                     "textStyle": {
                       "fontSize": "10px",
                       "color": "#252423",

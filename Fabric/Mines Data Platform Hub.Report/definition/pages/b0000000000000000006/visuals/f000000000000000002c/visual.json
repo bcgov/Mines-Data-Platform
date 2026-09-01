@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002c",
   "position": {
-    "x": 1566,
-    "y": 522,
+    "x": 100,
+    "y": 351,
     "z": 4400,
     "height": 33,
-    "width": 300,
+    "width": 1346,
     "tabOrder": 4400
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
+                    "value": "Report, figure, and what you expected instead. The current filter context and \"data as at\" date are attached automatically.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#013366"
+                      "color": "#605E5C"
                     }
                   }
                 ],

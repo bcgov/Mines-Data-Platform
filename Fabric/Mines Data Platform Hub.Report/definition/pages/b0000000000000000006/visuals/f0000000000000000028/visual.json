@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000028",
   "position": {
-    "x": 1520,
-    "y": 459,
+    "x": 54,
+    "y": 280,
     "z": 4000,
     "height": 33,
-    "width": 346,
+    "width": 600,
     "tabOrder": 4000
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Prefer to ask a person first?",
+                    "value": "What happens when you submit",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "12px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

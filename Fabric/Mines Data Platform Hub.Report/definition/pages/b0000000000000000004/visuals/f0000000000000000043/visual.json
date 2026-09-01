@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000043",
   "position": {
-    "x": 54,
-    "y": 700,
+    "x": 1022,
+    "y": 349,
     "z": 6700,
     "height": 33,
-    "width": 760,
+    "width": 231,
     "tabOrder": 6700
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Shared filter presets \u2014 the recurring windows this team asks for",
+                    "value": "Notice of Work",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "12px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

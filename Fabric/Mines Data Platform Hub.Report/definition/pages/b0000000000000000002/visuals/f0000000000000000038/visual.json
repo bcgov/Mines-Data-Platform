@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000038",
   "position": {
-    "x": 54,
-    "y": 700,
+    "x": 708,
+    "y": 349,
     "z": 5600,
     "height": 33,
-    "width": 760,
+    "width": 388,
     "tabOrder": 5600
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Curated commentary \u2014 written for field and planning use",
+                    "value": "Incidents",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "13px",
+                      "color": "#252423",
+                      "fontWeight": "bold"
                     }
                   }
                 ],

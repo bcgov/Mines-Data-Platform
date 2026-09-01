@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001d",
   "position": {
-    "x": 1449,
-    "y": 442,
+    "x": 1622,
+    "y": 84,
     "z": 2900,
-    "height": 54,
-    "width": 431,
+    "height": 33,
+    "width": 111,
     "tabOrder": 2900
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Ad-hoc or user-built content. Distinct grey styling so it is never mistaken for a governed figure.",
+                    "value": "Counting rules",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#252423"
+                      "fontSize": "12px",
+                      "color": "#013366"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }
@@ -35,6 +35,30 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004e",
   "position": {
-    "x": 1520,
-    "y": 667,
+    "x": 1493,
+    "y": 349,
     "z": 7800,
     "height": 33,
-    "width": 340,
+    "width": 231,
     "tabOrder": 7800
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Contacts & help",
+                    "value": "Dictionary & lineage",
                     "textStyle": {
                       "fontSize": "12px",
                       "color": "#252423",

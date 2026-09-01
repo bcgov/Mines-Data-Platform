@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001d",
   "position": {
-    "x": 58,
-    "y": 679,
+    "x": 1622,
+    "y": 84,
     "z": 2900,
     "height": 33,
-    "width": 700,
+    "width": 111,
     "tabOrder": 2900
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Start here \u2014 Executive view",
+                    "value": "Counting rules",
                     "textStyle": {
-                      "fontSize": "14px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "fontSize": "12px",
+                      "color": "#013366"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }
@@ -36,6 +35,30 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "title": [
         {
           "properties": {

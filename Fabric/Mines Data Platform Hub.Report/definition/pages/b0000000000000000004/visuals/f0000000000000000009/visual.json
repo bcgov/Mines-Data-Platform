@@ -6,7 +6,7 @@
     "y": 84,
     "z": 900,
     "height": 33,
-    "width": 93,
+    "width": 37,
     "tabOrder": 900
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "YOU ARE VIEWING",
+                    "value": "GO TO",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#8A8886",

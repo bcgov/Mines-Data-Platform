@@ -9,8 +9,12 @@ textbox and collapsed every small card.
 Every value slot is a cardVisual bound to a measure on the Gold Inspections Semantic
 Model - nothing is typed in (Romil's rule: "313 in FY26/27 must update itself").
 
-Page-navigation links are OFF by default: Fabric's report import schema rejects the
-`visualLink` property. Pass --nav to re-enable once the correct shape is confirmed.
+Page navigation is ON (2026-09-01). The action is a CONTAINER object -
+visual.visualContainerObjects.visualLink - NOT a sibling of visualType, which is
+what Fabric's import rejected in August. Confirmed against Microsoft's published
+schema (microsoft/json-schemas, visualConfiguration/2.3.0/schema-embedded.json).
+Pass --no-nav to strip every link, --no-report-links to keep page navigation but
+drop the cross-report web links.
 """
 import json, os, sys
 
@@ -21,7 +25,8 @@ from metrics import (TB_LINE, TB_VPAD, TB_HPAD, CARD_PAD_PLAIN, CARD_PAD_PILL,
                      wrap_lines, text_width, pt_to_px, fit_size)
 
 ROOT = sys.argv[1]
-NAV = "--nav" in sys.argv
+NAV = "--no-nav" not in sys.argv
+LINK_REPORTS = "--no-report-links" not in sys.argv
 PAGES_DIR = os.path.join(ROOT, "definition", "pages")
 
 VC = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json"
@@ -62,22 +67,44 @@ P_DEFS = "b0000000000000000005"
 P_CHANGE = "b0000000000000000006"
 P_STATES = "b0000000000000000007"
 P_RULES = "b0000000000000000008"
+P_HOME = "b0000000000000000000"
 
-PERSONAS = [("All", None), ("Executive", P_EXEC), ("Compliance & Enforcement", P_COMP),
+# Cross-report deep links. In-report page navigation cannot reach another
+# report, so the one report that IS published is linked by URL - Romil,
+# 28 Aug: "if I want to directly go into an inspection report I don't have to
+# even ... I could just have clicked that."
+WS = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
+REPORT_URLS = {
+    "Inspections":
+        f"https://app.powerbi.com/groups/{WS}/reports/56f2e0c7-ae85-42b0-be82-50d851b8bffb",
+}
+
+SUPPORT_LINKS = [("How to read these reports", P_DEFS),
+                 ("Counting rules", P_RULES),
+                 ("Request a change", P_CHANGE)]
+
+
+def report_link(title, fallback=None):
+    if LINK_REPORTS and title in REPORT_URLS:
+        return REPORT_URLS[title]
+    return fallback
+
+PERSONAS = [("Home", P_HOME), ("Executive", P_EXEC),
+            ("Compliance & Enforcement", P_COMP),
             ("Permitting & Titles", P_PERM), ("Audit & Analysis", P_AUDIT)]
 
 # Rail geometry derived from the rendered label width (button fonts are points).
-RAIL_CAPTION = "YOU ARE VIEWING"
+RAIL_CAPTION = "GO TO"
 RAIL_CAP_W = int(text_width(RAIL_CAPTION, pt_to_px(8), True)) + 22
 
 
 def _rail_geom():
-    """The rail is a LOCATION INDICATOR, not navigation (Romil, 24 Aug 2026:
-    the app's left nav does the navigating). Geometry starts after the
-    'YOU ARE VIEWING' caption so the row reads as a label, not a tab strip."""
+    """The rail IS the navigation again (Romil, 28 Aug 2026: the whole
+    navigation should live on the page, front and centre, not only in the app's
+    left pane). Geometry starts after the 'GO TO' caption."""
     x, geom = MARGIN + RAIL_CAP_W, []
     for label, _ in PERSONAS:
-        w = int(text_width(label, pt_to_px(10), True) * 1.10) + 36
+        w = int(text_width(label, pt_to_px(10), True) * 1.12) + 46
         geom.append((x, w))
         x += w + 10
     return geom
@@ -131,7 +158,7 @@ def container(bg=None, border=None, radius=4, title=False):
     return o
 
 
-def add(vtype, x, y, w, h, visual_body, vc_objects=None, link_to=None):
+def add(vtype, x, y, w, h, visual_body, vc_objects=None):
     if x < 0 or y < 0 or x + w > W or y + h > H:
         _issues.append(f"{_state['page']}: {vtype} out of canvas "
                        f"({x},{y},{w},{h})")
@@ -146,8 +173,6 @@ def add(vtype, x, y, w, h, visual_body, vc_objects=None, link_to=None):
     vid = "f" + format(_state["n"], "019x")
     body = {"visualType": vtype}
     body.update(visual_body)
-    if link_to and NAV:
-        body["visualLink"] = {"type": "PageNavigation", "navigationSection": link_to}
     body["drillFilterOtherVisuals"] = False
     if vc_objects:
         body["visualContainerObjects"] = vc_objects
@@ -156,6 +181,44 @@ def add(vtype, x, y, w, h, visual_body, vc_objects=None, link_to=None):
         "position": {"x": x, "y": y, "z": z, "height": h, "width": w, "tabOrder": z},
         "visual": body})
     return vid
+
+
+def link_objects(link):
+    """PBIR action object for a navigation target.
+
+    `visual.visualLink` (the PBIX shape) is REJECTED by Fabric's import. In PBIR
+    the action is a formatting object on the container:
+    visual.visualContainerObjects.visualLink[0].properties. A target starting
+    with http is a web link (used for cross-report navigation, which page
+    navigation cannot do); anything else is a page id on this report."""
+    if str(link).startswith("http"):
+        props = {"show": lit("true"), "type": s("WebUrl"), "webUrl": s(link)}
+    else:
+        props = {"show": lit("true"), "type": s("PageNavigation"),
+                 "navigationSection": s(link)}
+    return {"visualLink": [{"properties": props}]}
+
+
+def hit_target(x, y, w, h, link):
+    """An invisible actionButton laid OVER a drawn button, so the click has
+    somewhere to land.
+
+    actionButton labels do not paint in the Service (verified on the live
+    report), so the visible button stays shape+textbox and this transparent
+    button - drawn last, therefore on top - carries the action."""
+    if not (NAV and link):
+        return
+    vc = container(title=False)
+    vc.update(link_objects(link))
+    add("actionButton", x, y, w, h,
+        {"objects": {
+            "icon": [{"properties": {"shapeType": s("blank")},
+                      "selector": {"id": "default"}},
+                     {"properties": {"show": lit("false")}}],
+            "outline": [{"properties": {"show": lit("false")}}],
+            "fill": [{"properties": {"show": lit("false")}}],
+            "text": [{"properties": {"show": lit("false")}}]}},
+        vc)
 
 
 # --- element helpers ---------------------------------------------------------
@@ -257,15 +320,14 @@ def pill_card(x, y, w, measure, size=9, color=INK, fill=None, border=None,
 
 def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
            bold=True, align="center", link_to=None):
-    """A shape plus a centred textbox, NOT an actionButton.
+    """A shape plus a centred textbox, with an invisible actionButton on top when
+    the button navigates.
 
     actionButton text does not paint in the Power BI Service - verified on the
-    live reports: the JSON is byte-identical between a button that renders and
-    one that does not, and the label never reaches the DOM, so Share, the
-    persona rail, Open and Submit a change request all drew as empty boxes.
-    A shape carries the fill/border/radius and a textbox carries the label.
-    Nothing is lost: navigation is off anyway because Fabric rejects
-    `visualLink`.
+    live reports: the label never reaches the DOM, so Share, the persona rail,
+    Open and Submit a change request all drew as empty boxes. So the shape
+    carries the fill/border/radius, the textbox carries the label, and a
+    transparent actionButton on top carries the click.
     """
     need = text_width(label, pt_to_px(size), bold) + 24
     if need > w:
@@ -273,6 +335,7 @@ def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
     rect(x, y, w, h, fill=fill, border=border, radius=4)
     text(x + 8, vcy(y, h), w - 16, [(label, int(round(pt_to_px(size))), color, bold)],
          align=align, lines=1, bg=fill)
+    hit_target(x, y, w, h, link_to)
     return h
 
 # The widest string each measure actually returns, read back from the live model.
@@ -395,21 +458,34 @@ def chrome(active_page, show_rail=True):
     button(W - 148, 26, 118, 32, "Share", color=NAVY, size=10, border=LINE)
     if not show_rail:
         return
-    # 2026-08-28: the row of audience labels is GONE. It duplicated the Org
-    # app's left pane, cost 40px on every page, and — being unclickable — read
-    # as broken navigation. What is left is a single orientation label saying
-    # which view you are in, which still works when the report is opened
-    # outside the app (direct link or workspace), where there is no left pane.
-    active_label = next((lbl for lbl, tgt in PERSONAS
-                         if tgt and tgt == active_page), None)
-    if active_label is None:
-        return
+    # 2026-09-01: the audience strip is BACK, and this time every chip
+    # navigates (Romil, 28 Aug: "on the actual page itself I want the whole
+    # navigation to live" ... "it looks like one page landing, it gives me all
+    # the options of whatever I want to do next"). It was removed on 28 Aug
+    # only because it was unclickable and duplicated the app's left pane; a
+    # working rail also keeps the report navigable when it is opened OUTSIDE
+    # the app, where there is no left pane at all.
     text(MARGIN, vcy(86, 30), RAIL_CAP_W - 12,
          [(RAIL_CAPTION, 8, FAINT, True)], lines=1)
-    x, w = RAIL_GEOM[[lbl for lbl, _ in PERSONAS].index(active_label)]
-    x = MARGIN + RAIL_CAP_W
-    button(x, 86, w, 30, active_label, color=NAVY, size=10, bold=True)
-    rect(x + 8, 117, w - 16, 3, fill=NAVY, radius=0)
+    for (label, target), (x, w) in zip(PERSONAS, RAIL_GEOM):
+        on = target == active_page
+        button(x, 86, w, 30, label,
+               color=WHITE if on else NAVY, size=10,
+               fill=NAVY if on else WHITE, border=NAVY if on else LINE,
+               link_to=None if on else target)
+        if on:
+            rect(x + 8, 117, w - 16, 3, fill=NAVY, radius=0)
+    # Support pages hang off the right of the same row, so every page in the
+    # report is one click away from every other page.
+    sx = W - MARGIN
+    for label, target in reversed(SUPPORT_LINKS):
+        sw = int(text_width(label, pt_to_px(9), True) * 1.12) + 30
+        sx -= sw
+        on = target == active_page
+        button(sx, 88, sw, 26, label, color=NAVY, size=9, bold=on,
+               fill=PILL_BG if on else WHITE, border=LINE,
+               link_to=None if on else target)
+        sx -= 8
 
 
 INTRO_Y = HEADER_H + 16          # 140
@@ -475,7 +551,8 @@ def report_cards(cards, top=None):
             measure_card(x + pad, cy, cw - pad * 2 - 150, updated_m, size=9,
                          color=MUTED, align="left", sample=S_UPDATED)
             button(x + cw - pad - 132, cy + (upd_h - 32) // 2, 132, 32,
-                   "Open  →", color=NAVY, size=10)
+                   "Open  →", color=NAVY, size=10,
+                   link_to=report_link(title))
     return y0 + ch
 
 
@@ -618,10 +695,137 @@ def kv_panel(x, y, w, h, heading, sub, rows, label_w=160, size=10, color=INK):
 
 
 # =============================================================================
+# PAGE 0 - HOME
+# -----------------------------------------------------------------------------
+# Romil, 28 Aug 2026: "on the actual page itself, I want the whole navigation to
+# live" / "it looks like one page landing ... it gives me all the options of
+# whatever I want to do next". Collapsible persona grouping in the app's left
+# pane is impossible while all pages sit in one report, and Nhung ruled out one
+# app per persona ("that's going to be a lot of maintenance"). So the grouping
+# happens HERE, on the page: four audience columns, every row clickable.
+# =============================================================================
+AUDIENCES = [
+    ("Executive", P_EXEC, "Monthly corporate reporting, summary level",
+     [("Inspections", BLUE, "Completed inspections against the Service Plan target"),
+      ("Incidents", RED, "Reported incidents, dangerous occurrences, injuries"),
+      ("Notice of Work", GREEN, "Permits issued - new, amended, administrative")]),
+    ("Compliance & Enforcement", P_COMP, "Field and planning detail, incl. GIS",
+     [("Inspections", BLUE, "By type, region and inspector; sites not yet visited"),
+      ("Incidents", RED, "Where injuries and dangerous occurrences concentrate"),
+      ("Inspection planning map", PURPLE, "Which sites to visit next, by risk and last visit")]),
+    ("Permitting & Titles", P_PERM, "Permitting, turnaround and Mineral Titles",
+     [("Notice of Work", GREEN, "Permits issued by type, amendments separated"),
+      ("Permit turnaround", BLUE, "Application to decision, and where the backlog sits"),
+      ("Mineral Titles extract", PURPLE, "Active titles, parcels and authorisations")]),
+    ("Audit & Analysis", P_AUDIT, "All three reports, with lineage and export",
+     [("Inspections", BLUE, "Counts by type, region and period, with export"),
+      ("Incidents", RED, "Incidents and outcomes by period"),
+      ("Notice of Work", GREEN, "Permits issued by type and period"),
+      ("Dictionary & lineage", PURPLE, "Where each measure comes from, and who validated it")]),
+]
+
+HELP_TILES = [
+    ("How to read these reports", "Definitions, trust badges and sources", P_DEFS),
+    ("Counting rules", "Fiscal calendar, and what each figure counts", P_RULES),
+    ("Request a change", "Raise a data or definition issue", P_CHANGE),
+    ("Access & data states", "What you see with no access, or stale data", P_STATES),
+]
+
+start_page(P_HOME, "Home")
+chrome(P_HOME)
+hy = intro_tile(
+    "Mines Data Platform \u2014 start here",
+    "Pick the view for your work, or go straight to a report. Every view has the "
+    "same shape, so nothing has to be relearned when you move between them.")
+
+hy += 14
+_h = text(MARGIN, hy, 210, [("Choose your view", 12, INK, True)])
+text(MARGIN + 210, hy, 700,
+     [("Four audiences. Same layout, different content.", 9, MUTED, False)],
+     lines=1)
+hy += _h + 8
+
+# Bottom band is anchored to the footnote; the audience columns take whatever
+# is left, so the page fills exactly once and never guesses.
+BAND_H = 196
+BAND_Y = (H - 44 - 12) - BAND_H
+A_GAP = 24
+A_W = (CONTENT_W - A_GAP * 3) // 4
+A_H = (BAND_Y - 18) - hy
+n_rows = max(len(r) for _, _, _, r in AUDIENCES)
+
+for i, (a_name, a_target, a_who, a_reports) in enumerate(AUDIENCES):
+    ax = MARGIN + i * (A_W + A_GAP)
+    rect(ax, hy, A_W, A_H, fill=WHITE, border=LINE)
+    with region(ax, hy, A_W, A_H, f"audience {a_name!r}"):
+        cy = hy + 18
+        cy += text(ax + 20, cy, A_W - 40, [(a_name, 13, NAVY, True)], lines=1) + 2
+        cy += text(ax + 20, cy, A_W - 40, [(a_who, 9, MUTED, False)], lines=1) + 10
+        rect(ax + 20, cy, A_W - 40, 1, fill=LINE, radius=0)
+        cy += 12
+        btn_y = hy + A_H - 18 - 36
+        avail = (btn_y - 14) - cy
+        pitch = min(92, max(56, avail // len(a_reports)))
+        for r_label, r_chip, r_sub in a_reports:
+            rect(ax + 20, cy + 10, 12, 12, fill=r_chip, radius=2)
+            button(ax + 38, cy, A_W - 58, 30, r_label + "  \u2192", color=INK,
+                   size=10, bold=False, align="left",
+                   link_to=report_link(r_label, a_target))
+            text(ax + 38, cy + 28, A_W - 58, [(r_sub, 9, MUTED, False)], lines=1)
+            cy += pitch
+        button(ax + 20, btn_y, A_W - 40, 36, "Open this view  \u2192", color=WHITE,
+               size=10, fill=NAVY, border=NAVY, link_to=a_target)
+
+# --- help + contacts band ----------------------------------------------------
+CONTACT_W = 460
+HELP_W = CONTENT_W - CONTACT_W - A_GAP
+
+rect(MARGIN, BAND_Y, HELP_W, BAND_H, fill=WHITE, border=LINE)
+with region(MARGIN, BAND_Y, HELP_W, BAND_H, "help band"):
+    ty = BAND_Y + 14
+    ty += text(MARGIN + 24, ty, 620,
+               [("Help, definitions and change requests", 12, INK, True)])
+    ty += text(MARGIN + 24, ty, 900,
+               [("The same four pages sit on the top bar of every screen.",
+                 9, MUTED, False)], lines=1) + 4
+    t_gap = 18
+    t_w = (HELP_W - 48 - t_gap * 3) // 4
+    t_h = (BAND_Y + BAND_H - 14) - ty
+    for j, (t_label, t_sub, t_target) in enumerate(HELP_TILES):
+        tx = MARGIN + 24 + j * (t_w + t_gap)
+        rect(tx, ty, t_w, t_h, fill=BODY, border=LINE)
+        with region(tx, ty, t_w, t_h, f"help tile {t_label!r}"):
+            rect(tx + 16, ty + 14, 12, 12, fill=NAVY, radius=2)
+            text(tx + 16, ty + 28, t_w - 32, [(t_label, 10, INK, True)], lines=1)
+            text(tx + 16, ty + 52, t_w - 32, [(t_sub, 9, MUTED, False)], lines=1)
+        hit_target(tx, ty, t_w, t_h, t_target)
+
+rect(MARGIN + HELP_W + A_GAP, BAND_Y, CONTACT_W, BAND_H, fill=WHITE, border=LINE)
+with region(MARGIN + HELP_W + A_GAP, BAND_Y, CONTACT_W, BAND_H, "contacts band"):
+    kx = MARGIN + HELP_W + A_GAP
+    ky = BAND_Y + 14
+    ky += text(kx + 24, ky, CONTACT_W - 48, [("Who to ask", 12, INK, True)])
+    ky += text(kx + 24, ky, CONTACT_W - 48,
+               [("Named owners, not a shared inbox.", 9, MUTED, False)],
+               lines=1) + 4
+    for initials, name, sub in CONTACTS_STD:
+        oval(kx + 24, ky + 2, 30, 30, NAVY)
+        text(kx + 24, vcy(ky + 2, 30), 30, [(initials, 9, WHITE, True)],
+             align="center")
+        text(kx + 66, ky, CONTACT_W - 90, [(name, 10, INK, True)], lines=1)
+        text(kx + 66, ky + 24, CONTACT_W - 90, [(sub, 9, NAVY, False)], lines=1)
+        ky += 52
+
+footnote("Every tile on this page is a link. What each audience actually sees is "
+         "set under Manage audiences on the app \u2014 this page is the map; the "
+         "audience decides which parts of it open.")
+counts["Home"] = finish_page()
+
+# =============================================================================
 # PAGES 1-4 - the persona pages
 # =============================================================================
 persona_page(
-    P_EXEC, "Start here — Executive", "Start here — Executive view",
+    P_EXEC, "Executive", "Executive view",
     "You are viewing the Executive audience of the Mines Data Platform app. It contains "
     "the three monthly corporate reports at summary level. Operational detail sits under "
     "the Compliance & Enforcement and Permitting & Titles tabs.",
@@ -643,7 +847,7 @@ persona_page(
     "Manage audiences. Executive users never see the operational detail pages.")
 
 persona_page(
-    P_COMP, "Start here — Compliance & Enforcement", "Start here — Compliance & Enforcement",
+    P_COMP, "Compliance & Enforcement", "Compliance & Enforcement view",
     "You are viewing the Compliance & Enforcement audience, which also serves the GIS "
     "team. It adds inspection-planning and mine-site lookup content to the corporate "
     "inspection and incident reports. Notice of Work sits under Permitting & Titles.",
@@ -666,7 +870,7 @@ persona_page(
     "here is inspection planning, and they consume curated data through APIs.")
 
 persona_page(
-    P_PERM, "Start here — Permitting & Titles", "Start here — Permitting & Titles",
+    P_PERM, "Permitting & Titles", "Permitting & Titles view",
     "You are viewing the Permitting & Titles audience: Notice of Work permitting, "
     "turnaround performance, and Mineral Titles. Inspection and incident reporting sits "
     "under the Compliance & Enforcement tab.",
@@ -690,7 +894,7 @@ persona_page(
     "include them as a separate series — a definition worth stating on the landing page.")
 
 persona_page(
-    P_AUDIT, "Start here — Audit & Analysis", "Start here — Audit & Analysis",
+    P_AUDIT, "Audit & Analysis", "Audit & Analysis view",
     "You are viewing the Audit & Analysis audience: all three corporate reports, plus "
     "saved time-window presets, exports with context, and the definition and lineage "
     "panel. Every figure here can be traced to source without writing a query.",
@@ -718,7 +922,7 @@ persona_page(
 # PAGE 5 - How to read these reports
 # =============================================================================
 start_page(P_DEFS, "How to read these reports")
-chrome("")
+chrome(P_DEFS)
 y = intro_tile("How to read these reports",
                "One page for every definition, so meanings are not scattered across "
                "reports. Each figure states what it counts, where it comes from, when it "
@@ -783,7 +987,7 @@ counts["How to read"] = finish_page()
 # never be ambiguous. Full width fits the longest string the model returns.
 # =============================================================================
 start_page(P_RULES, "Counting rules")
-chrome("")
+chrome(P_RULES)
 y = intro_tile("Counting rules and the fiscal calendar",
                "The date logic behind every headline figure. Read with How to read "
                "these reports, which carries the trust badges and the anatomy of a "
@@ -803,7 +1007,7 @@ counts["Counting rules"] = finish_page()
 # PAGE 6 - Request a change
 # =============================================================================
 start_page(P_CHANGE, "Request a change")
-chrome("")
+chrome(P_CHANGE)
 y = intro_tile("Request a change",
                "Something look wrong, missing, or defined differently from how your team "
                "uses it? Raise it here. Requests are logged against the report and the "
@@ -895,7 +1099,7 @@ counts["Request a change"] = finish_page()
 # PAGE 7 - Access and data states
 # =============================================================================
 start_page(P_STATES, "Access & data states")
-chrome("")
+chrome(P_STATES)
 y = intro_tile("Access & data states",
                "The two screens users hit that are not the happy path. Both are designed "
                "rather than left to the platform default, because both are moments where "
@@ -932,7 +1136,7 @@ S2_H = (H - 44 - 12) - y
 rect(MARGIN, y, CONTENT_W, S2_H, fill=WHITE, border=LINE)
 rect(MARGIN, y, 5, S2_H, fill=ALERT, radius=0)
 sy = y + 16
-sy += text(MARGIN + 28, sy, 700, [("Start here — Executive view", 14, NAVY, True)])
+sy += text(MARGIN + 28, sy, 700, [("Executive view", 14, NAVY, True)])
 STALE_PILL_W = card_min_width(S_ASAT, 9, pill=False, bold=True) + 28
 pill_card(W - MARGIN - 24 - STALE_PILL_W, y + 16, STALE_PILL_W, "Hub Data As At",
           size=9, color=ALERT, fill="#FDF3F0", border=ALERT, sample=S_ASAT)
@@ -958,9 +1162,10 @@ footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for s
 counts["Access & data states"] = finish_page()
 
 # --- pages.json --------------------------------------------------------------
-order = [P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES, P_CHANGE, P_STATES]
+order = [P_HOME, P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES, P_CHANGE,
+         P_STATES]
 with open(os.path.join(PAGES_DIR, "pages.json"), "w", encoding="utf-8") as f:
-    json.dump({"$schema": PM, "pageOrder": order, "activePageName": P_EXEC}, f, indent=2)
+    json.dump({"$schema": PM, "pageOrder": order, "activePageName": P_HOME}, f, indent=2)
 
 print(f"canvas {W}x{H}   navigation links: {'ON' if NAV else 'OFF'}")
 for k, v in counts.items():

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000023",
   "position": {
-    "x": 54,
-    "y": 735,
+    "x": 56,
+    "y": 189,
     "z": 3500,
     "height": 33,
-    "width": 136,
+    "width": 1240,
     "tabOrder": 3500
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "SOURCE",
+                    "value": "One page for every definition, so meanings are not scattered across reports. Each figure states what it counts, where it comes from, when it last refreshed and who validated it. Report a disagreement through Request a change.",
                     "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#8A8886",
-                      "fontWeight": "bold"
+                      "fontSize": "10px",
+                      "color": "#252423"
                     }
                   }
                 ],

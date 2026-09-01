@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000037",
   "position": {
-    "x": 54,
-    "y": 646,
+    "x": 708,
+    "y": 349,
     "z": 5500,
     "height": 33,
-    "width": 620,
+    "width": 388,
     "tabOrder": 5500
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "What changed this month",
+                    "value": "Permit turnaround",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "13px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

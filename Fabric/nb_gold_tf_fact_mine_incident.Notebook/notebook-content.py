@@ -42,12 +42,27 @@
 #   responsible_inspector_party_guid -> dim_party (Responsible_Inspector_SK)
 #   determination_inspector_party_guid -> dim_party (Determination_Inspector_SK)
 #
-# DO flag (Dangerous Occurrence): incident is a DO if any row in
-#   mine_incident_category_xref maps to a category where
-#   is_dangerous_occurrence = TRUE (verify column name once Silver lands).
+#   effective_timestamp (date part)  -> dim_date  (Effective_Date_SK)   [added 2026-09-03]
 #
-# ⚠️  BLOCKED until GRANT SELECT applied on public.mine_incident in PostgreSQL.
-#     Once unblocked: re-run Bronze + Silver pipeline, then this notebook runs.
+# DO flag (Dangerous Occurrence): determination_type_code = 'DO'. Matches the
+#   Metabase corporate report (questions 3287 / 3289). No category join needed.
+#
+# EFFECTIVE TIMESTAMP (added 2026-09-03) — the rule the corporate-report KPI cards
+#   (Metabase 3284 / 3285 / 3288, R. Gulati) count on:
+#     if reported_timestamp > incident_timestamp + 24h  -> use incident_timestamp
+#     else                                              -> use reported_timestamp
+#   i.e. a report logged more than a day late is distrusted and the incident time
+#   is used instead. Materialised here because the semantic model is Direct Lake
+#   (no DAX calculated columns). The two corporate CHARTS still use reported_timestamp,
+#   so Reported_Date_SK is kept alongside — the measure picks which key to use.
+#
+# Incident categories are many-to-many -> see nb_gold_tf_bridge_incident_category
+#   and nb_gold_tf_dim_incident_category (not joined here).
+#
+# KNOWN DIVERGENCES vs Metabase (documented, deliberate):
+#   * WHERE deleted_ind = 0 — Metabase applies no deleted filter (38 rows at source).
+#   * Source carries a future-dated incident (reported 2040-08-22). It is NOT filtered
+#     here; bound the date axis in the report, and confirm with R. Gulati.
 # ════════════════════════════════════════════════════════════════════════════
 from pyspark.sql import functions as F  # noqa: F401
 from notebookutils import mssparkutils
@@ -129,10 +144,24 @@ print("dropped (if existed):", TARGET_TABLE)
 #                  determination_inspector_party_guid
 #   DO flag:       determination_type_code = 'DO' (values: 'DO', 'NDO')
 #                  No category join needed — DO is determined directly.
+#   Effective ts:  derived in src_mine_incident_adj (see cell below) — never NULL,
+#                  both source timestamps are NOT NULL across all rows (verified 2026-09-01).
 #
 # Confirmed Gold column names (from Spark schema):
 #   SCD2 flag:  dl_iscurrent = 1  (dim_mine + dim_party)
 #   dim_date:   Date_SK (surrogate key), full_date (join column)
+
+# Effective timestamp — computed once, then the main SELECT reads it like any other column.
+spark.sql("""
+    SELECT
+        *,
+        CASE
+            WHEN reported_timestamp > incident_timestamp + INTERVAL 24 HOURS
+            THEN incident_timestamp
+            ELSE reported_timestamp
+        END AS effective_timestamp
+    FROM src_mine_incident
+""").createOrReplaceTempView("src_mine_incident_adj")
 
 df = spark.sql("""
     SELECT
@@ -144,6 +173,7 @@ df = spark.sql("""
         dm.Mine_SK,
         rdd.Date_SK                   AS Reported_Date_SK,
         idd.Date_SK                   AS Incident_Date_SK,
+        edd.Date_SK                   AS Effective_Date_SK,
         dp_rpt.Party_SK               AS Reported_To_Inspector_SK,
         dp_res.Party_SK               AS Responsible_Inspector_SK,
         dp_det.Party_SK               AS Determination_Inspector_SK,
@@ -153,6 +183,10 @@ df = spark.sql("""
         CAST(i.reported_timestamp AS DATE) AS reported_date,
         i.incident_timestamp,
         CAST(i.incident_timestamp AS DATE) AS incident_date,
+        i.effective_timestamp,
+        CAST(i.effective_timestamp AS DATE) AS effective_date,
+        CASE WHEN i.reported_timestamp > i.incident_timestamp + INTERVAL 24 HOURS
+             THEN 1 ELSE 0 END          AS is_late_report,
 
         -- Incident facts
         i.number_of_fatalities,
@@ -169,7 +203,7 @@ df = spark.sql("""
         CASE WHEN i.determination_type_code = 'DO' THEN 1 ELSE 0 END
             AS is_dangerous_occurrence
 
-    FROM src_mine_incident i
+    FROM src_mine_incident_adj i
 
     -- Mine surrogate key (SCD2 current row)
     LEFT JOIN gold_dim_mine dm
@@ -184,6 +218,10 @@ df = spark.sql("""
     LEFT JOIN gold_dim_date idd
         ON idd.full_date = CAST(i.incident_timestamp AS DATE)
 
+    -- Date keys: effective date (corporate-report KPI rule)
+    LEFT JOIN gold_dim_date edd
+        ON edd.full_date = CAST(i.effective_timestamp AS DATE)
+
     -- Party roles (3 FKs)
     LEFT JOIN gold_dim_party dp_rpt
         ON i.reported_to_inspector_party_guid = dp_rpt.party_guid
@@ -197,7 +235,7 @@ df = spark.sql("""
         ON i.determination_inspector_party_guid = dp_det.party_guid
         AND dp_det.dl_iscurrent = 1
 
-    -- Filter: exclude soft-deleted incidents
+    -- Filter: exclude soft-deleted incidents (38 rows at source; Metabase does not filter these)
     WHERE i.deleted_ind = 0
 """)
 print("built dataframe:", df.count(), "rows,", len(df.columns), "cols")
@@ -217,6 +255,27 @@ print("built dataframe:", df.count(), "rows,", len(df.columns), "cols")
 (df.write.format("delta").mode("overwrite")
    .option("overwriteSchema", "true").saveAsTable(TARGET_TABLE))
 print("wrote", df.count(), "rows to", TARGET_TABLE)
+
+# ── Schema guard (added 2026-09-03) ─────────────────────────────────────────
+# build_fact's MERGE (whenMatchedUpdateAll / whenNotMatchedInsertAll) does NOT
+# evolve the target schema: any stg column missing from gold.fact_mine_incident
+# would be silently dropped. So, when the gold table already exists, add any
+# missing stg columns to it here (typed from the stg schema) before the
+# orchestrator merges. First-ever load needs nothing — build_fact creates the
+# table from stg.
+GOLD_TABLE = f"gold.{OBJECT_NAME}"
+if spark.catalog.tableExists(GOLD_TABLE):
+    gold_cols = {f.name.lower() for f in spark.table(GOLD_TABLE).schema}
+    missing   = [f for f in spark.table(TARGET_TABLE).schema if f.name.lower() not in gold_cols]
+    if missing:
+        ddl = ", ".join(f"`{f.name}` {f.dataType.simpleString()}" for f in missing)
+        spark.sql(f"ALTER TABLE {GOLD_TABLE} ADD COLUMNS ({ddl})")
+        print(f"schema guard: added {len(missing)} column(s) to {GOLD_TABLE}: "
+              + ", ".join(f.name for f in missing))
+    else:
+        print(f"schema guard: {GOLD_TABLE} already has every stg column")
+else:
+    print(f"schema guard: {GOLD_TABLE} does not exist yet — build_fact will create it")
 
 # METADATA ********************
 

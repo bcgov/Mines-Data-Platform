@@ -1,0 +1,69 @@
+table bridge_incident_category
+	isHidden
+	lineageTag: 88de9eb0-5b57-400c-8a19-602cf36aa08f
+	sourceLineageTag: [gold].[bridge_incident_category]
+
+	column mine_incident_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: int
+		lineageTag: 68a17f28-4bfe-481c-a0f9-e969d06fb70f
+		sourceLineageTag: mine_incident_id
+		summarizeBy: none
+		sourceColumn: mine_incident_id
+
+		annotation SummarizationSetBy = Automatic
+	column mine_incident_category_code
+		dataType: string
+		isHidden
+		displayFolder: Keys
+		sourceProviderType: varchar(8000)
+		lineageTag: f7fac0ed-f901-4364-8451-b52bdcd527c0
+		sourceLineageTag: mine_incident_category_code
+		summarizeBy: none
+		sourceColumn: mine_incident_category_code
+
+		annotation SummarizationSetBy = Automatic
+	column Incident_Category_SK
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: bigint
+		lineageTag: 0e49684e-214f-4ac1-a444-fa9b119b1324
+		sourceLineageTag: Incident_Category_SK
+		summarizeBy: none
+		sourceColumn: Incident_Category_SK
+
+		annotation SummarizationSetBy = Automatic
+	column category_group
+		dataType: string
+		isHidden
+		sourceProviderType: varchar(8000)
+		lineageTag: ac969019-ba5c-401f-bd71-bc524b22d6e7
+		sourceLineageTag: category_group
+		summarizeBy: none
+		sourceColumn: category_group
+
+		annotation SummarizationSetBy = Automatic
+	column is_uncategorised
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: ff8cbb8d-3cc0-4d39-a783-bd4c788ed4ec
+		sourceLineageTag: is_uncategorised
+		summarizeBy: none
+		sourceColumn: is_uncategorised
+
+		annotation SummarizationSetBy = Automatic
+
+	partition bridge_incident_category = entity
+		mode: directLake
+		source
+			entityName: bridge_incident_category
+			schemaName: gold
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,115 @@
+table dim_incident_category
+	lineageTag: 758d4822-a3e2-4489-8932-fa23bde16a2a
+	sourceLineageTag: [gold].[dim_incident_category]
+
+	column Incident_Category_SK
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: bigint
+		lineageTag: dfa1908a-c6ad-48bd-a392-415288613f36
+		sourceLineageTag: Incident_Category_SK
+		summarizeBy: none
+		sourceColumn: Incident_Category_SK
+
+		annotation SummarizationSetBy = Automatic
+	column mine_incident_category_code
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: f9aa931a-3d56-4b99-96ce-0b02d40f7ca3
+		sourceLineageTag: mine_incident_category_code
+		summarizeBy: none
+		sourceColumn: mine_incident_category_code
+
+		annotation SummarizationSetBy = Automatic
+	column category_description
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 09586449-b366-40c4-9ef7-3076970da33e
+		sourceLineageTag: category_description
+		summarizeBy: none
+		sourceColumn: category_description
+
+		annotation SummarizationSetBy = Automatic
+	column parent_category_code
+		dataType: string
+		isHidden
+		displayFolder: Keys
+		sourceProviderType: varchar(8000)
+		lineageTag: eb52dd2b-d927-490c-9caf-eae6fda48a8c
+		sourceLineageTag: parent_category_code
+		summarizeBy: none
+		sourceColumn: parent_category_code
+
+		annotation SummarizationSetBy = Automatic
+	column parent_category_description
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 175b76ac-bfd5-44ee-acdf-57f19e63bed7
+		sourceLineageTag: parent_category_description
+		summarizeBy: none
+		sourceColumn: parent_category_description
+
+		annotation SummarizationSetBy = Automatic
+	column category_group
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 78c4091a-df99-4105-8daf-1838bd1f945b
+		sourceLineageTag: category_group
+		summarizeBy: none
+		sourceColumn: category_group
+
+		annotation SummarizationSetBy = Automatic
+	column is_top_level
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: d2fe0258-00c0-4ded-9d99-88cc70547242
+		sourceLineageTag: is_top_level
+		summarizeBy: none
+		sourceColumn: is_top_level
+
+		annotation SummarizationSetBy = Automatic
+	column display_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: int
+		lineageTag: bab1f944-a992-42fc-92e5-e511aa50cde6
+		sourceLineageTag: display_order
+		summarizeBy: none
+		sourceColumn: display_order
+
+		annotation SummarizationSetBy = Automatic
+	column is_uncategorised_member
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: b9965af8-e1e7-4bf1-8dd8-f9d629139544
+		sourceLineageTag: is_uncategorised_member
+		summarizeBy: none
+		sourceColumn: is_uncategorised_member
+
+		annotation SummarizationSetBy = Automatic
+	column dl_iscurrent
+		dataType: boolean
+		isHidden
+		displayFolder: Keys
+		sourceProviderType: bit
+		lineageTag: c34524ec-9537-4501-ac27-0778878baaf7
+		sourceLineageTag: dl_iscurrent
+		summarizeBy: none
+		sourceColumn: dl_iscurrent
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_incident_category = entity
+		mode: directLake
+		source
+			entityName: dim_incident_category
+			schemaName: gold
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table

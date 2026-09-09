@@ -1,0 +1,21 @@
+relationship 8c4e9053-ffdf-466d-aa03-cbd513da4e55
+	fromColumn: fact_mine_incident.Mine_SK
+	toColumn: dim_mine.Mine_SK
+
+relationship fact_mine_incident_Reported_Date_SK_dim_date_Date_SK
+	fromColumn: fact_mine_incident.Reported_Date_SK
+	toColumn: dim_date.Date_SK
+
+relationship fact_mine_incident_Effective_Date_SK_dim_date_Date_SK
+	isActive: false
+	fromColumn: fact_mine_incident.Effective_Date_SK
+	toColumn: dim_date.Date_SK
+
+relationship bridge_incident_category_mine_incident_id_fact_mine_incident_mine_incident_id
+	crossFilteringBehavior: bothDirections
+	fromColumn: bridge_incident_category.mine_incident_id
+	toColumn: fact_mine_incident.mine_incident_id
+
+relationship bridge_incident_category_Incident_Category_SK_dim_incident_category_Incident_Category_SK
+	fromColumn: bridge_incident_category.Incident_Category_SK
+	toColumn: dim_incident_category.Incident_Category_SK

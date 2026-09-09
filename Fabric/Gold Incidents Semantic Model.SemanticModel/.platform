@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Gold Incidents Semantic Model"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "afa0c8e9-45ff-43c2-b4bc-2f074a65f645"
+  }
+}

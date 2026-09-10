@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000028",
   "position": {
-    "x": 100,
-    "y": 399,
+    "x": 1520,
+    "y": 419,
     "z": 4000,
     "height": 33,
-    "width": 600,
+    "width": 346,
     "tabOrder": 4000
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "A ticket is raised",
+                    "value": "Prefer to ask a person first?",
                     "textStyle": {
                       "fontSize": "10px",
                       "color": "#252423",

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000060",
   "position": {
-    "x": 1489,
-    "y": 411,
+    "x": 1481,
+    "y": 493,
     "z": 9600,
     "height": 33,
-    "width": 373,
+    "width": 389,
     "tabOrder": 9600
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Inspections  \u2192",
+                    "value": "Incidents and outcomes by period",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

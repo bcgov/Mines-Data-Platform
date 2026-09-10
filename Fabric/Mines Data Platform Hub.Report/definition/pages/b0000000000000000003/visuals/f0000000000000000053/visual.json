@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000053",
   "position": {
-    "x": 1520,
-    "y": 687,
+    "x": 30,
+    "y": 1036,
     "z": 8300,
     "height": 33,
-    "width": 34,
+    "width": 1860,
     "tabOrder": 8300
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "RG",
+                    "value": "Notice of Work counts exclude administrative amendments in the headline measure, but include them as a separate series \u2014 a definition worth stating on the landing page.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "color": "#8A8886"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

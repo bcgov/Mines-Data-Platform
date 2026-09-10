@@ -2,47 +2,68 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000019",
   "position": {
-    "x": 1410,
-    "y": 84,
+    "x": 984,
+    "y": 314,
     "z": 2500,
-    "height": 33,
-    "width": 188,
+    "height": 82,
+    "width": 148,
     "tabOrder": 2500
   },
   "visual": {
-    "visualType": "textbox",
-    "objects": {
-      "general": [
-        {
-          "properties": {
-            "paragraphs": [
-              {
-                "textRuns": [
-                  {
-                    "value": "How to read these reports",
-                    "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_inspection"
                     }
-                  }
-                ],
-                "horizontalTextAlignment": "center"
-              }
-            ]
-          }
+                  },
+                  "Property": "Hub Badge Provisional"
+                }
+              },
+              "queryRef": "fact_inspection.Hub Badge Provisional",
+              "nativeQueryRef": "Hub Badge Provisional"
+            }
+          ]
         }
-      ]
+      }
     },
-    "drillFilterOtherVisuals": false,
-    "visualContainerObjects": {
-      "background": [
+    "objects": {
+      "label": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
                 }
               }
             },
@@ -51,15 +72,39 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E9F1F8'"
+                      "Value": "'#8A6100'"
                     }
                   }
                 }
               }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8A6100'"
+                    }
+                  }
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
             }
+          },
+          "selector": {
+            "id": "default"
           }
         }
-      ],
+      ]
+    },
+    "drillFilterOtherVisuals": false,
+    "visualContainerObjects": {
       "title": [
         {
           "properties": {

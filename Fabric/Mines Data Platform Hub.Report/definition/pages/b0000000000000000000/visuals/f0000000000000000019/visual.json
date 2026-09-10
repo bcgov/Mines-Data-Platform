@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000019",
   "position": {
-    "x": 1622,
-    "y": 84,
+    "x": 68,
+    "y": 401,
     "z": 2500,
     "height": 33,
-    "width": 111,
+    "width": 389,
     "tabOrder": 2500
   },
   "visual": {
@@ -19,14 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Counting rules",
+                    "value": "Completed inspections against the Service Plan target",
                     "textStyle": {
-                      "fontSize": "12px",
-                      "color": "#013366"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }
@@ -35,30 +35,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#FFFFFF'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000023",
   "position": {
-    "x": 240,
-    "y": 264,
+    "x": 68,
+    "y": 585,
     "z": 3500,
     "height": 33,
-    "width": 700,
+    "width": 389,
     "tabOrder": 3500
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Four audiences. Same layout, different content.",
+                    "value": "Permits issued - new, amended, administrative",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

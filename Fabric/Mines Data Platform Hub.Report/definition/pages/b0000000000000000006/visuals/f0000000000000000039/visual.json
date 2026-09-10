@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000039",
   "position": {
-    "x": 1520,
-    "y": 459,
+    "x": 674,
+    "y": 757,
     "z": 5700,
     "height": 33,
-    "width": 346,
+    "width": 586,
     "tabOrder": 5700
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Prefer to ask a person first?",
+                    "value": "Confirmation with a ticket reference, shown in place.",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#252423"
                     }
                   }
                 ],

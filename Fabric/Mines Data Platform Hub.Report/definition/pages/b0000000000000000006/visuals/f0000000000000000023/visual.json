@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000023",
   "position": {
-    "x": 54,
-    "y": 321,
+    "x": 1520,
+    "y": 273,
     "z": 3500,
     "height": 33,
-    "width": 26,
+    "width": 346,
     "tabOrder": 3500
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "1",
+                    "value": "Takes about a minute. You will get the ticket reference back on screen.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

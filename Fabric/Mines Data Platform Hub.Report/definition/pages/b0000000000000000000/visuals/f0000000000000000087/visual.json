@@ -3,10 +3,10 @@
   "name": "f0000000000000000087",
   "position": {
     "x": 1454,
-    "y": 912,
+    "y": 875,
     "z": 13500,
     "height": 33,
-    "width": 30,
+    "width": 412,
     "tabOrder": 13500
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "RG",
+                    "value": "Named owners, not a shared inbox.",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "color": "#605E5C"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

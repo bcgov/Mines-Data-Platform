@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000046",
   "position": {
-    "x": 54,
-    "y": 700,
+    "x": 1520,
+    "y": 730,
     "z": 7000,
     "height": 33,
-    "width": 760,
+    "width": 34,
     "tabOrder": 7000
   },
   "visual": {
@@ -19,14 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Curated commentary \u2014 one short paragraph per report",
+                    "value": "NN",
                     "textStyle": {
                       "fontSize": "9px",
-                      "color": "#605E5C"
+                      "color": "#FFFFFF",
+                      "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "left"
+                "horizontalTextAlignment": "center"
               }
             ]
           }

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002c",
   "position": {
-    "x": 100,
-    "y": 477,
+    "x": 1566,
+    "y": 482,
     "z": 4400,
     "height": 33,
-    "width": 600,
+    "width": 300,
     "tabOrder": 4400
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "The section owner reviews it",
+                    "value": "Rajneesh.1.Gulati@gov.bc.ca",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#013366"
                     }
                   }
                 ],

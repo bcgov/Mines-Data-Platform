@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004b",
   "position": {
-    "x": 68,
-    "y": 830,
+    "x": 1550,
+    "y": 781,
     "z": 7500,
     "height": 33,
-    "width": 154,
+    "width": 284,
     "tabOrder": 7500
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Administrative amendments",
+                    "value": "Definitions & data sources",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
+                      "fontSize": "13px",
+                      "color": "#013366",
                       "fontWeight": "bold"
                     }
                   }

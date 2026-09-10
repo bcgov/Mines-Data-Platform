@@ -3,7 +3,7 @@
   "name": "f0000000000000000065",
   "position": {
     "x": 1481,
-    "y": 523,
+    "y": 585,
     "z": 10100,
     "height": 33,
     "width": 389,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Incidents and outcomes by period",
+                    "value": "Permits issued by type and period",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

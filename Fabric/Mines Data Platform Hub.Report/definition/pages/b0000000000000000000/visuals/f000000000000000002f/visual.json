@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002f",
   "position": {
-    "x": 68,
-    "y": 533,
+    "x": 539,
+    "y": 401,
     "z": 4700,
     "height": 33,
     "width": 389,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Reported incidents, dangerous occurrences, injuries",
+                    "value": "By type, region and inspector; sites not yet visited",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#605E5C"

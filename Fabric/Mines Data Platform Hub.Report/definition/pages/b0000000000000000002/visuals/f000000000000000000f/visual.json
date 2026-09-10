@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000000f",
   "position": {
-    "x": 299,
-    "y": 84,
+    "x": 30,
+    "y": 221,
     "z": 1500,
     "height": 33,
-    "width": 216,
+    "width": 150,
     "tabOrder": 1500
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "Compliance & Enforcement",
+                    "value": "Your reports",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#FFFFFF",
+                      "fontSize": "12px",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }
@@ -36,30 +36,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

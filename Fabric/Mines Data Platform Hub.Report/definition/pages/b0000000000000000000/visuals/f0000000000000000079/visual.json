@@ -3,7 +3,7 @@
   "name": "f0000000000000000079",
   "position": {
     "x": 406,
-    "y": 940,
+    "y": 964,
     "z": 12100,
     "height": 33,
     "width": 286,
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Counting rules",
+                    "value": "Fiscal calendar, and what each figure counts",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000020",
   "position": {
-    "x": 1357,
-    "y": 154,
+    "x": 1088,
+    "y": 285,
     "z": 3200,
     "height": 82,
-    "width": 236,
+    "width": 148,
     "tabOrder": 3200
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_inspection"
                     }
                   },
-                  "Property": "Hub Next Refresh"
+                  "Property": "Hub Trust Permit Turnaround"
                 }
               },
-              "queryRef": "fact_inspection.Hub Next Refresh",
-              "nativeQueryRef": "Hub Next Refresh"
+              "queryRef": "fact_inspection.Hub Trust Permit Turnaround",
+              "nativeQueryRef": "Hub Trust Permit Turnaround"
             }
           ]
         }
@@ -63,7 +63,7 @@
             "horizontalAlignment": {
               "expr": {
                 "Literal": {
-                  "Value": "'right'"
+                  "Value": "'center'"
                 }
               }
             },
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#605E5C'"
+                      "Value": "'#8A6100'"
                     }
                   }
                 }
@@ -83,9 +83,16 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#605E5C'"
+                      "Value": "'#8A6100'"
                     }
                   }
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
                 }
               }
             }

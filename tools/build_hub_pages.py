@@ -28,6 +28,13 @@ ROOT = sys.argv[1]
 # --nav-test puts ONE navigating button in the whole report (the Home rail's
 # Executive chip), so a Fabric import either accepts the visualLink shape or
 # rejects it while only one visual is at stake.
+# 2026-09-10 UX call. Three "Home"s were showing at once — the app/report page
+# pane, the "Home (left nav)" page, and the rail's own Home chip — and Romil
+# read the whole thing as duplicate navigation ("what does all of these home
+# mean?"). Agreed on the call: HIDE the top rail, let the left page pane be the
+# navigation, and clean up once page-level buttons actually work. Pass --rail to
+# bring it back.
+SHOW_RAIL = "--rail" in sys.argv
 NAV_TEST = "--nav-test" in sys.argv
 NAV = "--no-nav" not in sys.argv
 LINK_REPORTS = "--no-report-links" not in sys.argv
@@ -463,7 +470,7 @@ def badge(x, y, measure, state, w=None):
 
 
 # --- shared page chrome ------------------------------------------------------
-HEADER_H = 124
+HEADER_H = 124 if SHOW_RAIL else 84
 
 
 def chrome(active_page, show_rail=True):
@@ -477,7 +484,7 @@ def chrome(active_page, show_rail=True):
     text(190, 18, 520, [("Mines Data Platform", 17, NAVY, True)])
     text(190, 50, 520, [("Org app  ·  Mining & Critical Minerals", 9, MUTED, False)])
     button(W - 148, 26, 118, 32, "Share", color=NAVY, size=10, border=LINE)
-    if not show_rail:
+    if not (show_rail and SHOW_RAIL):
         return
     # 2026-09-01: the audience strip is BACK, and this time every chip
     # navigates (Romil, 28 Aug: "on the actual page itself I want the whole
@@ -807,7 +814,7 @@ with region(MARGIN, BAND_Y, HELP_W, BAND_H, "help band"):
     ty += text(MARGIN + 24, ty, 620,
                [("Help, definitions and change requests", 12, INK, True)])
     ty += text(MARGIN + 24, ty, 900,
-               [("The same four pages sit on the top bar of every screen.",
+               [("Definitions, counting rules and change requests.",
                  9, MUTED, False)], lines=1) + 4
     t_gap = 18
     t_w = (HELP_W - 48 - t_gap * 3) // 4
@@ -837,117 +844,19 @@ with region(MARGIN + HELP_W + A_GAP, BAND_Y, CONTACT_W, BAND_H, "contacts band")
         text(kx + 66, ky + 24, CONTACT_W - 90, [(sub, 9, NAVY, False)], lines=1)
         ky += 52
 
-footnote("Every tile on this page is a link. What each audience actually sees is "
-         "set under Manage audiences on the app \u2014 this page is the map; the "
-         "audience decides which parts of it open.")
+footnote("Use the page list on the left to move between views. What each audience "
+         "actually sees is set under Manage audiences on the app \u2014 this page is "
+         "the map; the audience decides which parts of it open.")
 counts["Home"] = finish_page()
 
 # =============================================================================
-# PAGE 9 - HOME, LEFT-NAVIGATION VARIANT
+# PAGE 9 - HOME, LEFT-NAVIGATION VARIANT - REMOVED 2026-09-10
 # -----------------------------------------------------------------------------
-# Same content as Home, different frame. Romil's own Option C mockup put the
-# in-page navigation down the LEFT ("this is kind of on the left side right now
-# ... this itself is a complete page"); the top rail came out of the tab
-# conversation on the same call. Both exist so he can choose rather than be
-# told, and so the answer to "did you follow my design?" is a side by side.
+# Built 1 Sep so Romil could choose between a top rail and his Option C left
+# pane. Superseded on 10 Sep: with the rail hidden, the report's own page pane
+# IS the left navigation, so a second left pane drawn on the canvas would be the
+# duplication Romil objected to. The page folder is in _to_delete.
 # =============================================================================
-LNAV_W = 268
-LX = MARGIN + LNAV_W + 20
-LCW = W - MARGIN - LX
-
-start_page(P_HOME_L, "Home (left nav)")
-chrome(P_HOME_L, show_rail=False)
-
-NAV_Y = HEADER_H + 16
-NAV_H = (H - 44 - 12) - NAV_Y
-rect(MARGIN, NAV_Y, LNAV_W, NAV_H, fill=WHITE, border=LINE)
-with region(MARGIN, NAV_Y, LNAV_W, NAV_H, "left nav"):
-    ny = NAV_Y + 16
-    ny += text(MARGIN + 20, ny, LNAV_W - 40, [("GO TO", 8, FAINT, True)],
-               lines=1) + 4
-    for lbl, tgt in PERSONAS:
-        on = tgt == P_HOME_L or (lbl == "Home" and tgt == P_HOME)
-        button(MARGIN + 16, ny, LNAV_W - 32, 34, lbl,
-               color=WHITE if on else NAVY, size=10, align="left",
-               fill=NAVY if on else WHITE, border=NAVY if on else LINE,
-               link_to=None if on else tgt)
-        ny += 40
-    ny += 6
-    rect(MARGIN + 20, ny, LNAV_W - 40, 1, fill=LINE, radius=0)
-    ny += 14
-    ny += text(MARGIN + 20, ny, LNAV_W - 40, [("HELP", 8, FAINT, True)],
-               lines=1) + 4
-    for lbl, tgt in SUPPORT_LINKS + [("Access & data states", P_STATES)]:
-        button(MARGIN + 16, ny, LNAV_W - 32, 30, lbl, color=NAVY, size=9,
-               bold=False, align="left", fill=WHITE, border=LINE, link_to=tgt)
-        ny += 36
-
-# intro tile, sized to the narrower content column
-ltitle = "Mines Data Platform \u2014 start here"
-lbody = ("Pick the view for your work, or go straight to a report. Every view "
-         "has the same shape, so nothing has to be relearned.")
-lth = tb_height(ltitle, 700, 17, True)
-lbh = tb_height(lbody, LCW - 52 - PILL_W - 40, 10)
-ltile_h = 14 + max(lth + 2 + lbh, card_height(10)) + 14
-rect(LX, NAV_Y, LCW, ltile_h, fill=WHITE, border=LINE)
-with region(LX, NAV_Y, LCW, ltile_h, "intro tile (left nav)"):
-    text(LX + 26, NAV_Y + 14, 700, [(ltitle, 17, NAVY, True)])
-    text(LX + 26, NAV_Y + 14 + lth + 2, LCW - 52 - PILL_W - 40,
-         [(lbody, 10, INK, False)])
-    lpx = LX + LCW - 26 - PILL_W
-    pill_card(lpx, NAV_Y + 14, PILL_W, "Hub Data As At", size=10, color=NAVY,
-              fill=PILL_BG, border=PILL_BG, sample=S_ASAT)
-
-ly = NAV_Y + ltile_h + 14
-_lh = text(LX, ly, 210, [("Choose your view", 12, INK, True)])
-ly += _lh + 8
-
-LBAND_H = 196
-LBAND_Y = (H - 44 - 12) - LBAND_H
-LA_GAP = 20
-LA_W = (LCW - LA_GAP * 3) // 4
-LA_H = (LBAND_Y - 18) - ly
-
-for i, (a_name, a_target, a_who, a_reports) in enumerate(AUDIENCES):
-    ax = LX + i * (LA_W + LA_GAP)
-    rect(ax, ly, LA_W, LA_H, fill=WHITE, border=LINE)
-    with region(ax, ly, LA_W, LA_H, f"L audience {a_name!r}"):
-        cy = ly + 16
-        cy += text(ax + 16, cy, LA_W - 32, [(a_name, 12, NAVY, True)], lines=1) + 2
-        cy += text(ax + 16, cy, LA_W - 32, [(a_who, 9, MUTED, False)], lines=1) + 8
-        rect(ax + 16, cy, LA_W - 32, 1, fill=LINE, radius=0)
-        cy += 12
-        lbtn_y = ly + LA_H - 16 - 34
-        lavail = (lbtn_y - 12) - cy
-        lpitch = min(92, max(52, lavail // len(a_reports)))
-        for r_label, r_chip, r_sub in a_reports:
-            rect(ax + 16, cy + 9, 10, 10, fill=r_chip, radius=2)
-            button(ax + 32, cy, LA_W - 48, 28, r_label + "  \u2192", color=INK,
-                   size=10, bold=False, align="left",
-                   link_to=report_link(r_label, a_target))
-            text(ax + 32, cy + 26, LA_W - 48, [(r_sub, 9, MUTED, False)], lines=1)
-            cy += lpitch
-        button(ax + 16, lbtn_y, LA_W - 32, 34, "Open this view  \u2192",
-               color=WHITE, size=10, fill=NAVY, border=NAVY, link_to=a_target)
-
-rect(LX, LBAND_Y, LCW, LBAND_H, fill=WHITE, border=LINE)
-with region(LX, LBAND_Y, LCW, LBAND_H, "L band"):
-    by = LBAND_Y + 14
-    by += text(LX + 24, by, 620, [("Who to ask", 12, INK, True)])
-    by += text(LX + 24, by, 900,
-               [("Named owners, not a shared inbox. Help and definitions are "
-                 "in the left pane.", 9, MUTED, False)], lines=1) + 8
-    for j, (initials, name, sub) in enumerate(CONTACTS_STD):
-        cx = LX + 24 + j * 420
-        oval(cx, by + 2, 30, 30, NAVY)
-        text(cx, vcy(by + 2, 30), 30, [(initials, 9, WHITE, True)], align="center")
-        text(cx + 42, by, 360, [(name, 10, INK, True)], lines=1)
-        text(cx + 42, by + 24, 360, [(sub, 9, NAVY, False)], lines=1)
-
-footnote("Draft variant: same content as Home, navigation moved to the left as "
-         "in the Option C mockup. Home keeps the top rail \u2014 pick one and the "
-         "other goes.")
-counts["Home (left nav)"] = finish_page()
 
 # =============================================================================
 # PAGES 1-4 - the persona pages
@@ -971,8 +880,8 @@ persona_page(
      ("Incidents", RED, "Hub Changed Incidents"),
      ("Notice of Work", GREEN, "Hub Changed NoW")],
     CONTACTS_STD, HELP_LINKS_STD,
-    "Each audience tab above shows only the items made visible to that audience under "
-    "Manage audiences. Executive users never see the operational detail pages.")
+    "Each audience shows only the items made visible to it under Manage audiences. "
+    "Executive users never see the operational detail pages.")
 
 persona_page(
     P_COMP, "Compliance & Enforcement", "Compliance & Enforcement view",
@@ -1290,7 +1199,7 @@ footnote("Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for s
 counts["Access & data states"] = finish_page()
 
 # --- pages.json --------------------------------------------------------------
-order = [P_HOME, P_HOME_L, P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES,
+order = [P_HOME, P_EXEC, P_COMP, P_PERM, P_AUDIT, P_DEFS, P_RULES,
          P_CHANGE, P_STATES]
 with open(os.path.join(PAGES_DIR, "pages.json"), "w", encoding="utf-8") as f:
     json.dump({"$schema": PM, "pageOrder": order, "activePageName": P_HOME}, f, indent=2)

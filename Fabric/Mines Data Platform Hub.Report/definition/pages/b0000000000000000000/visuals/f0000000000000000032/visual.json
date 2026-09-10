@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000032",
   "position": {
-    "x": 76,
-    "y": 595,
+    "x": 547,
+    "y": 463,
     "z": 5000,
     "height": 33,
     "width": 373,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Notice of Work  \u2192",
+                    "value": "Incidents  \u2192",
                     "textStyle": {
                       "fontSize": "13px",
                       "color": "#252423"

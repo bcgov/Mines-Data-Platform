@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000001c",
   "position": {
-    "x": 56,
-    "y": 189,
+    "x": 100,
+    "y": 467,
     "z": 2800,
     "height": 33,
-    "width": 1240,
+    "width": 1346,
     "tabOrder": 2800
   },
   "visual": {
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Something look wrong, missing, or defined differently from how your team uses it? Raise it here. Requests are logged against the report and the named owner, so nothing depends on remembering who to email.",
+                    "value": "The named owner on the report card is accountable for the answer, rather than a shared inbox.",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423"
+                      "fontSize": "9px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

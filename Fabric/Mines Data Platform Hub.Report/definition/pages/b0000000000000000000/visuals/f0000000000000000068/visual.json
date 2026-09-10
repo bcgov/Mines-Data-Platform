@@ -3,7 +3,7 @@
   "name": "f0000000000000000068",
   "position": {
     "x": 1489,
-    "y": 575,
+    "y": 647,
     "z": 10400,
     "height": 33,
     "width": 373,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Notice of Work  \u2192",
+                    "value": "Dictionary & lineage  \u2192",
                     "textStyle": {
                       "fontSize": "13px",
                       "color": "#252423"

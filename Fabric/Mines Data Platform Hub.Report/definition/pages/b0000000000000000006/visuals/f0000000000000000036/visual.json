@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000036",
   "position": {
-    "x": 1528,
-    "y": 361,
+    "x": 54,
+    "y": 757,
     "z": 5400,
     "height": 33,
-    "width": 330,
+    "width": 586,
     "tabOrder": 5400
   },
   "visual": {
@@ -19,15 +19,14 @@
               {
                 "textRuns": [
                   {
-                    "value": "Submit a change request",
+                    "value": "Default state. The button is live and the flow is reachable.",
                     "textStyle": {
-                      "fontSize": "15px",
-                      "color": "#FFFFFF",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#252423"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }
@@ -36,30 +35,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

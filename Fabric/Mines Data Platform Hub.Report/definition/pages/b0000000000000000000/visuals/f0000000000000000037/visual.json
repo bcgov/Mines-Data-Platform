@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000037",
   "position": {
-    "x": 521,
-    "y": 323,
+    "x": 547,
+    "y": 555,
     "z": 5500,
     "height": 33,
-    "width": 407,
+    "width": 373,
     "tabOrder": 5500
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Compliance & Enforcement",
+                    "value": "Inspection planning map  \u2192",
                     "textStyle": {
                       "fontSize": "13px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
+                      "color": "#252423"
                     }
                   }
                 ],

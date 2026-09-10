@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000005f",
   "position": {
-    "x": 1566,
-    "y": 706,
+    "x": 30,
+    "y": 1036,
     "z": 9500,
     "height": 33,
-    "width": 300,
+    "width": 1860,
     "tabOrder": 9500
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Rebecca",
+                    "value": "Survey evidence: \"trusted / certified data\" ranked #1 capability, and respondents wanted source, definition, last refresh and drill-through together.",
                     "textStyle": {
-                      "fontSize": "10px",
-                      "color": "#252423",
-                      "fontWeight": "bold"
+                      "fontSize": "9px",
+                      "color": "#8A8886"
                     }
                   }
                 ],

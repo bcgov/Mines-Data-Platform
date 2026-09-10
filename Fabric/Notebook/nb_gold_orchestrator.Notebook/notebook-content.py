@@ -146,6 +146,15 @@ for li, level in enumerate(levels):
     except Exception as e:
         print(f"runMultiple failed for level {li}: {e}")
         log_error(f"runMultiple_L{li}", f"runMultiple raised: {e}", traceback.format_exc())
+        # Fallback: runMultiple is all-or-nothing (one missing/bad notebook aborts the whole level),
+        # so run the remaining transforms one by one and let only the bad node fail at merge time.
+        for a in activities:
+            try:
+                mssparkutils.notebook.run(a["path"], 3600)
+                print(f"fallback run OK: {a['name']}")
+            except Exception as e2:
+                print(f"fallback run FAILED: {a['name']}: {str(e2)[:300]}")
+                log_error(a["name"], f"fallback run failed: {e2}", traceback.format_exc(), target_table=a["name"])
 
     # 2) merge each node in this level into gold (orchestrator does the merge)
     for n in level:

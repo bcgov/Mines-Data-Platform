@@ -59,6 +59,10 @@ for r in q("SELECT node_name, table_type, load_strategy, is_active FROM app.gold
 
 # CELL ********************
 
+print("gold_dependency columns:", [tuple(r) for r in q("SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='app' AND TABLE_NAME='gold_dependency' ORDER BY ORDINAL_POSITION")])
+print("gold_dependency rows BEFORE:")
+for r in q("SELECT * FROM app.gold_dependency ORDER BY node_name"): print("  ", tuple(r))
+
 stmts = [
 ("dim_incident_category", """
 IF NOT EXISTS (SELECT 1 FROM app.gold_build WHERE node_name = 'dim_incident_category')
@@ -76,16 +80,20 @@ INSERT INTO app.gold_build (node_name, gold_object, object_type, transform_noteb
 VALUES ('bridge_incident_category','gold.bridge_incident_category','FACT','nb_gold_tf_bridge_incident_category',
     'stg.bridge_incident_category','reload_fact','full',NULL,'mine_incident_id,mine_incident_category_code',NULL,
     1, GETDATE(),'system',GETDATE(),'system')"""),
-("dependency", """
-IF NOT EXISTS (SELECT 1 FROM app.gold_dependency WHERE node_name = 'bridge_incident_category' AND depends_on = 'dim_incident_category')
-INSERT INTO app.gold_dependency (node_name, depends_on) VALUES ('bridge_incident_category','dim_incident_category')"""),
+("dependency: delete stale", "DELETE FROM app.gold_dependency WHERE node_name = 'bridge_incident_category'"),
+("dependency: insert",       "INSERT INTO app.gold_dependency (node_name, depends_on) VALUES ('bridge_incident_category','dim_incident_category')"),
 ("deactivate fact_inspection (transform notebook nb_gold_tf_fact_inspection does not exist)", """
 UPDATE app.gold_build SET is_active = 0, modified_date = GETDATE(), modified_by = 'claude-admin'
 WHERE node_name = 'fact_inspection' AND is_active = 1"""),
 ]
 for name, sql in stmts:
-    print(name, "->", q(sql))
+    try:
+        print(name, "->", q(sql))
+    except Exception as e:
+        print(name, "-> ERROR:", str(e)[:400])
 
+print("gold_dependency rows AFTER:")
+for r in q("SELECT * FROM app.gold_dependency ORDER BY node_name"): print("  ", tuple(r))
 print("AFTER:")
 for r in q("""SELECT gb.node_name, gb.table_type, gb.load_strategy, gb.is_active, gd.depends_on
 FROM app.gold_build gb LEFT JOIN app.gold_dependency gd ON gb.node_name = gd.node_name

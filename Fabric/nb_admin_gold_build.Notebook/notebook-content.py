@@ -81,7 +81,7 @@ VALUES ('bridge_incident_category','gold.bridge_incident_category','FACT','nb_go
     'stg.bridge_incident_category','reload_fact','full',NULL,'mine_incident_id,mine_incident_category_code',NULL,
     1, GETDATE(),'system',GETDATE(),'system')"""),
 ("dependency: delete stale", "DELETE FROM app.gold_dependency WHERE node_name = 'bridge_incident_category'"),
-("dependency: insert",       "INSERT INTO app.gold_dependency (node_name, depends_on) VALUES ('bridge_incident_category','dim_incident_category')"),
+("dependency: insert",       "INSERT INTO app.gold_dependency (node_name, depends_on, created_date, created_by, modified_date, modified_by) VALUES ('bridge_incident_category','dim_incident_category', GETDATE(), 'system', GETDATE(), 'system')"),
 ("deactivate fact_inspection (transform notebook nb_gold_tf_fact_inspection does not exist)", """
 UPDATE app.gold_build SET is_active = 0, modified_date = GETDATE(), modified_by = 'claude-admin'
 WHERE node_name = 'fact_inspection' AND is_active = 1"""),

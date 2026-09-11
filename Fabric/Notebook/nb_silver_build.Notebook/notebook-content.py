@@ -331,10 +331,10 @@ try:
 except Exception as e:
     print(f"warehouse silver_run_log write failed: {e}")
 try:
-    bp = f"Tables/{SILVER_SCHEMA}/_silver_run_log"   # readback copy next to silver
+    bp = f"Tables/{SILVER_SCHEMA}/silver_run_log"   # lakehouse copy of the run log (quick readback)
     summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(bp)
 except Exception as e:
-    print(f"bronze readback write failed: {e}")
+    print(f"lakehouse run-log copy failed (non-fatal): {e}")
 
 ok = sum(1 for r in results if r[4] == "OK")
 failed = sum(1 for r in results if r[4] == "FAILED")

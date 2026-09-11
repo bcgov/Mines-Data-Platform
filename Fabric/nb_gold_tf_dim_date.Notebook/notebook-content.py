@@ -128,6 +128,14 @@ df = df.withColumn(
     F.concat(F.col("month_short"), F.lit(" "), F.col("year").cast("string"))
 )
 
+# Rolling "last 6 fiscal years" label (current FY + 5 prior; NULL otherwise) — used by the NoW
+# Permitting model (dim_date.fiscal_year_last6). Used to be an ALTER/UPDATE inside
+# nb_build_fact_now_permit; generated here so a dim_date rebuild never loses it.
+_today = spark.sql("SELECT year(current_date()) AS y, month(current_date()) AS m").first()
+CURRENT_FY = _today.y if _today.m >= 4 else _today.y - 1
+df = df.withColumn("fiscal_year_last6",
+                   F.when(F.col("fiscal_year").between(CURRENT_FY - 5, CURRENT_FY), F.col("fiscal_year_label")))
+
 # Numeric sort key for fiscal_month_label (e.g. 202501 = Apr 2025, 1st month of FY2025/26). The semantic models sort
 # the month axis by this column; it used to be added by hand (ALTER TABLE) in July — now scripted.
 df = df.withColumn("fiscal_year_month_key", (F.col("fiscal_year") * 100 + F.col("fiscal_month")).cast("int"))
@@ -157,58 +165,6 @@ spark.sql("""
     WHERE full_date IN ('2026-04-01', '2026-06-30', '2026-07-01', '2027-03-31')
     ORDER BY full_date
 """).show()
-
-# METADATA ********************
-# META { "language": "python", "language_group": "synapse_pyspark" }
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-df = spark.sql("SELECT * FROM lh_gold.gold.dim_date LIMIT 1000")
-display(df)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-df = spark.sql("SELECT * FROM lh_gold.gold.dim_permit LIMIT 1000")
-display(df)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-tables = [
-    "silver.mine_incident",
-    "silver.mine_incident_document",
-    "silver.mine_incident_followup_type_code",
-    "silver.mine_status",
-    "silver.mine_document",
-    "silver.mine_verified_status"
-]
-
-for t in tables:
-    try:
-        count = spark.table(t).count()
-        print(f"✅ {t} — {count:,} rows")
-    except Exception as e:
-        print(f"❌ {t} — NOT FOUND")
 
 # METADATA ********************
 

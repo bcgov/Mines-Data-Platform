@@ -159,22 +159,18 @@ FACT_MODE = {"append_fact": "append", "upsert_fact": "upsert", "reload_fact": "r
 
 results = []
 
-# 0) standalone builders (calendar, lookups, NoW facts) — independent, run in parallel first
+# 0) standalone builders (calendar, lookups, NoW facts) — run one by one so a failure in one
+#    does not re-run or block the others; each outcome is logged.
 print(f"\n===== STANDALONE: {STANDALONE_NOTEBOOKS} =====")
-_standalone = [{"name": nb, "path": nb, "args": {}, "dependencies": []} for nb in STANDALONE_NOTEBOOKS]
-try:
-    rm = mssparkutils.notebook.runMultiple({"activities": _standalone, "timeoutInSeconds": 3600, "concurrency": 0})
-    print(f"runMultiple standalone result: {rm}")
-    results += [(nb, nb, "OK", 0, "standalone") for nb in STANDALONE_NOTEBOOKS]
-except Exception as e:
-    print(f"runMultiple standalone failed: {e} — running one by one")
-    for nb in STANDALONE_NOTEBOOKS:
-        try:
-            mssparkutils.notebook.run(nb, 3600)
-            results.append((nb, nb, "OK", 0, "standalone"))
-        except Exception as e2:
-            log_error(nb, f"standalone run failed: {e2}", traceback.format_exc(), target_table=nb)
-            results.append((nb, nb, "FAILED", 0, str(e2)[:200]))
+for nb in STANDALONE_NOTEBOOKS:
+    try:
+        mssparkutils.notebook.run(nb, 3600)
+        print(f"standalone OK: {nb}")
+        results.append((nb, nb, "OK", 0, "standalone"))
+    except Exception as e:
+        print(f"standalone FAILED: {nb}: {str(e)[:300]}")
+        log_error(nb, f"standalone run failed: {e}", traceback.format_exc(), target_table=nb)
+        results.append((nb, nb, "FAILED", 0, str(e)[:200]))
 
 for li, level in enumerate(levels):
     print(f"\n===== LEVEL {li}: {level} =====")

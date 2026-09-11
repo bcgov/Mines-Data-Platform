@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Incidents Report (Gold)"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "45f10c71-27cf-45af-9aea-d9daec4e060b"
+  }
+}

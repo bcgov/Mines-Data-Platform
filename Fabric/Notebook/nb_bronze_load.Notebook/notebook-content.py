@@ -8,16 +8,27 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "8cd34a44-500a-47d9-aa2d-5ad0c2149858",
-# META       "default_lakehouse_name": "mines_data_platform_lh1",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
 # META   }
+# META }
+
+# CELL ********************
+
+%run nb_config
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
 # META }
 
 # CELL ********************
@@ -39,13 +50,11 @@ import re
 import uuid
 import traceback
 
-WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
-BRONZE_LH_ID = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
-RAW_ROOT_PATH = "Files/raw"
-TARGET_SCHEMA = "bronze"
+# RAW_ROOT_PATH (Files/raw/parquet) and BRONZE_SCHEMA come from nb_config / vl_mdp.
+TARGET_SCHEMA = BRONZE_SCHEMA
 MANIFEST_TABLE = "bronze.load_manifest"
 # read the manifest by absolute path (spark.catalog can lag across sessions)
-MANIFEST_PATH = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/load_manifest"
+MANIFEST_PATH = f"Tables/{TARGET_SCHEMA}/load_manifest"   # relative to the default lakehouse
 SUMMARY_TABLE = "bronze.load_summary"
 REBUILD = False         # clean rebuild done; routine runs are incremental (by-path file skip)
 MAX_WORKERS = 8
@@ -73,7 +82,7 @@ def get_entities():
 
 
 def get_all_parquet_files(entity):
-    """Walk Files/raw/<entity>/<yyyy>/<mm>/<dd>/*.parquet (numeric folders only)."""
+    """Walk <RAW_ROOT_PATH>/<entity>/<yyyy>/<mm>/<dd>/*.parquet (numeric folders only)."""
     found, base = [], f"{RAW_ROOT_PATH}/{entity}"
     try:
         for y in mssparkutils.fs.ls(base):
@@ -99,7 +108,7 @@ def file_ts(name):
 
 
 def bronze_tbl_path(table):
-    return f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/{table}/"
+    return f"Tables/{TARGET_SCHEMA}/{table}"   # relative to the default lakehouse
 
 
 def loaded_files_for(table):

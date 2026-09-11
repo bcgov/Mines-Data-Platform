@@ -8,12 +8,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
@@ -34,25 +34,20 @@ from pyspark.sql import functions as F
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInRead", "LEGACY")
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInWrite", "LEGACY")
 
-WS     = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
-SILVER = "a0190e0e-c2f5-4740-ab90-a2f29b6e6991"
-BRONZE = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
-sp = f"abfss://{WS}@onelake.dfs.fabric.microsoft.com/{SILVER}/Tables/silver/"
-bp = f"abfss://{WS}@onelake.dfs.fabric.microsoft.com/{BRONZE}/Tables/bronze/"
 
 # silver control/lineage columns dropped from the gold-bound projection
 CTRL = {"dl_load_id", "bronze_file_name", "bronze_file_timestamp", "bronze_load_date",
         "dl_load_ts", "dl_rowhash", "silver_load_ts"}
 
 # the grain + the admin-amendment link, from silver
-spark.read.format("delta").load(sp + "now_application/").createOrReplaceTempView("src_na")               # grain: one row per now_application_id
-spark.read.format("delta").load(sp + "application_reason_code_xref/").createOrReplaceTempView("src_x")   # a reason code here => administrative amendment
+spark.table("silver.now_application").createOrReplaceTempView("src_na")               # grain: one row per now_application_id
+spark.table("silver.application_reason_code_xref").createOrReplaceTempView("src_x")   # a reason code here => administrative amendment
 
 # notice_of_work_type (commodity lookup) - prefer silver, fall back to bronze (tiny static lookup)
 nowt_src = None
-for p in (sp + "notice_of_work_type/", bp + "notice_of_work_type/"):
+for p in ("silver.notice_of_work_type", "bronze.notice_of_work_type"):
     try:
-        spark.read.format("delta").load(p).createOrReplaceTempView("src_nowt")
+        spark.table(p).createOrReplaceTempView("src_nowt")
         nowt_src = p
         break
     except Exception as e:

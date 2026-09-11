@@ -8,12 +8,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
@@ -31,12 +31,11 @@ from pyspark.sql import functions as F
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInRead","LEGACY")
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInWrite","LEGACY")
 
-# grab the four permitting tables from silver. abfss path because silver sits in a different lakehouse
-b="abfss://8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0@onelake.dfs.fabric.microsoft.com/a0190e0e-c2f5-4740-ab90-a2f29b6e6991/Tables/silver/"
-spark.read.format("delta").load(b+"permit_amendment/").createOrReplaceTempView("src_pa")            # the permit actions - this is our grain
-spark.read.format("delta").load(b+"now_application/").createOrReplaceTempView("src_na")             # carries the AIA approved status
-spark.read.format("delta").load(b+"now_application_identity/").createOrReplaceTempView("src_nai")   # bridge from now_application_guid to now_application_id
-spark.read.format("delta").load(b+"application_reason_code_xref/").createOrReplaceTempView("src_x")  # a reason code in here means the amendment is administrative
+# grab the four permitting tables from silver (same lakehouse, schema silver)
+spark.table("silver.permit_amendment").createOrReplaceTempView("src_pa")            # the permit actions - this is our grain
+spark.table("silver.now_application").createOrReplaceTempView("src_na")             # carries the AIA approved status
+spark.table("silver.now_application_identity").createOrReplaceTempView("src_nai")   # bridge from now_application_guid to now_application_id
+spark.table("silver.application_reason_code_xref").createOrReplaceTempView("src_x")  # a reason code in here means the amendment is administrative
 
 # The query is two steps - the JOIN conditions sit on their own lines so they are easy to read:
 #   Step 1 (app CTE): roll the application side up to ONE row per now_application_guid,

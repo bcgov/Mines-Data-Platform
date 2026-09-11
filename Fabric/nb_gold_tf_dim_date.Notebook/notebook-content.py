@@ -8,32 +8,14 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
-# META     }
-# META   }
-# META }
-
-# CELL ********************
-
-# Fabric notebook source
-
-# METADATA ********************
-
-# META {
-# META   "kernel_info": { "name": "synapse_pyspark" },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
-# META       "known_lakehouses": [ { "id": "5e43f78b-2156-4469-980e-bffda0295fac" } ]
 # META     }
 # META   }
 # META }
@@ -145,6 +127,10 @@ df = df.withColumn(
     "fiscal_month_label",
     F.concat(F.col("month_short"), F.lit(" "), F.col("year").cast("string"))
 )
+
+# Numeric sort key for fiscal_month_label (e.g. 202501 = Apr 2025, 1st month of FY2025/26). The semantic models sort
+# the month axis by this column; it used to be added by hand (ALTER TABLE) in July — now scripted.
+df = df.withColumn("fiscal_year_month_key", (F.col("fiscal_year") * 100 + F.col("fiscal_month")).cast("int"))
 
 print(f"Generated {df.count()} date rows from {START_DATE} to {END_DATE}")
 df.show(5)

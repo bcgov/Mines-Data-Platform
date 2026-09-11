@@ -8,12 +8,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
@@ -68,19 +68,16 @@ OBJECT_NAME  = NOTEBOOK_NAME[len(NB_PREFIX):]
 TARGET_TABLE = f"{STG_SCHEMA}.{OBJECT_NAME}"
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {STG_SCHEMA}")
 
-# Silver is cross-lakehouse (gold is the default lakehouse) → read via abfss.
-WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
-SILVER_LH_ID = "a0190e0e-c2f5-4740-ab90-a2f29b6e6991"
-base = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{SILVER_LH_ID}/Tables/silver"
+# Silver is in the same lakehouse (schema silver) -> read by table name, no IDs needed.
 
 # Core mine table (19,257 rows after geom fix — geom lands as WKT text).
-spark.read.format("delta").load(f"{base}/mine/").createOrReplaceTempView("src_mine")
+spark.table("silver.mine").createOrReplaceTempView("src_mine")
 # Region decode: mine.mine_region -> mine_region_code.mine_region_code -> .description
-spark.read.format("delta").load(f"{base}/mine_region_code/").createOrReplaceTempView("src_mine_region_code")
+spark.table("silver.mine_region_code").createOrReplaceTempView("src_mine_region_code")
 # Current operational status chain: mine_status -> mine_status_xref -> mine_operation_status_code
-spark.read.format("delta").load(f"{base}/mine_status/").createOrReplaceTempView("src_mine_status")
-spark.read.format("delta").load(f"{base}/mine_status_xref/").createOrReplaceTempView("src_mine_status_xref")
-spark.read.format("delta").load(f"{base}/mine_operation_status_code/").createOrReplaceTempView("src_mine_op_status")
+spark.table("silver.mine_status").createOrReplaceTempView("src_mine_status")
+spark.table("silver.mine_status_xref").createOrReplaceTempView("src_mine_status_xref")
+spark.table("silver.mine_operation_status_code").createOrReplaceTempView("src_mine_op_status")
 
 # Build mine column list for projection (drop all CTRL/lineage columns).
 mine_cols = [c for c in spark.table("src_mine").columns if c not in CTRL]

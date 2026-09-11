@@ -8,25 +8,38 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
-# META         }
-# META       ]
-# META     },
-# META     "warehouse": {
-# META       "default_warehouse": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
-# META       "known_warehouses": [
-# META         {
-# META           "id": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
-# META           "type": "Datawarehouse"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
 # META   }
+# META }
+
+# CELL ********************
+
+%run nb_config
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+%run nb_gold_config
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
 # META }
 
 # CELL ********************
@@ -48,7 +61,7 @@ from notebookutils import mssparkutils
 import uuid
 import traceback
 
-WAREHOUSE = "mines-data-platform-fabwh1"
+# WAREHOUSE comes from nb_config / vl_mdp.
 RUN_ID = str(uuid.uuid4())
 
 # Source data contains pre-1900 timestamps (e.g. permit_amendment) — rebase on write/read.
@@ -82,18 +95,34 @@ def log_error(entity, error_message, stack_trace=None, target_table=None):
                .withColumn("error_state", F.lit(None).cast(IntegerType()))
                .withColumn("error_procedure", F.lit(None).cast(StringType()))
                .withColumn("error_line", F.lit(None).cast(IntegerType())))
-        edf.write.mode("append").synapsesql(f"{WAREHOUSE}.app.error_log")
+        # notebooks log to their own table: the pipeline-owned app.error_log has a different (IDENTITY) shape
+        edf.write.mode("append").synapsesql(f"{WAREHOUSE}.app.nb_error_log")
     except Exception as e:
         print(f"log_error failed (non-fatal): {e}")
 
 
-# Read build config + DAG from the warehouse (split tables: metadata + dependencies).
+# Build plan + DAG come from nb_gold_config (in Git), not hand-edited warehouse rows.
 from com.microsoft.spark.fabric import Constants  # noqa: F401
-build = spark.read.synapsesql(f"{WAREHOUSE}.app.gold_build").filter("is_active = true")
-nodes = {r["node_name"]: r.asDict() for r in build.collect()}
-deps = {r["node_name"]: (r["depends_on"] or "")
-        for r in spark.read.synapsesql(f"{WAREHOUSE}.app.gold_dependency").collect()}
+nodes = {n["node_name"]: dict(n) for n in GOLD_BUILD if n["is_active"]}
+deps = dict(GOLD_DEPENDENCY)
 print("gold_build nodes:", list(nodes))
+
+# Publish the plan to the warehouse for visibility only (non-fatal; the run does not read it back).
+try:
+    from pyspark.sql.types import IntegerType, BooleanType
+    _plan_schema = StructType([StructField(k, StringType()) for k in (
+        "node_name", "gold_object", "object_type", "transform_notebook", "source_table", "table_type",
+        "load_strategy", "surrogate_key", "business_keys", "non_historized_columns", "watermark_column")]
+        + [StructField("last_n_days", IntegerType()), StructField("is_active", BooleanType())])
+    _cols = [f.name for f in _plan_schema.fields]
+    (spark.createDataFrame([tuple(n[c] for c in _cols) for n in GOLD_BUILD], _plan_schema)
+        .withColumn("modified_date", F.current_timestamp())
+        .write.mode("overwrite").option("overwriteSchema", "true").synapsesql(f"{WAREHOUSE}.app.gold_build"))
+    (spark.createDataFrame([(k, v) for k, v in GOLD_DEPENDENCY.items()], "node_name string, depends_on string")
+        .withColumn("modified_date", F.current_timestamp())
+        .write.mode("overwrite").option("overwriteSchema", "true").synapsesql(f"{WAREHOUSE}.app.gold_dependency"))
+except Exception as e:
+    print(f"plan publish to warehouse skipped (non-fatal): {e}")
 
 
 def deps_of(n):
@@ -129,6 +158,24 @@ DIM_SCD = {"type1_dimension": 1, "type2_dimension": 2}
 FACT_MODE = {"append_fact": "append", "upsert_fact": "upsert", "reload_fact": "reload"}
 
 results = []
+
+# 0) standalone builders (calendar, lookups, NoW facts) — independent, run in parallel first
+print(f"\n===== STANDALONE: {STANDALONE_NOTEBOOKS} =====")
+_standalone = [{"name": nb, "path": nb, "args": {}, "dependencies": []} for nb in STANDALONE_NOTEBOOKS]
+try:
+    rm = mssparkutils.notebook.runMultiple({"activities": _standalone, "timeoutInSeconds": 3600, "concurrency": 0})
+    print(f"runMultiple standalone result: {rm}")
+    results += [(nb, nb, "OK", 0, "standalone") for nb in STANDALONE_NOTEBOOKS]
+except Exception as e:
+    print(f"runMultiple standalone failed: {e} — running one by one")
+    for nb in STANDALONE_NOTEBOOKS:
+        try:
+            mssparkutils.notebook.run(nb, 3600)
+            results.append((nb, nb, "OK", 0, "standalone"))
+        except Exception as e2:
+            log_error(nb, f"standalone run failed: {e2}", traceback.format_exc(), target_table=nb)
+            results.append((nb, nb, "FAILED", 0, str(e2)[:200]))
+
 for li, level in enumerate(levels):
     print(f"\n===== LEVEL {li}: {level} =====")
 

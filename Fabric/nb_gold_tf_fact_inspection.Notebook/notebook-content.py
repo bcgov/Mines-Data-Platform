@@ -23,25 +23,23 @@
 # CELL ********************
 
 # ════════════════════════════════════════════════════════════════════════════
-# STANDARD GOLD TRANSFORM TEMPLATE  (see nb_gold_tf_dim_permit for the canonical example)
-#   Cell 1  imports + Spark properties              (this cell)
-#   Cell 2  derive TARGET_TABLE from notebook name + register sources
-#   Cell 3  drop the existing stg table             (schema may change each build)
-#   Cell 4  SparkSQL business logic -> DataFrame
-#   Cell 5  write the DataFrame to TARGET_TABLE      (full overwrite each run)
-# dim_party is a SINGLE-TABLE type-2 dimension (straight projection of silver.party). It is a
-# DAG ROOT (no parents) — built in parallel with dim_permit / dim_municipality.
+# nb_gold_tf_fact_inspection — materializes stg.fact_inspection for the Gold orchestrator.
+# Replaces the one-off SparkSQL build from July (BC (1)/Notebooks/gold_build_fact_inspection_corrected.sql)
+# so the Inspections fact is SCRIPTED and rebuilt on every run.
+# Fact type: upsert_fact on inspection_id (incremental). Level 1 — depends on dim_mine.
+# Grain: one row per NRIS inspection. Columns = every silver.nris_inspection column
+#   + mine_guid (via silver.mine on mine_no) + Mine_SK (current dim_mine row)
+#   + inspection_date_key = CAST(inspection_date AS DATE)  (the model joins dim_date on this;
+#     joining on the raw timestamp dropped ~88% of rows in July).
 # ════════════════════════════════════════════════════════════════════════════
-from pyspark.sql import functions as F  # noqa: F401 — available to business-logic cells
+from pyspark.sql import functions as F  # noqa: F401
 from notebookutils import mssparkutils
 
-# Keep rebase confs consistent across all gold transforms (some silver tables carry old timestamps).
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInWrite", "LEGACY")
 spark.conf.set("spark.sql.parquet.datetimeRebaseModeInRead", "LEGACY")
 spark.conf.set("spark.sql.parquet.int96RebaseModeInWrite", "LEGACY")
 spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
 
-# Control/lineage columns dropped from the gold-bound projection.
 CTRL = {"dl_load_id", "bronze_file_name", "bronze_file_timestamp", "bronze_load_date",
         "dl_load_ts", "dl_rowhash", "silver_load_ts"}
 
@@ -54,7 +52,6 @@ CTRL = {"dl_load_id", "bronze_file_name", "bronze_file_timestamp", "bronze_load_
 
 # CELL ********************
 
-# NAMING CONVENTION: 'nb_gold_tf_<object>' materializes 'stg.<object>'.
 NB_PREFIX  = "nb_gold_tf_"
 STG_SCHEMA = "stg"
 NOTEBOOK_NAME = mssparkutils.runtime.context.get("currentNotebookName")
@@ -64,11 +61,16 @@ OBJECT_NAME  = NOTEBOOK_NAME[len(NB_PREFIX):]
 TARGET_TABLE = f"{STG_SCHEMA}.{OBJECT_NAME}"
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {STG_SCHEMA}")
 
-# Silver is in the same lakehouse (schema silver) -> read by table name, no IDs needed.
-spark.table("silver.party").createOrReplaceTempView("src_party")
+# Silver + gold.dim_mine are all in the same (default) lakehouse -> read by table name.
+spark.table("silver.nris_inspection").createOrReplaceTempView("src_inspection")
+spark.table("silver.mine").createOrReplaceTempView("src_mine")
+spark.table("gold.dim_mine").createOrReplaceTempView("gold_dim_mine")
 
-SELECT_COLS = ", ".join(f"`{c}`" for c in spark.table("src_party").columns if c not in CTRL)
-print("notebook:", NOTEBOOK_NAME, "-> target:", TARGET_TABLE)
+DERIVED = {"mine_guid", "mine_sk", "inspection_date_key"}
+INSP_COLS = ", ".join(f"i.`{c}`" for c in spark.table("src_inspection").columns
+                      if c not in CTRL and c.lower() not in DERIVED)
+print("notebook:", NOTEBOOK_NAME, "-> target:", TARGET_TABLE,
+      "| nris_inspection rows:", spark.table("src_inspection").count())
 
 # METADATA ********************
 
@@ -91,12 +93,23 @@ print("dropped (if existed):", TARGET_TABLE)
 
 # CELL ********************
 
-# BUSINESS LOGIC — straight projection of the current party attributes (BK party_guid).
+# BUSINESS LOGIC — one row per inspection; mine resolved through silver.mine (mine_no -> mine_guid)
+# then to the CURRENT dim_mine row (dim_mine is SCD2).
 df = spark.sql(f"""
-    SELECT {SELECT_COLS}
-    FROM src_party
+    SELECT {INSP_COLS},
+           CAST(i.inspection_date AS DATE) AS inspection_date_key,
+           m.mine_guid,
+           d.Mine_SK
+    FROM src_inspection i
+    LEFT JOIN (SELECT mine_no, MAX(mine_guid) AS mine_guid FROM src_mine GROUP BY mine_no) m
+           ON i.mine_no = m.mine_no
+    LEFT JOIN gold_dim_mine d
+           ON m.mine_guid = d.mine_guid AND d.dl_iscurrent = true
 """)
-print("built dataframe:", df.count(), "rows,", len(df.columns), "cols")
+n = df.count()
+dupes = df.groupBy("inspection_id").count().filter("count > 1").count()
+print("built dataframe:", n, "rows,", len(df.columns), "cols | duplicate inspection_id:", dupes)
+assert dupes == 0, "fact_inspection grain broken: duplicate inspection_id"
 
 # METADATA ********************
 
@@ -117,3 +130,4 @@ print("wrote", df.count(), "rows to", TARGET_TABLE)
 # META   "language": "python",
 # META   "language_group": "synapse_pyspark"
 # META }
+

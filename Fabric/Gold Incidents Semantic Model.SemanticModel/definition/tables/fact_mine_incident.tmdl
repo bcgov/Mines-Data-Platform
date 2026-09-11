@@ -38,38 +38,38 @@ table fact_mine_incident
 		displayFolder: Incidents KPIs
 		lineageTag: 9615b51b-e449-4dae-b484-2be261604494
 
-	/// Chart 1, green bars. Last 5 COMPLETED fiscal years on the REPORTED date, current FY excluded - exactly Metabase 3287. Axis: dim_date[fiscal_year_label].
-	measure 'Incidents per Fiscal Year' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[reported_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[reported_date] < DATE ( fyStart, 4, 1 ) )
+	/// Chart 1, green bars. Last 5 COMPLETED fiscal years on the EFFECTIVE date, current FY excluded. Window matches Metabase 3287; the date basis follows Rajneesh 10 Sep 2026 - the 24-hour rule applies to charts as well as cards, per Caroline. Axis: dim_date[fiscal_year_label].
+	measure 'Incidents per Fiscal Year' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[effective_date] < DATE ( fyStart, 4, 1 ) )
 		formatString: #,##0
 		displayFolder: Incidents Trend
 		lineageTag: ddd78c25-f888-47b8-8917-d3a482ec3e83
 
-	/// Chart 1, blue bars. Dangerous Occurrences (determination_type_code = 'DO') in the same window.
-	measure 'DOs per Fiscal Year' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[reported_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[reported_date] < DATE ( fyStart, 4, 1 ) )
+	/// Chart 1, blue bars. Dangerous Occurrences (determination_type_code = 'DO') in the same window, effective date.
+	measure 'DOs per Fiscal Year' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[effective_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[effective_date] < DATE ( fyStart, 4, 1 ) )
 		formatString: #,##0
 		displayFolder: Incidents Trend
 		lineageTag: a687b739-6d65-4d9a-8f0a-0638f334d6ae
 
-	/// Chart 2 series 1. Monthly incidents on the REPORTED date, trailing 4 years including the current partial month - exactly Metabase 3289 (titled 'last 3 years' there, but the SQL is 4). Axis: dim_date[fiscal_month_label].
-	measure 'Incidents per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[reported_date] >= wStart, fact_mine_incident[reported_date] < wEnd )
+	/// Chart 2 series 1. Monthly incidents on the EFFECTIVE date, trailing 4 years including the current partial month - exactly Metabase 3289 (titled 'last 3 years' there, but the SQL is 4). Axis: dim_date[fiscal_month_label].
+	measure 'Incidents per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
 		formatString: #,##0
 		displayFolder: Incidents Trend
 		lineageTag: 72404477-20f0-436c-9024-37a7cf20516c
 
 	/// Chart 2 series 2. Dangerous Occurrences per month.
-	measure 'DOs per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[reported_date] >= wStart, fact_mine_incident[reported_date] < wEnd )
+	measure 'DOs per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
 		formatString: #,##0
 		displayFolder: Incidents Trend
 		lineageTag: d0f0160e-f7c4-43ff-9424-c0736cecd459
 
 	/// Chart 2 series 3. SUM of number_of_injuries (not a count of incidents).
-	measure 'Injuries per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_injuries] ), fact_mine_incident[reported_date] >= wStart, fact_mine_incident[reported_date] < wEnd )
+	measure 'Injuries per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_injuries] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
 		formatString: #,##0
 		displayFolder: Incidents Trend
 		lineageTag: dd44daac-b7c7-4b75-8497-80a550fe7f27
 
 	/// Chart 2 series 4. SUM of number_of_fatalities.
-	measure 'Fatalities per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_fatalities] ), fact_mine_incident[reported_date] >= wStart, fact_mine_incident[reported_date] < wEnd )
+	measure 'Fatalities per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_fatalities] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
 		formatString: #,##0
 		displayFolder: Incidents Trend
 		lineageTag: 70a2bc01-64ab-4f96-9c8b-ae12480f99be
@@ -104,14 +104,31 @@ table fact_mine_incident
 		displayFolder: By Category
 		lineageTag: c9c786f6-fed0-4e67-8638-0c773c068aea
 
-	/// Alternative to 'Incidents per Fiscal Year' that slices on the EFFECTIVE date via the inactive relationship. Use only if Rajneesh confirms the charts should align with the KPI cards.
-	measure 'Incidents per Fiscal Year (Effective Date)' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[effective_date] < DATE ( fyStart, 4, 1 ) )
+	/// Reconciliation only. Same window as 'Incidents per Fiscal Year' but on the RAW reported date - i.e. what Metabase 3287 returns today. Keep for tie-outs against the Metabase report; not for the published visual.
+	measure 'Incidents per Fiscal Year (Reported Date)' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[reported_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[reported_date] < DATE ( fyStart, 4, 1 ) )
 		formatString: #,##0
 		displayFolder: Incidents Trend
 		lineageTag: 1afea0d6-7624-4fdd-bf72-07f2c6aff7c8
 
-	/// Freshness label. Latest reported date in gold - never typed in.
-	measure 'Data As Of Label' = "Data current through " & FORMAT ( MAX ( fact_mine_incident[reported_date] ), "d MMM yyyy" )
+	/// Chart 3 value. Distinct incidents per PARENT category group, on the effective date, scoped to 21 May 2018 onward and excluding the Uncategorised member. Verified at source 10 Sep 2026: categorisation begins 21 May 2018 - zero categorised incidents before that date, 93% after - so an all-history view would be 50% Uncategorised for reasons that have nothing to do with data quality. Self-trimming: returns BLANK outside the top 5, so the visual needs no filter of its own. An incident with two categories counts once in each group; do not SUM across groups.
+	measure 'Incidents by Category (Top 5)' = VAR Base = CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( 2018, 5, 21 ), bridge_incident_category[is_uncategorised] = 0 ) VAR Ranked = RANKX ( ALLSELECTED ( dim_incident_category[category_group] ), CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( 2018, 5, 21 ), bridge_incident_category[is_uncategorised] = 0 ), , DESC, DENSE ) RETURN IF ( ISBLANK ( Ranked ) || Ranked <= 5, Base )
+		formatString: #,##0
+		displayFolder: By Category
+		lineageTag: a76c4601-fe7d-4e4d-b5eb-2d61aa391900
+
+	/// Hidden 1/0 flag. Ranks the parent category groups by incident count and keeps the top 5 - Rajneesh 10 Sep 2026. Apply as a visual-level filter (is 1) on the category chart.
+	measure 'Is Top 5 Category' = VAR cat = SELECTEDVALUE ( dim_incident_category[category_group] ) VAR r = RANKX ( ALLSELECTED ( dim_incident_category[category_group] ), [Incidents by Category (Top 5)], , DESC, DENSE ) RETURN IF ( NOT ISBLANK ( cat ) && NOT ISBLANK ( r ) && r <= 5, 1, 0 )
+		formatString: 0
+		isHidden
+		lineageTag: 81f80553-8c4d-4fb1-8b16-c63d33d80bd4
+
+	/// Subtitle for the category chart. States the 2018 scope so nobody reads the chart as all-history.
+	measure 'Category Scope Label' = "Top 5 categories, May 2018 onward - categories were not recorded before then"
+		displayFolder: Card Labels
+		lineageTag: 9b32df5b-20c1-4fc1-af16-0143aa8bfc02
+
+	/// Freshness label. Latest reported date in gold, ignoring future-dated records - one incident is keyed 22 Aug 2040 at source. Never typed in.
+	measure 'Data As Of Label' = VAR latest = CALCULATE ( MAX ( fact_mine_incident[reported_date] ), fact_mine_incident[reported_date] <= TODAY() ) RETURN "Data current through " & FORMAT ( latest, "d MMM yyyy" )
 		displayFolder: Card Labels
 		lineageTag: d4adbf4c-49e2-49e1-9c5e-a1d9fe27c51d
 

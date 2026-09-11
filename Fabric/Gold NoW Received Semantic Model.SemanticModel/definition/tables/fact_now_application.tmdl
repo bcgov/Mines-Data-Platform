@@ -1,0 +1,149 @@
+table fact_now_application
+	lineageTag: 7d69cf72-25bd-4cf0-8338-7d6c1e3d8276
+	sourceLineageTag: [gold].[fact_now_application]
+
+	/// Report base: distinct NoW applications received, status <> PCO, exclude administrative amendments. Used for the commodity chart (sliced by notice_of_work_type_description).
+	measure 'NoWs Received Total' = CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)
+		formatString: #,##0
+		displayFolder: NoW Received KPIs
+		lineageTag: ce36246d-17c9-465e-b036-f8180c2b1460
+
+	/// FYTD received: distinct now_application_id by submitted_date, status<>PCO, exclude admin. DEMO ANCHOR: latest available data date (max submitted_date, capped at today); self-heals to true FYTD once current data lands.
+	measure 'NoWs Received FYTD' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=50), dim_date[fiscal_year]) VAR CurrentDate = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR FYStartYear = IF(MONTH(CurrentDate)>=4, YEAR(CurrentDate), YEAR(CurrentDate)-1) VAR FYStart = DATE(FYStartYear,4,1) RETURN CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[submitted_date]>=FYStart, fact_now_application[submitted_date]<CurrentDate+1, fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)
+		formatString: #,##0
+		displayFolder: NoW Received KPIs
+		lineageTag: fee58097-18e9-4e82-9e51-3898441c1459
+
+	/// Prior-FY comparison, same window one year earlier (status<>PCO, exclude admin).
+	measure 'NoWs Received Same Time Last FY' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=50), dim_date[fiscal_year]) VAR CurrentDate = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR FYStartYear = IF(MONTH(CurrentDate)>=4, YEAR(CurrentDate), YEAR(CurrentDate)-1) VAR LastFYStart = DATE(FYStartYear-1,4,1) VAR LastFYSameDate = DATE(YEAR(CurrentDate)-1, MONTH(CurrentDate), DAY(CurrentDate)) RETURN CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[submitted_date]>=LastFYStart, fact_now_application[submitted_date]<LastFYSameDate+1, fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)
+		formatString: #,##0
+		displayFolder: NoW Received KPIs
+		lineageTag: 6acdee05-6cfb-49e2-a550-7a5593c8ccc7
+
+	/// Last completed month up to the anchor date (status<>PCO, exclude admin).
+	measure 'NoWs Received Last Month' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=50), dim_date[fiscal_year]) VAR CurrentDate = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR ThisMonthStart = DATE(YEAR(CurrentDate), MONTH(CurrentDate),1) VAR LastMonthStart = EDATE(ThisMonthStart,-1) RETURN CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[submitted_date]>=LastMonthStart, fact_now_application[submitted_date]<ThisMonthStart, fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)
+		formatString: #,##0
+		displayFolder: NoW Received KPIs
+		lineageTag: 4567ee17-eb0d-4c0a-bdbf-7d416f9d1936
+
+	/// FYTD received minus same time last FY.
+	measure 'NoWs Received YoY Delta' = [NoWs Received FYTD] - [NoWs Received Same Time Last FY]
+		formatString: +#,0;-#,0;0
+		displayFolder: NoW Received KPIs
+		lineageTag: bcfae502-1d80-48f0-9f2d-049a4f0debcd
+
+	/// Series (Metabase 'New Permits'): distinct received New Permit applications, status<>PCO, exclude admin. By submitted_date via dim_date.
+	measure 'NoWs Received New Permits' = CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0, fact_now_application[type_of_application]="New Permit")
+		formatString: #,##0
+		displayFolder: NoW Received Trend
+		lineageTag: 59126a5e-f016-4295-8b8c-441e430cb413
+
+	/// Series (Metabase 'Amendments'): distinct received Amendment applications, status<>PCO, exclude admin. By submitted_date via dim_date.
+	measure 'NoWs Received Amendments' = CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0, fact_now_application[type_of_application]="Amendment")
+		formatString: #,##0
+		displayFolder: NoW Received Trend
+		lineageTag: 10142e1f-5a76-4b42-b6c6-5cabc9647dbf
+
+	/// Dynamic KPI card label for FYTD (anchored to latest available data).
+	measure 'Lbl NoW Received FYTD' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=50), dim_date[fiscal_year]) VAR d = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR s = IF(MONTH(d)>=4, YEAR(d), YEAR(d)-1) VAR fy = RIGHT(FORMAT(s,"0000"),2) & "/" & RIGHT(FORMAT(s+1,"0000"),2) RETURN "Number of NoWs Received FYTD " & fy & " (latest FY with data)"
+		displayFolder: NoW Received Card Labels
+		lineageTag: 69269ce3-983f-4e15-8731-bdf54f5c9d3e
+
+	/// Dynamic KPI card label for same-time-last-FY.
+	measure 'Lbl NoW Received Same Last FY' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=50), dim_date[fiscal_year]) VAR d = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR s = IF(MONTH(d)>=4, YEAR(d), YEAR(d)-1) VAR fyp = FORMAT(s-1,"0000") & "/" & RIGHT(FORMAT(s,"0000"),2) RETURN "Number of NoWs Received same time Last FY " & fyp
+		displayFolder: NoW Received Card Labels
+		lineageTag: 5a0c873d-77f1-40b5-bb9c-aa1e796f54fc
+
+	/// Dynamic KPI card label for last completed month.
+	measure 'Lbl NoW Received Last Month' = VAR _ByFY = ADDCOLUMNS(VALUES(dim_date[fiscal_year]), "@c", CALCULATE(DISTINCTCOUNT(fact_now_application[now_application_id]), fact_now_application[now_application_status_code]<>"PCO", fact_now_application[is_administrative_amendment]=0)) VAR _AnchorFY = MAXX(FILTER(_ByFY,[@c]>=50), dim_date[fiscal_year]) VAR d = IF(ISBLANK(_AnchorFY), TODAY(), MIN(DATE(_AnchorFY+1,3,31), TODAY())) VAR s = IF(MONTH(d)>=4, YEAR(d), YEAR(d)-1) VAR fy = RIGHT(FORMAT(s,"0000"),2) & "/" & RIGHT(FORMAT(s+1,"0000"),2) VAR lm = FORMAT(EOMONTH(d,-1),"MMMM") RETURN "Number of NoWs Received Last Month " & lm & " FY " & fy
+		displayFolder: NoW Received Card Labels
+		lineageTag: b046346c-2b7f-47f2-87b6-e4c8bf2e2171
+
+	/// Dynamic data-freshness label = latest submitted_date in the gold data.
+	measure 'NoW Received Data As Of Label' = "Data current through " & FORMAT(MAX(fact_now_application[submitted_date]), "d MMM yyyy")
+		displayFolder: NoW Received Card Labels
+		lineageTag: 119dcdc3-ab29-4317-b994-48a37605acaf
+
+	column now_application_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 2bfb86b5-03f1-46f0-96e1-1e3e255fa581
+		sourceLineageTag: now_application_id
+		summarizeBy: none
+		sourceColumn: now_application_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column submitted_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 0d50db78-d8a6-415f-8bc2-1c20645fc3d5
+		sourceLineageTag: submitted_date
+		summarizeBy: none
+		sourceColumn: submitted_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column submitted_date_key
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 33b709e8-8ab5-4579-8b64-6db5aab31e9d
+		sourceLineageTag: submitted_date_key
+		summarizeBy: none
+		sourceColumn: submitted_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column type_of_application
+		dataType: string
+		lineageTag: 6decf76b-1061-4ba1-87bb-c95b8a2a34e5
+		sourceLineageTag: type_of_application
+		summarizeBy: none
+		sourceColumn: type_of_application
+
+		annotation SummarizationSetBy = Automatic
+
+	column now_application_status_code
+		dataType: string
+		lineageTag: c1b187b3-5063-4a23-81fa-1d7d865795b7
+		sourceLineageTag: now_application_status_code
+		summarizeBy: none
+		sourceColumn: now_application_status_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column notice_of_work_type_code
+		dataType: string
+		lineageTag: f337216e-671a-45c9-a397-f6dca6921526
+		sourceLineageTag: notice_of_work_type_code
+		summarizeBy: none
+		sourceColumn: notice_of_work_type_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column notice_of_work_type_description
+		dataType: string
+		lineageTag: edbe4697-1db0-4e6e-8427-deba4cd843f3
+		sourceLineageTag: notice_of_work_type_description
+		summarizeBy: none
+		sourceColumn: notice_of_work_type_description
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_administrative_amendment
+		dataType: int64
+		formatString: 0
+		lineageTag: 3d134f9a-b93a-4125-aaf1-cdd22f7eaf93
+		sourceLineageTag: is_administrative_amendment
+		summarizeBy: none
+		sourceColumn: is_administrative_amendment
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_now_application = entity
+		mode: directLake
+		source
+			entityName: fact_now_application
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_gold'
+

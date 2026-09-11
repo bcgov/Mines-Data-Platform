@@ -8,32 +8,14 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
-# META     }
-# META   }
-# META }
-
-# CELL ********************
-
-# Fabric notebook source
-
-# METADATA ********************
-
-# META {
-# META   "kernel_info": { "name": "synapse_pyspark" },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
-# META       "known_lakehouses": [ { "id": "5e43f78b-2156-4469-980e-bffda0295fac" } ]
 # META     }
 # META   }
 # META }
@@ -146,6 +128,18 @@ df = df.withColumn(
     F.concat(F.col("month_short"), F.lit(" "), F.col("year").cast("string"))
 )
 
+# Rolling "last 6 fiscal years" label (current FY + 5 prior; NULL otherwise) — used by the NoW
+# Permitting model (dim_date.fiscal_year_last6). Used to be an ALTER/UPDATE inside
+# nb_build_fact_now_permit; generated here so a dim_date rebuild never loses it.
+_today = spark.sql("SELECT year(current_date()) AS y, month(current_date()) AS m").first()
+CURRENT_FY = _today.y if _today.m >= 4 else _today.y - 1
+df = df.withColumn("fiscal_year_last6",
+                   F.when(F.col("fiscal_year").between(CURRENT_FY - 5, CURRENT_FY), F.col("fiscal_year_label")))
+
+# Numeric sort key for fiscal_month_label (e.g. 202501 = Apr 2025, 1st month of FY2025/26). The semantic models sort
+# the month axis by this column; it used to be added by hand (ALTER TABLE) in July — now scripted.
+df = df.withColumn("fiscal_year_month_key", (F.col("fiscal_year") * 100 + F.col("fiscal_month")).cast("int"))
+
 print(f"Generated {df.count()} date rows from {START_DATE} to {END_DATE}")
 df.show(5)
 
@@ -171,58 +165,6 @@ spark.sql("""
     WHERE full_date IN ('2026-04-01', '2026-06-30', '2026-07-01', '2027-03-31')
     ORDER BY full_date
 """).show()
-
-# METADATA ********************
-# META { "language": "python", "language_group": "synapse_pyspark" }
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-df = spark.sql("SELECT * FROM lh_gold.gold.dim_date LIMIT 1000")
-display(df)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-df = spark.sql("SELECT * FROM lh_gold.gold.dim_permit LIMIT 1000")
-display(df)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-tables = [
-    "silver.mine_incident",
-    "silver.mine_incident_document",
-    "silver.mine_incident_followup_type_code",
-    "silver.mine_status",
-    "silver.mine_document",
-    "silver.mine_verified_status"
-]
-
-for t in tables:
-    try:
-        count = spark.table(t).count()
-        print(f"✅ {t} — {count:,} rows")
-    except Exception as e:
-        print(f"❌ {t} — NOT FOUND")
 
 # METADATA ********************
 

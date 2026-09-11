@@ -1,0 +1,9 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/variableLibrary/definition/valueSet/1.0.0/schema.json",
+  "name": "PROD",
+  "variableOverrides": [
+    { "name": "environment",    "value": "prod" },
+    { "name": "lakehouse_name", "value": "mcm_mdp_lh1_prod" },
+    { "name": "warehouse_name", "value": "mcm-mdp-fabwh1-prod" }
+  ]
+}

@@ -8,12 +8,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
@@ -24,11 +24,8 @@
 
 from pyspark.sql import functions as F
 
-WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
-LH1_ID       = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"   # mines_data_platform_lh1 (holds silver)
-silver_path  = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{LH1_ID}/Tables/silver/nris_inspection_type/"
 
-df = (spark.read.format("delta").load(silver_path)
+df = (spark.table("silver.nris_inspection_type")
         .select(F.col("inspection_type_id").cast("int").alias("inspection_type_id"),
                 F.col("inspection_type_code").alias("inspection_type_name"))
         .dropDuplicates(["inspection_type_id"]))

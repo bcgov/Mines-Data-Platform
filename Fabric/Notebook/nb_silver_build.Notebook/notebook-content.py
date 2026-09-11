@@ -8,25 +8,27 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "a0190e0e-c2f5-4740-ab90-a2f29b6e6991",
-# META       "default_lakehouse_name": "lh_silver",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "a0190e0e-c2f5-4740-ab90-a2f29b6e6991"
-# META         }
-# META       ]
-# META     },
-# META     "warehouse": {
-# META       "default_warehouse": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
-# META       "known_warehouses": [
-# META         {
-# META           "id": "dad1e7ab-adc2-bd51-408b-33e59ed9a608",
-# META           "type": "Datawarehouse"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
 # META   }
+# META }
+
+# CELL ********************
+
+%run nb_config
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
 # META }
 
 # CELL ********************
@@ -48,10 +50,7 @@ from datetime import datetime
 import uuid
 import traceback
 
-WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
-BRONZE_LH_ID = "8cd34a44-500a-47d9-aa2d-5ad0c2149858"
-WAREHOUSE = "mines-data-platform-fabwh1"
-SILVER_SCHEMA = "silver"
+# WAREHOUSE, BRONZE_SCHEMA and SILVER_SCHEMA come from nb_config / vl_mdp (one lakehouse per env).
 QUARANTINE_SCHEMA = "quarantine"
 
 # bronze lineage/control columns — used for dedup/cursor, then dropped from silver.
@@ -76,7 +75,7 @@ spark.conf.set("spark.sql.parquet.int96RebaseModeInRead", "LEGACY")
 
 
 def bronze_path(table):
-    return f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/{table}/"
+    return f"Tables/{BRONZE_SCHEMA}/{table}"   # same lakehouse, relative path
 
 
 def normalize(name):
@@ -105,7 +104,8 @@ def log_error(layer, run_id, entity, error_message, stack_trace=None, target_tab
                .withColumn("error_state", F.lit(None).cast(IntegerType()))
                .withColumn("error_procedure", F.lit(None).cast(StringType()))
                .withColumn("error_line", F.lit(None).cast(IntegerType())))
-        edf.write.mode("append").synapsesql(f"{WAREHOUSE}.app.error_log")
+        # notebooks log to their own table: the pipeline-owned app.error_log has a different (IDENTITY) shape
+        edf.write.mode("append").synapsesql(f"{WAREHOUSE}.app.nb_error_log")
     except Exception as e:
         print(f"log_error failed (non-fatal): {e}")
 
@@ -331,10 +331,10 @@ try:
 except Exception as e:
     print(f"warehouse silver_run_log write failed: {e}")
 try:
-    bp = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{BRONZE_LH_ID}/Tables/bronze/silver_run_log/"
+    bp = f"Tables/{SILVER_SCHEMA}/silver_run_log"   # lakehouse copy of the run log (quick readback)
     summary_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(bp)
 except Exception as e:
-    print(f"bronze readback write failed: {e}")
+    print(f"lakehouse run-log copy failed (non-fatal): {e}")
 
 ok = sum(1 for r in results if r[4] == "OK")
 failed = sum(1 for r in results if r[4] == "FAILED")
@@ -342,20 +342,6 @@ print("=" * 80)
 print(f"SILVER BUILD DONE | ok={ok} failed={failed} force_full={force_full} "
       f"RUN_ID={RUN_ID} duration={(datetime.now()-START).total_seconds():.1f}s")
 print("=" * 80)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-RUN_ID = "manual_insp_reload"
-res = process({"bronze_table": "nris_inspection", "primary_key": None, "load_type": "FULL"}, None, True)
-print("RESULT:", res)
-print("silver now:", spark.table("silver.nris_inspection").count())
 
 # METADATA ********************
 

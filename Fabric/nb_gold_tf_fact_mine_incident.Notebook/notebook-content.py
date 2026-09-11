@@ -8,12 +8,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "5e43f78b-2156-4469-980e-bffda0295fac",
-# META       "default_lakehouse_name": "lh_gold",
-# META       "default_lakehouse_workspace_id": "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0",
+# META       "default_lakehouse": "896cd6b0-6cd0-47e5-8438-f50dde9564b8",
+# META       "default_lakehouse_name": "mcm_mdp_lh1_dev",
+# META       "default_lakehouse_workspace_id": "475a3e70-610e-49ae-be54-dd2c31167535",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "5e43f78b-2156-4469-980e-bffda0295fac"
+# META           "id": "896cd6b0-6cd0-47e5-8438-f50dde9564b8"
 # META         }
 # META       ]
 # META     }
@@ -95,13 +95,10 @@ OBJECT_NAME   = NOTEBOOK_NAME[len(NB_PREFIX):]
 TARGET_TABLE  = f"{STG_SCHEMA}.{OBJECT_NAME}"
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {STG_SCHEMA}")
 
-# Silver is cross-lakehouse (gold is the default lakehouse) -> read via abfss.
-WORKSPACE_ID = "8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0"
-SILVER_LH_ID = "a0190e0e-c2f5-4740-ab90-a2f29b6e6991"
-base = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{SILVER_LH_ID}/Tables/silver"
+# Silver is in the same lakehouse (schema silver) -> read by table name, no IDs needed.
 
 # Silver source — mine_incident is confirmed in Silver (silver_load_ts 2026-06-26).
-spark.read.format("delta").load(f"{base}/mine_incident/").createOrReplaceTempView("src_mine_incident")
+spark.table("silver.mine_incident").createOrReplaceTempView("src_mine_incident")
 
 # Gold dimension lookups — Gold is the default lakehouse, readable as spark.table().
 spark.table("gold.dim_mine").createOrReplaceTempView("gold_dim_mine")

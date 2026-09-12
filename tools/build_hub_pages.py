@@ -302,6 +302,15 @@ def text(x, y, w, runs, align="left", lines=None, bg=None):
     bold = any(r[3] for r in runs)
     # runs are ALREADY scaled above - use the raw metric so ts() is not applied twice
     h = _tb_height_raw(joined, w, size, bold, lines)
+    # A forced line count that the text actually exceeds is CLIPPED by the Service
+    # and shows a scrollbar. The bounds check cannot see it - the box is in place,
+    # the text inside is not - so flag it here instead.
+    if lines is not None:
+        natural = wrap_lines(joined, w - TB_HPAD, size, bold)
+        if natural > lines:
+            _issues.append(f"{_state['page']}: text {joined[:42]!r} forced to "
+                           f"{lines} line(s) but needs {natural} at {size}px in "
+                           f"w={w}")
     tr = []
     for value, sz, color, bd in runs:
         style = {"fontSize": f"{sz}px", "color": color}
@@ -788,29 +797,32 @@ def kv_panel(x, y, w, h, heading, sub, rows, label_w=160, size=10, color=INK):
 # =============================================================================
 AUDIENCES = [
     ("Executive", P_EXEC, "Monthly corporate reporting, summary level",
-     [("Inspections", BLUE, "Completed inspections against the Service Plan target"),
-      ("Incidents", RED, "Reported incidents, dangerous occurrences, injuries"),
+     [("Inspections", BLUE, "Completed inspections vs Service Plan target"),
+      ("Incidents", RED, "Incidents, dangerous occurrences, injuries"),
       ("Notice of Work", GREEN, "Permits issued - new, amended, administrative")]),
     ("Compliance & Enforcement", P_COMP, "Field and planning detail, incl. GIS",
-     [("Inspections", BLUE, "By type, region and inspector; sites not yet visited"),
-      ("Incidents", RED, "Where injuries and dangerous occurrences concentrate"),
+     [("Inspections", BLUE, "By type, region and inspector"),
+      ("Incidents", RED, "Where injuries and incidents concentrate"),
       ("Inspection planning map", PURPLE, "Which sites to visit next, by risk and last visit")]),
     ("Permitting & Titles", P_PERM, "Permitting, turnaround and Mineral Titles",
      [("Notice of Work", GREEN, "Permits issued by type, amendments separated"),
-      ("Permit turnaround", BLUE, "Application to decision, and where the backlog sits"),
+      ("Permit turnaround", BLUE, "Application to decision, and the backlog"),
       ("Mineral Titles extract", PURPLE, "Active titles, parcels and authorisations")]),
     ("Audit & Analysis", P_AUDIT, "All three reports, with lineage and export",
      [("Inspections", BLUE, "Counts by type, region and period, with export"),
       ("Incidents", RED, "Incidents and outcomes by period"),
       ("Notice of Work", GREEN, "Permits issued by type and period"),
-      ("Dictionary & lineage", PURPLE, "Where each measure comes from, and who validated it")]),
+      ("Dictionary & lineage", PURPLE, "Where each measure comes from")]),
 ]
 
+# Captions shortened 2026-09-12 so each still fits ONE line at the larger type -
+# a wrapped caption in a lines=1 box is clipped by the Service and shows a
+# scrollbar, which is exactly how the first pass shipped.
 HELP_TILES = [
-    ("How to read these reports", "Definitions, trust badges and sources", P_DEFS),
-    ("Counting rules", "Fiscal calendar, and what each figure counts", P_RULES),
+    ("How to read these reports", "Definitions, badges and sources", P_DEFS),
+    ("Counting rules", "Fiscal calendar and definitions", P_RULES),
     ("Request a change", "Raise a data or definition issue", P_CHANGE),
-    ("Access & data states", "What you see with no access, or stale data", P_STATES),
+    ("Access & data states", "No-access and stale-data states", P_STATES),
 ]
 
 start_page(P_HOME, "Home")
@@ -829,7 +841,7 @@ hy += _h + 8
 
 # Bottom band is anchored to the footnote; the audience columns take whatever
 # is left, so the page fills exactly once and never guesses.
-BAND_H = 224          # was 196; the larger type needs the extra rows
+BAND_H = 240          # was 196; the larger type needs the extra rows
 BAND_Y = (H - 44 - 12) - BAND_H
 A_GAP = 24
 A_W = (CONTENT_W - A_GAP * 3) // 4
@@ -877,9 +889,11 @@ with region(MARGIN, BAND_Y, HELP_W, BAND_H, "help band"):
         tx = MARGIN + 24 + j * (t_w + t_gap)
         rect(tx, ty, t_w, t_h, fill=BODY, border=LINE)
         with region(tx, ty, t_w, t_h, f"help tile {t_label!r}"):
-            rect(tx + 16, ty + 14, 12, 12, fill=NAVY, radius=2)
-            text(tx + 16, ty + 28, t_w - 32, [(t_label, 10, INK, True)], lines=1)
-            text(tx + 16, ty + 52, t_w - 32, [(t_sub, 9, MUTED, False)], lines=1)
+            rect(tx + 16, ty + 12, 12, 12, fill=NAVY, radius=2)
+            lh = text(tx + 16, ty + 26, t_w - 32, [(t_label, 10, INK, True)],
+                      lines=1)
+            text(tx + 16, ty + 26 + lh, t_w - 32, [(t_sub, 9, MUTED, False)],
+                 lines=1)
         hit_target(tx, ty, t_w, t_h, t_target)
 
 rect(MARGIN + HELP_W + A_GAP, BAND_Y, CONTACT_W, BAND_H, fill=WHITE, border=LINE)
@@ -887,16 +901,17 @@ with region(MARGIN + HELP_W + A_GAP, BAND_Y, CONTACT_W, BAND_H, "contacts band")
     kx = MARGIN + HELP_W + A_GAP
     ky = BAND_Y + 14
     ky += text(kx + 24, ky, CONTACT_W - 48, [("Who to ask", 12, INK, True)])
-    ky += text(kx + 24, ky, CONTACT_W - 48,
-               [("Named owners, not a shared inbox.", 9, MUTED, False)],
-               lines=1) + 4
+    ky += 4
+    # Derived pitch. The old +24 / 52 constants were sized for the 21px line box;
+    # at the new type the name box alone is 42 tall and the email sat on top of it.
     for initials, name, sub in CONTACTS_STD:
-        oval(kx + 24, ky + 2, 30, 30, NAVY)
-        text(kx + 24, vcy(ky + 2, 30), 30, [(initials, 9, WHITE, True)],
+        oval(kx + 24, ky + 4, 34, 34, NAVY)
+        text(kx + 22, vcy(ky + 4, 34, ts(9)), 38, [(initials, 9, WHITE, True)],
              align="center")
-        text(kx + 66, ky, CONTACT_W - 90, [(name, 10, INK, True)], lines=1)
-        text(kx + 66, ky + 24, CONTACT_W - 90, [(sub, 9, NAVY, False)], lines=1)
-        ky += 52
+        nh = text(kx + 70, ky, CONTACT_W - 94, [(name, 10, INK, True)], lines=1)
+        sh = text(kx + 70, ky + nh - 8, CONTACT_W - 94,
+                  [(sub, 9, NAVY, False)], lines=1)
+        ky += nh - 8 + sh + 8
 
 footnote("Use the page list on the left to move between views. What each audience "
          "actually sees is set under Manage audiences on the app \u2014 this page is "

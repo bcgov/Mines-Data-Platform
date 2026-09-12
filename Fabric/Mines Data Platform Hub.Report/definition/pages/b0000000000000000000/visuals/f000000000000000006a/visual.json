@@ -3,7 +3,7 @@
   "name": "f000000000000000006a",
   "position": {
     "x": 1481,
-    "y": 663,
+    "y": 651,
     "z": 10600,
     "height": 42,
     "width": 389,
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Where each measure comes from, and who validated it",
+                    "value": "Where each measure comes from",
                     "textStyle": {
                       "fontSize": "15px",
                       "color": "#605E5C"

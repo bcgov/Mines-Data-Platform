@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Completed inspections against the Service Plan target",
+                    "value": "Completed inspections vs Service Plan target",
                     "textStyle": {
                       "fontSize": "15px",
                       "color": "#605E5C"

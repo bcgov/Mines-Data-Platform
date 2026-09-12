@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000008d",
   "position": {
-    "x": 1454,
-    "y": 950,
+    "x": 1500,
+    "y": 928,
     "z": 14100,
     "height": 42,
-    "width": 30,
+    "width": 366,
     "tabOrder": 14100
   },
   "visual": {
@@ -19,15 +19,15 @@
               {
                 "textRuns": [
                   {
-                    "value": "NN",
+                    "value": "Nhung Nguyen",
                     "textStyle": {
-                      "fontSize": "15px",
-                      "color": "#FFFFFF",
+                      "fontSize": "16px",
+                      "color": "#252423",
                       "fontWeight": "bold"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

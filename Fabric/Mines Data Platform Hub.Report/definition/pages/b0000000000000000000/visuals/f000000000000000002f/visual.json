@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "By type, region and inspector; sites not yet visited",
+                    "value": "By type, region and inspector",
                     "textStyle": {
                       "fontSize": "15px",
                       "color": "#605E5C"

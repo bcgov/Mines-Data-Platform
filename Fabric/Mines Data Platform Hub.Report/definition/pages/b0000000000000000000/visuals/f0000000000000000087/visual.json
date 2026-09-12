@@ -3,32 +3,62 @@
   "name": "f0000000000000000087",
   "position": {
     "x": 1454,
-    "y": 856,
+    "y": 848,
     "z": 13500,
-    "height": 42,
-    "width": 412,
+    "height": 34,
+    "width": 34,
     "tabOrder": 13500
   },
   "visual": {
-    "visualType": "textbox",
+    "visualType": "shape",
     "objects": {
-      "general": [
+      "shape": [
         {
           "properties": {
-            "paragraphs": [
-              {
-                "textRuns": [
-                  {
-                    "value": "Named owners, not a shared inbox.",
-                    "textStyle": {
-                      "fontSize": "15px",
-                      "color": "#605E5C"
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'oval'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fill": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fillColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#013366'"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
+                }
               }
-            ]
+            }
+          }
+        }
+      ],
+      "outline": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
           }
         }
       ]

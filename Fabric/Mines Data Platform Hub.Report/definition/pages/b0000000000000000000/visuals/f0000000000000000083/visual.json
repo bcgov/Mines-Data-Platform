@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "What you see with no access, or stale data",
+                    "value": "No-access and stale-data states",
                     "textStyle": {
                       "fontSize": "15px",
                       "color": "#605E5C"

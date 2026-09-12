@@ -3,9 +3,9 @@
   "name": "f000000000000000000f",
   "position": {
     "x": 30,
-    "y": 221,
+    "y": 255,
     "z": 1500,
-    "height": 33,
+    "height": 42,
     "width": 150,
     "tabOrder": 1500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Your reports",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

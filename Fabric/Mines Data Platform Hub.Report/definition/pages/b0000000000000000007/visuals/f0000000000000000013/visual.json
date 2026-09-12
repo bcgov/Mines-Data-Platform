@@ -3,9 +3,9 @@
   "name": "f0000000000000000013",
   "position": {
     "x": 30,
-    "y": 323,
+    "y": 366,
     "z": 1900,
-    "height": 33,
+    "height": 42,
     "width": 1860,
     "tabOrder": 1900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "You don't have access to this app yet",
                     "textStyle": {
-                      "fontSize": "16px",
+                      "fontSize": "24px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

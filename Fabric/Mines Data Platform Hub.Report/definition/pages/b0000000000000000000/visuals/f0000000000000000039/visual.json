@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000039",
   "position": {
-    "x": 527,
-    "y": 640,
+    "x": 539,
+    "y": 616,
     "z": 5700,
-    "height": 34,
-    "width": 405,
+    "height": 42,
+    "width": 389,
     "tabOrder": 5700
   },
   "visual": {
@@ -21,9 +21,8 @@
                   {
                     "value": "Which sites to visit next, by risk and last visit",
                     "textStyle": {
-                      "fontSize": "14px",
-                      "color": "#605E5C",
-                      "fontWeight": "normal"
+                      "fontSize": "15px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

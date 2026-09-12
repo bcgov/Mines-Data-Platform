@@ -3,9 +3,9 @@
   "name": "f0000000000000000032",
   "position": {
     "x": 54,
-    "y": 629,
+    "y": 699,
     "z": 5000,
-    "height": 33,
+    "height": 42,
     "width": 600,
     "tabOrder": 5000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Request states",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

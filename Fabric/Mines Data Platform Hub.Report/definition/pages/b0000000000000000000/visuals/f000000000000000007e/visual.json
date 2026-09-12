@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000007e",
   "position": {
-    "x": 732,
-    "y": 990,
+    "x": 742,
+    "y": 954,
     "z": 12600,
-    "height": 34,
-    "width": 300,
+    "height": 42,
+    "width": 286,
     "tabOrder": 12600
   },
   "visual": {
@@ -21,9 +21,8 @@
                   {
                     "value": "Raise a data or definition issue",
                     "textStyle": {
-                      "fontSize": "14px",
-                      "color": "#605E5C",
-                      "fontWeight": "normal"
+                      "fontSize": "15px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

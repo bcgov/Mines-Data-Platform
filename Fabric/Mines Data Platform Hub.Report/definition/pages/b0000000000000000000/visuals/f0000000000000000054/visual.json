@@ -3,9 +3,9 @@
   "name": "f0000000000000000054",
   "position": {
     "x": 1463,
-    "y": 316,
+    "y": 296,
     "z": 8400,
-    "height": 47,
+    "height": 42,
     "width": 407,
     "tabOrder": 8400
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Audit &amp; Analysis",
+                    "value": "Audit & Analysis",
                     "textStyle": {
-                      "fontSize": "22px",
+                      "fontSize": "21px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

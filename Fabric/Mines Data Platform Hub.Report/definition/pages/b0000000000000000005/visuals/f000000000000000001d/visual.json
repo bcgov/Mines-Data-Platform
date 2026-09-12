@@ -3,9 +3,9 @@
   "name": "f000000000000000001d",
   "position": {
     "x": 1449,
-    "y": 402,
+    "y": 453,
     "z": 2900,
-    "height": 54,
+    "height": 72,
     "width": 431,
     "tabOrder": 2900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Ad-hoc or user-built content. Distinct grey styling so it is never mistaken for a governed figure.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#252423"
                     }
                   }

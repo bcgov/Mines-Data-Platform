@@ -3,10 +3,10 @@
   "name": "f0000000000000000005",
   "position": {
     "x": 190,
-    "y": 14,
+    "y": 18,
     "z": 500,
-    "height": 50,
-    "width": 620,
+    "height": 42,
+    "width": 520,
     "tabOrder": 500
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Mines Data Platform",
                     "textStyle": {
-                      "fontSize": "24px",
+                      "fontSize": "26px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

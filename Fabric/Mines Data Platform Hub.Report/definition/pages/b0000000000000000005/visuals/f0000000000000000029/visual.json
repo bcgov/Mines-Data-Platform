@@ -5,7 +5,7 @@
     "x": 30,
     "y": 1036,
     "z": 4100,
-    "height": 33,
+    "height": 42,
     "width": 1860,
     "tabOrder": 4100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Definitions are maintained here as the single source of truth. Counting rules and the fiscal calendar are on the next page.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#8A8886"
                     }
                   }

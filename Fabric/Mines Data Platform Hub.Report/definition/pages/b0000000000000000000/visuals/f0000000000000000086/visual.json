@@ -3,9 +3,9 @@
   "name": "f0000000000000000086",
   "position": {
     "x": 1454,
-    "y": 848,
+    "y": 814,
     "z": 13400,
-    "height": 44,
+    "height": 42,
     "width": 412,
     "tabOrder": 13400
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Who to ask",
                     "textStyle": {
-                      "fontSize": "20px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

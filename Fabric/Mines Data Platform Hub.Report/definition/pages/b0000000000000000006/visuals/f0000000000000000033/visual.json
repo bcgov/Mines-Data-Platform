@@ -3,9 +3,9 @@
   "name": "f0000000000000000033",
   "position": {
     "x": 54,
-    "y": 662,
+    "y": 741,
     "z": 5100,
-    "height": 33,
+    "height": 42,
     "width": 1000,
     "tabOrder": 5100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The three states the button shows, so a submitted request never looks like nothing happened.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000084",
   "position": {
-    "x": 1050,
-    "y": 930,
+    "x": 1062,
+    "y": 902,
     "z": 13200,
-    "height": 90,
-    "width": 316,
+    "height": 108,
+    "width": 318,
     "tabOrder": 13200
   },
   "visual": {
@@ -39,22 +39,6 @@
           }
         }
       ],
-      "text": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
       "outline": [
         {
           "properties": {
@@ -80,10 +64,36 @@
             }
           }
         }
+      ],
+      "text": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
       "visualLink": [
         {
           "properties": {
@@ -105,19 +115,6 @@
               "expr": {
                 "Literal": {
                   "Value": "'b0000000000000000007'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
                 }
               }
             }

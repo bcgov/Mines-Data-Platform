@@ -3,9 +3,9 @@
   "name": "f0000000000000000027",
   "position": {
     "x": 54,
-    "y": 914,
+    "y": 936,
     "z": 3900,
-    "height": 33,
+    "height": 42,
     "width": 136,
     "tabOrder": 3900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "VALIDATED BY",
                     "textStyle": {
-                      "fontSize": "8px",
+                      "fontSize": "13px",
                       "color": "#8A8886",
                       "fontWeight": "bold"
                     }

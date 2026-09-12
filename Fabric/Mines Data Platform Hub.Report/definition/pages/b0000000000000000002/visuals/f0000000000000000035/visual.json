@@ -3,9 +3,9 @@
   "name": "f0000000000000000035",
   "position": {
     "x": 54,
-    "y": 660,
+    "y": 698,
     "z": 5300,
-    "height": 33,
+    "height": 42,
     "width": 760,
     "tabOrder": 5300
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Curated commentary \u2014 written for field and planning use",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

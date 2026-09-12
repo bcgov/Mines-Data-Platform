@@ -3,9 +3,9 @@
   "name": "f000000000000000003f",
   "position": {
     "x": 1520,
-    "y": 606,
+    "y": 660,
     "z": 6300,
-    "height": 33,
+    "height": 42,
     "width": 340,
     "tabOrder": 6300
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Contacts & help",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

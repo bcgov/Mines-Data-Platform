@@ -3,9 +3,9 @@
   "name": "f0000000000000000013",
   "position": {
     "x": 50,
-    "y": 358,
+    "y": 340,
     "z": 1900,
-    "height": 36,
+    "height": 42,
     "width": 407,
     "tabOrder": 1900
   },
@@ -22,8 +22,7 @@
                     "value": "Monthly corporate reporting, summary level",
                     "textStyle": {
                       "fontSize": "15px",
-                      "color": "#605E5C",
-                      "fontWeight": "normal"
+                      "color": "#605E5C"
                     }
                   }
                 ],

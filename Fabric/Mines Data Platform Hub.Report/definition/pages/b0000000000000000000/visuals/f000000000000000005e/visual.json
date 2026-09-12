@@ -3,10 +3,10 @@
   "name": "f000000000000000005e",
   "position": {
     "x": 1489,
-    "y": 506,
+    "y": 475,
     "z": 9400,
     "height": 42,
-    "width": 381,
+    "width": 373,
     "tabOrder": 9400
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Incidents  →",
+                    "value": "Incidents  \u2192",
                     "textStyle": {
-                      "fontSize": "19px",
-                      "color": "#252423",
-                      "fontWeight": "normal"
+                      "fontSize": "21px",
+                      "color": "#252423"
                     }
                   }
                 ],

@@ -3,9 +3,9 @@
   "name": "f0000000000000000033",
   "position": {
     "x": 54,
-    "y": 606,
+    "y": 656,
     "z": 5100,
-    "height": 33,
+    "height": 42,
     "width": 620,
     "tabOrder": 5100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "What changed this month",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

@@ -3,9 +3,9 @@
   "name": "f0000000000000000011",
   "position": {
     "x": 54,
-    "y": 273,
+    "y": 316,
     "z": 1700,
-    "height": 33,
+    "height": 42,
     "width": 900,
     "tabOrder": 1700
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Shown on every report card and, once the validation layer lands, on every KPI.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

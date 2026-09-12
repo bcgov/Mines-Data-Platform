@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000004f",
   "position": {
-    "x": 998,
-    "y": 640,
+    "x": 1010,
+    "y": 616,
     "z": 7900,
-    "height": 34,
-    "width": 405,
+    "height": 42,
+    "width": 389,
     "tabOrder": 7900
   },
   "visual": {
@@ -21,9 +21,8 @@
                   {
                     "value": "Active titles, parcels and authorisations",
                     "textStyle": {
-                      "fontSize": "14px",
-                      "color": "#605E5C",
-                      "fontWeight": "normal"
+                      "fontSize": "15px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

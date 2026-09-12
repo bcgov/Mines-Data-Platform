@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000079",
   "position": {
-    "x": 400,
-    "y": 990,
+    "x": 406,
+    "y": 954,
     "z": 12100,
-    "height": 34,
-    "width": 300,
+    "height": 42,
+    "width": 286,
     "tabOrder": 12100
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Fiscal calendar and figure definitions",
+                    "value": "Fiscal calendar, and what each figure counts",
                     "textStyle": {
-                      "fontSize": "14px",
-                      "color": "#605E5C",
-                      "fontWeight": "normal"
+                      "fontSize": "15px",
+                      "color": "#605E5C"
                     }
                   }
                 ],

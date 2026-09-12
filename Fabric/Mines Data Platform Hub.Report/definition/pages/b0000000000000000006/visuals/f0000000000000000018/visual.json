@@ -3,9 +3,9 @@
   "name": "f0000000000000000018",
   "position": {
     "x": 100,
-    "y": 389,
+    "y": 441,
     "z": 2400,
-    "height": 33,
+    "height": 42,
     "width": 1346,
     "tabOrder": 2400
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The button writes a work item through Power Automate \u2014 no separate form to find and no email that gets lost.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

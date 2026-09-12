@@ -3,9 +3,9 @@
   "name": "f0000000000000000087",
   "position": {
     "x": 1454,
-    "y": 886,
+    "y": 856,
     "z": 13500,
-    "height": 36,
+    "height": 42,
     "width": 412,
     "tabOrder": 13500
   },
@@ -22,8 +22,7 @@
                     "value": "Named owners, not a shared inbox.",
                     "textStyle": {
                       "fontSize": "15px",
-                      "color": "#605E5C",
-                      "fontWeight": "normal"
+                      "color": "#605E5C"
                     }
                   }
                 ],

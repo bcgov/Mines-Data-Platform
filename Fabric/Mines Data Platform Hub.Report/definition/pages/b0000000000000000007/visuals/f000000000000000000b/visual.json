@@ -3,9 +3,9 @@
   "name": "f000000000000000000b",
   "position": {
     "x": 56,
-    "y": 149,
+    "y": 158,
     "z": 1100,
-    "height": 33,
+    "height": 72,
     "width": 1240,
     "tabOrder": 1100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The two screens users hit that are not the happy path. Both are designed rather than left to the platform default, because both are moments where trust is won or lost.",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423"
                     }
                   }

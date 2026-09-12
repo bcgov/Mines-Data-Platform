@@ -3,9 +3,9 @@
   "name": "f000000000000000001f",
   "position": {
     "x": 54,
-    "y": 500,
+    "y": 551,
     "z": 3100,
-    "height": 33,
+    "height": 42,
     "width": 1812,
     "tabOrder": 3100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Anatomy of a definition",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

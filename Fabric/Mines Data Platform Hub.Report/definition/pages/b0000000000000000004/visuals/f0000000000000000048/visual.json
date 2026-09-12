@@ -3,10 +3,10 @@
   "name": "f0000000000000000048",
   "position": {
     "x": 68,
-    "y": 903,
+    "y": 931,
     "z": 7200,
-    "height": 33,
-    "width": 154,
+    "height": 42,
+    "width": 196,
     "tabOrder": 7200
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Rolling 5 fiscal years",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

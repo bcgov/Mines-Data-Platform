@@ -3,10 +3,10 @@
   "name": "f0000000000000000048",
   "position": {
     "x": 1018,
-    "y": 506,
+    "y": 490,
     "z": 7200,
     "height": 42,
-    "width": 381,
+    "width": 373,
     "tabOrder": 7200
   },
   "visual": {
@@ -19,11 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Permit turnaround  →",
+                    "value": "Permit turnaround  \u2192",
                     "textStyle": {
-                      "fontSize": "19px",
-                      "color": "#252423",
-                      "fontWeight": "normal"
+                      "fontSize": "21px",
+                      "color": "#252423"
                     }
                   }
                 ],

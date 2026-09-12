@@ -3,9 +3,9 @@
   "name": "f0000000000000000008",
   "position": {
     "x": 1780,
-    "y": 25,
+    "y": 21,
     "z": 800,
-    "height": 33,
+    "height": 42,
     "width": 102,
     "tabOrder": 800
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Share",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

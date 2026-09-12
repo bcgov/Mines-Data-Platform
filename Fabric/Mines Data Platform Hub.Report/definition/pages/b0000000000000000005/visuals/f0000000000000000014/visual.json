@@ -3,9 +3,9 @@
   "name": "f0000000000000000014",
   "position": {
     "x": 54,
-    "y": 402,
+    "y": 453,
     "z": 2000,
-    "height": 54,
+    "height": 72,
     "width": 431,
     "tabOrder": 2000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Validated and approved by MDS. Used on the corporate reports and every measure derived from them.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#252423"
                     }
                   }

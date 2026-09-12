@@ -3,9 +3,9 @@
   "name": "f0000000000000000039",
   "position": {
     "x": 1467,
-    "y": 412,
+    "y": 446,
     "z": 5700,
-    "height": 54,
+    "height": 72,
     "width": 397,
     "tabOrder": 5700
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Where each measure comes from, how it is calculated, and when it was validated.",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423"
                     }
                   }

@@ -3,9 +3,9 @@
   "name": "f000000000000000001f",
   "position": {
     "x": 708,
-    "y": 309,
+    "y": 330,
     "z": 3100,
-    "height": 33,
+    "height": 42,
     "width": 388,
     "tabOrder": 3100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Incidents",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

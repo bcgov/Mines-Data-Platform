@@ -3,9 +3,9 @@
   "name": "f0000000000000000010",
   "position": {
     "x": 54,
-    "y": 240,
+    "y": 274,
     "z": 1600,
-    "height": 33,
+    "height": 42,
     "width": 600,
     "tabOrder": 1600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "What happens when you submit",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

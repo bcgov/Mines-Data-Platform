@@ -3,9 +3,9 @@
   "name": "f0000000000000000017",
   "position": {
     "x": 100,
-    "y": 359,
+    "y": 411,
     "z": 2300,
-    "height": 33,
+    "height": 42,
     "width": 600,
     "tabOrder": 2300
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "A ticket is raised",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

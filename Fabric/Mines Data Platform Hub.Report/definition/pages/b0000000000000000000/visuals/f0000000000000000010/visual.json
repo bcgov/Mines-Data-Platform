@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000010",
   "position": {
-    "x": 310,
-    "y": 254,
+    "x": 240,
+    "y": 228,
     "z": 1600,
-    "height": 36,
-    "width": 760,
+    "height": 42,
+    "width": 700,
     "tabOrder": 1600
   },
   "visual": {
@@ -22,8 +22,7 @@
                     "value": "Four audiences. Same layout, different content.",
                     "textStyle": {
                       "fontSize": "15px",
-                      "color": "#605E5C",
-                      "fontWeight": "normal"
+                      "color": "#605E5C"
                     }
                   }
                 ],

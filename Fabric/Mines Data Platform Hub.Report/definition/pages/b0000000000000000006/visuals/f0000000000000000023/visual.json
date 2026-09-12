@@ -3,9 +3,9 @@
   "name": "f0000000000000000023",
   "position": {
     "x": 1520,
-    "y": 273,
+    "y": 316,
     "z": 3500,
-    "height": 33,
+    "height": 72,
     "width": 346,
     "tabOrder": 3500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Takes about a minute. You will get the ticket reference back on screen.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

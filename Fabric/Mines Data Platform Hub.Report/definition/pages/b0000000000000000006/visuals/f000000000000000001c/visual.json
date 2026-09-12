@@ -3,9 +3,9 @@
   "name": "f000000000000000001c",
   "position": {
     "x": 100,
-    "y": 467,
+    "y": 528,
     "z": 2800,
-    "height": 33,
+    "height": 42,
     "width": 1346,
     "tabOrder": 2800
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The named owner on the report card is accountable for the answer, rather than a shared inbox.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

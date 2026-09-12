@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000002e",
   "position": {
-    "x": 539,
-    "y": 373,
+    "x": 541,
+    "y": 414,
     "z": 4600,
-    "height": 30,
-    "width": 389,
+    "height": 34,
+    "width": 387,
     "tabOrder": 4600
   },
   "visual": {
@@ -39,6 +39,22 @@
           }
         }
       ],
+      "text": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
       "outline": [
         {
           "properties": {
@@ -64,36 +80,10 @@
             }
           }
         }
-      ],
-      "text": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
       "visualLink": [
         {
           "properties": {
@@ -107,14 +97,27 @@
             "type": {
               "expr": {
                 "Literal": {
-                  "Value": "'WebUrl'"
+                  "Value": "'PageNavigation'"
                 }
               }
             },
-            "webUrl": {
+            "navigationSection": {
               "expr": {
                 "Literal": {
-                  "Value": "'https://app.powerbi.com/groups/8f380f88-5ce5-48d1-9fa5-fbbfbe2685a0/reports/56f2e0c7-ae85-42b0-be82-50d851b8bffb'"
+                  "Value": "'b0000000000000000002'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

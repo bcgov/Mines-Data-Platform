@@ -3,10 +3,10 @@
   "name": "f000000000000000004d",
   "position": {
     "x": 1018,
-    "y": 555,
+    "y": 602,
     "z": 7700,
-    "height": 33,
-    "width": 373,
+    "height": 42,
+    "width": 381,
     "tabOrder": 7700
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Mineral Titles extract  \u2192",
+                    "value": "Mineral Titles extract  →",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423"
+                      "fontSize": "19px",
+                      "color": "#252423",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

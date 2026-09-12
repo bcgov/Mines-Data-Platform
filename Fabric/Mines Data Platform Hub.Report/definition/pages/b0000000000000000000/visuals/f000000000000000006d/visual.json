@@ -3,9 +3,9 @@
   "name": "f000000000000000006d",
   "position": {
     "x": 1463,
-    "y": 756,
+    "y": 772,
     "z": 10900,
-    "height": 36,
+    "height": 44,
     "width": 407,
     "tabOrder": 10900
   },
@@ -39,6 +39,22 @@
           }
         }
       ],
+      "text": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
       "outline": [
         {
           "properties": {
@@ -64,36 +80,10 @@
             }
           }
         }
-      ],
-      "text": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
       ]
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
       "visualLink": [
         {
           "properties": {
@@ -115,6 +105,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'b0000000000000000004'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

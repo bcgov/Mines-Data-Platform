@@ -3,9 +3,9 @@
   "name": "f000000000000000008a",
   "position": {
     "x": 1496,
-    "y": 912,
+    "y": 916,
     "z": 13800,
-    "height": 33,
+    "height": 39,
     "width": 370,
     "tabOrder": 13800
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Rajneesh Gulati",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "17px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

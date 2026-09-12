@@ -3,10 +3,10 @@
   "name": "f000000000000000000f",
   "position": {
     "x": 30,
-    "y": 224,
+    "y": 248,
     "z": 1500,
-    "height": 33,
-    "width": 210,
+    "height": 44,
+    "width": 280,
     "tabOrder": 1500
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Choose your view",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "20px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

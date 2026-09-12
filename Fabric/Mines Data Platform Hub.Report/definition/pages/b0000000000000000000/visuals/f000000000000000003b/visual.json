@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f000000000000000003b",
   "position": {
-    "x": 529,
-    "y": 757,
+    "x": 521,
+    "y": 775,
     "z": 5900,
-    "height": 33,
-    "width": 391,
+    "height": 41,
+    "width": 407,
     "tabOrder": 5900
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Open this view  \u2192",
+                    "value": "Open this view  →",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "18px",
                       "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }
@@ -36,30 +36,6 @@
     },
     "drillFilterOtherVisuals": false,
     "visualContainerObjects": {
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "title": [
         {
           "properties": {

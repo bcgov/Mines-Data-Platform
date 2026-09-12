@@ -3,9 +3,9 @@
   "name": "f0000000000000000028",
   "position": {
     "x": 521,
-    "y": 283,
+    "y": 316,
     "z": 4000,
-    "height": 33,
+    "height": 47,
     "width": 407,
     "tabOrder": 4000
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Compliance & Enforcement",
+                    "value": "Compliance &amp; Enforcement",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "22px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

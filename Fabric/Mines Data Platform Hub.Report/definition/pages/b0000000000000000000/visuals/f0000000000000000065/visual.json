@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000065",
   "position": {
-    "x": 1481,
-    "y": 585,
+    "x": 1469,
+    "y": 640,
     "z": 10100,
-    "height": 33,
-    "width": 389,
+    "height": 34,
+    "width": 405,
     "tabOrder": 10100
   },
   "visual": {
@@ -21,8 +21,9 @@
                   {
                     "value": "Permits issued by type and period",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "14px",
+                      "color": "#605E5C",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

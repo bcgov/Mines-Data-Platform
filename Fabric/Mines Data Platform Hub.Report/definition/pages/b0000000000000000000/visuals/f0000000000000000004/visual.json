@@ -3,10 +3,10 @@
   "name": "f0000000000000000004",
   "position": {
     "x": 28,
-    "y": 22,
+    "y": 26,
     "z": 400,
-    "height": 42,
-    "width": 145,
+    "height": 44,
+    "width": 160,
     "tabOrder": 400
   },
   "visual": {

@@ -3,10 +3,10 @@
   "name": "f0000000000000000068",
   "position": {
     "x": 1489,
-    "y": 647,
+    "y": 698,
     "z": 10400,
-    "height": 33,
-    "width": 373,
+    "height": 42,
+    "width": 381,
     "tabOrder": 10400
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Dictionary & lineage  \u2192",
+                    "value": "Dictionary &amp; lineage  →",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423"
+                      "fontSize": "19px",
+                      "color": "#252423",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

@@ -3,9 +3,9 @@
   "name": "f0000000000000000029",
   "position": {
     "x": 521,
-    "y": 318,
+    "y": 358,
     "z": 4100,
-    "height": 33,
+    "height": 36,
     "width": 407,
     "tabOrder": 4100
   },
@@ -21,8 +21,9 @@
                   {
                     "value": "Field and planning detail, incl. GIS",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "15px",
+                      "color": "#605E5C",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

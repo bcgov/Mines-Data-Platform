@@ -3,7 +3,7 @@
   "name": "f0000000000000000090",
   "position": {
     "x": 30,
-    "y": 1036,
+    "y": 1044,
     "z": 14400,
     "height": 33,
     "width": 1860,
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Use the page list on the left to move between views. What each audience actually sees is set under Manage audiences on the app \u2014 this page is the map; the audience decides which parts of it open.",
+                    "value": "Every tile on this page is a link. What each audience actually sees is set under Manage audiences on the app — this page is the map; the audience decides which parts of it open.",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#8A8886"
+                      "fontSize": "13px",
+                      "color": "#8A8886",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

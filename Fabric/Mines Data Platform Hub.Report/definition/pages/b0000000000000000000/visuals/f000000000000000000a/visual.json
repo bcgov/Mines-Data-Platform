@@ -3,10 +3,10 @@
   "name": "f000000000000000000a",
   "position": {
     "x": 56,
-    "y": 114,
+    "y": 120,
     "z": 1000,
-    "height": 33,
-    "width": 800,
+    "height": 54,
+    "width": 900,
     "tabOrder": 1000
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Mines Data Platform \u2014 start here",
+                    "value": "Mines Data Platform — start here",
                     "textStyle": {
-                      "fontSize": "17px",
+                      "fontSize": "26px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

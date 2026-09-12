@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000078",
   "position": {
-    "x": 406,
-    "y": 940,
+    "x": 400,
+    "y": 956,
     "z": 12000,
-    "height": 33,
-    "width": 286,
+    "height": 39,
+    "width": 300,
     "tabOrder": 12000
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Counting rules",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "17px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

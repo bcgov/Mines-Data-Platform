@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000023",
   "position": {
-    "x": 68,
-    "y": 585,
+    "x": 56,
+    "y": 640,
     "z": 3500,
-    "height": 33,
-    "width": 389,
+    "height": 34,
+    "width": 405,
     "tabOrder": 3500
   },
   "visual": {
@@ -21,8 +21,9 @@
                   {
                     "value": "Permits issued - new, amended, administrative",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "14px",
+                      "color": "#605E5C",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

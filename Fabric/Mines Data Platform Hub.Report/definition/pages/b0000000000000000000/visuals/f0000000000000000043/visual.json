@@ -3,10 +3,10 @@
   "name": "f0000000000000000043",
   "position": {
     "x": 1018,
-    "y": 371,
+    "y": 410,
     "z": 6700,
-    "height": 33,
-    "width": 373,
+    "height": 42,
+    "width": 381,
     "tabOrder": 6700
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Notice of Work  \u2192",
+                    "value": "Notice of Work  →",
                     "textStyle": {
-                      "fontSize": "13px",
-                      "color": "#252423"
+                      "fontSize": "19px",
+                      "color": "#252423",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

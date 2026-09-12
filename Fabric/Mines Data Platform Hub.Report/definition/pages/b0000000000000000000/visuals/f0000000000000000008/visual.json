@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000008",
   "position": {
-    "x": 1780,
-    "y": 25,
+    "x": 1770,
+    "y": 31,
     "z": 800,
-    "height": 33,
-    "width": 102,
+    "height": 38,
+    "width": 112,
     "tabOrder": 800
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Share",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "16px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

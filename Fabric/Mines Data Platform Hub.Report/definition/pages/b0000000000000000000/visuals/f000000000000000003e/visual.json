@@ -3,9 +3,9 @@
   "name": "f000000000000000003e",
   "position": {
     "x": 992,
-    "y": 283,
+    "y": 316,
     "z": 6200,
-    "height": 33,
+    "height": 47,
     "width": 407,
     "tabOrder": 6200
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Permitting & Titles",
+                    "value": "Permitting &amp; Titles",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "22px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

@@ -3,10 +3,10 @@
   "name": "f0000000000000000089",
   "position": {
     "x": 1454,
-    "y": 912,
+    "y": 920,
     "z": 13700,
     "height": 33,
-    "width": 30,
+    "width": 34,
     "tabOrder": 13700
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "RG",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "13px",
                       "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }

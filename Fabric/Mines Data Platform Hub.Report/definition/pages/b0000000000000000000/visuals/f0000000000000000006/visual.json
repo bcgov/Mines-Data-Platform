@@ -3,10 +3,10 @@
   "name": "f0000000000000000006",
   "position": {
     "x": 190,
-    "y": 50,
+    "y": 56,
     "z": 600,
-    "height": 33,
-    "width": 520,
+    "height": 34,
+    "width": 620,
     "tabOrder": 600
   },
   "visual": {
@@ -19,10 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Org app  \u00b7  Mining & Critical Minerals",
+                    "value": "Org app  ·  Mining &amp; Critical Minerals",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C"
+                      "fontSize": "14px",
+                      "color": "#605E5C",
+                      "fontWeight": "normal"
                     }
                   }
                 ],

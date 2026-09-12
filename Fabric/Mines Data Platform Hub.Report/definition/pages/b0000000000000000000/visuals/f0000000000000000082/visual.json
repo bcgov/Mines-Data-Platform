@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
   "name": "f0000000000000000082",
   "position": {
-    "x": 1078,
-    "y": 940,
+    "x": 1064,
+    "y": 956,
     "z": 13000,
-    "height": 33,
-    "width": 286,
+    "height": 39,
+    "width": 300,
     "tabOrder": 13000
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Access & data states",
+                    "value": "Access &amp; data states",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "17px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

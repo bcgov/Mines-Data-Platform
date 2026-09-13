@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
-  "name": "e0000000000000000009",
+  "name": "f0000000000000000008",
   "position": {
     "x": 24,
-    "y": 678,
-    "z": 1,
+    "y": 712,
+    "z": 0,
     "width": 1232,
-    "height": 40,
-    "tabOrder": 1
+    "height": 6,
+    "tabOrder": 0
   },
   "visual": {
     "visualType": "textbox",
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Top 5 parent categories, 21 May 2018 onward — categories were not recorded before then. An incident with two categories counts once in each bar; do not add the bars together.",
+                    "value": " ",
                     "textStyle": {
                       "fontSize": "11px",
                       "color": "#605E5C"

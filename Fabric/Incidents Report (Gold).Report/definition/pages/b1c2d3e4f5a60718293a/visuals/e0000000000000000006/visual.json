@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "e0000000000000000006",
   "position": {
-    "x": 40,
-    "y": 280,
+    "x": 24,
+    "y": 242,
     "z": 5,
-    "width": 590,
-    "height": 200,
+    "width": 604,
+    "height": 228,
     "tabOrder": 5
   },
   "visual": {
@@ -65,7 +65,7 @@
         }
       }
     },
-    "objects": {
+    "visualContainerObjects": {
       "title": [
         {
           "properties": {
@@ -78,8 +78,102 @@
             },
             "text": {
               "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_mine_incident"
+                    }
+                  },
+                  "Property": "FY Chart Title"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
                 "Literal": {
-                  "Value": "'Incidents and Dangerous Occurrences per fiscal year'"
+                  "Value": "12D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "objects": {
+      "labels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "legend": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "valueAxis": [
+        {
+          "properties": {
+            "showAxisTitle": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "titleText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Number of Incidents'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "categoryAxis": [
+        {
+          "properties": {
+            "showAxisTitle": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

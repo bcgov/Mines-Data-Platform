@@ -1,0 +1,207 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "name": "f0000000000000000004",
+  "position": {
+    "x": 652,
+    "y": 110,
+    "z": 0,
+    "width": 604,
+    "height": 286,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "THE 24-HOUR RULE",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#42814A",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "effective_date = incident_date",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "       if reported more than 24 h after the incident",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "effective_date = reported_date",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "   otherwise",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": " ",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Confirmed by Rajneesh, 10 Sep 2026, on Caroline's",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "recommendation: the rule applies to ",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  },
+                  {
+                    "value": "every visual",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ".",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Metabase applies it to the three cards only; its charts use",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#605E5C"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "the raw reported date, so figures will not always tie.",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#605E5C"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "e0000000000000000003",
   "position": {
-    "x": 40,
-    "y": 100,
+    "x": 24,
+    "y": 122,
     "z": 2,
-    "width": 380,
-    "height": 150,
+    "width": 400,
+    "height": 112,
     "tabOrder": 2
   },
   "visual": {
@@ -33,8 +33,7 @@
         }
       }
     },
-    "drillFilterOtherVisuals": true,
-    "objects": {
+    "visualContainerObjects": {
       "title": [
         {
           "properties": {
@@ -56,10 +55,25 @@
                   "Property": "FYTD Label"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
+                }
+              }
             }
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

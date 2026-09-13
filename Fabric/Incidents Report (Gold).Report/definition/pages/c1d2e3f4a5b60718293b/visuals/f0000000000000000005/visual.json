@@ -1,0 +1,171 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "name": "f0000000000000000005",
+  "position": {
+    "x": 24,
+    "y": 406,
+    "z": 0,
+    "width": 604,
+    "height": 160,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "MEASURES",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Cards",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "   FYTD (3284) · same time last FY (3285) · last month (3288)",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Charts",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "   Incidents + DOs per FY (3287) · 4 series per month (3289)",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Category",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "   top 5 parent groups, May 2018 onward, self-trimming",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Data Anchor Date",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "   hidden; every window hangs off it",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

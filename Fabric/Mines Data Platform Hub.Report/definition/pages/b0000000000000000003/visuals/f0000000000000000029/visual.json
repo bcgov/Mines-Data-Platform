@@ -3,9 +3,9 @@
   "name": "f0000000000000000029",
   "position": {
     "x": 1336,
-    "y": 309,
+    "y": 334,
     "z": 4100,
-    "height": 33,
+    "height": 42,
     "width": 388,
     "tabOrder": 4100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Mineral Titles extract",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

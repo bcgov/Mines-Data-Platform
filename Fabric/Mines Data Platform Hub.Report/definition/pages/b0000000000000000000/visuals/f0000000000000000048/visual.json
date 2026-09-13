@@ -3,9 +3,9 @@
   "name": "f0000000000000000048",
   "position": {
     "x": 1018,
-    "y": 463,
+    "y": 494,
     "z": 7200,
-    "height": 33,
+    "height": 42,
     "width": 373,
     "tabOrder": 7200
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Permit turnaround  \u2192",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#252423"
                     }
                   }

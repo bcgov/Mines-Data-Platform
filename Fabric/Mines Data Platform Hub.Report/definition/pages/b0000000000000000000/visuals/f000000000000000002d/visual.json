@@ -3,9 +3,9 @@
   "name": "f000000000000000002d",
   "position": {
     "x": 547,
-    "y": 371,
+    "y": 402,
     "z": 4500,
-    "height": 33,
+    "height": 42,
     "width": 373,
     "tabOrder": 4500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Inspections  \u2192",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#252423"
                     }
                   }

@@ -3,9 +3,9 @@
   "name": "f0000000000000000045",
   "position": {
     "x": 1010,
-    "y": 401,
+    "y": 436,
     "z": 6900,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 6900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Permits issued by type, amendments separated",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

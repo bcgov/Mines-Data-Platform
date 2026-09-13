@@ -3,9 +3,9 @@
   "name": "f0000000000000000036",
   "position": {
     "x": 54,
-    "y": 757,
+    "y": 849,
     "z": 5400,
-    "height": 33,
+    "height": 72,
     "width": 586,
     "tabOrder": 5400
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Default state. The button is live and the flow is reachable.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#252423"
                     }
                   }

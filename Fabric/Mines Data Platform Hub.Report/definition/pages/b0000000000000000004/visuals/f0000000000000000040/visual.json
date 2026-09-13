@@ -3,9 +3,9 @@
   "name": "f0000000000000000040",
   "position": {
     "x": 54,
-    "y": 660,
+    "y": 696,
     "z": 6400,
-    "height": 33,
+    "height": 42,
     "width": 760,
     "tabOrder": 6400
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Shared filter presets \u2014 the recurring windows this team asks for",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

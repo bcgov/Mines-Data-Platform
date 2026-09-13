@@ -3,9 +3,9 @@
   "name": "f000000000000000007e",
   "position": {
     "x": 742,
-    "y": 964,
+    "y": 954,
     "z": 12600,
-    "height": 33,
+    "height": 42,
     "width": 286,
     "tabOrder": 12600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Raise a data or definition issue",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

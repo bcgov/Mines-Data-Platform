@@ -3,9 +3,9 @@
   "name": "f0000000000000000034",
   "position": {
     "x": 539,
-    "y": 493,
+    "y": 528,
     "z": 5200,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 5200
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Where injuries and dangerous occurrences concentrate",
+                    "value": "Where injuries and incidents concentrate",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

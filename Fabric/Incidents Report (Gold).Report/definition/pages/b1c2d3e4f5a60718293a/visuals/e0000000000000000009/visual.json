@@ -2,52 +2,36 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "e0000000000000000009",
   "position": {
-    "x": 860,
-    "y": 500,
-    "z": 8,
-    "width": 380,
-    "height": 90,
-    "tabOrder": 8
+    "x": 24,
+    "y": 678,
+    "z": 1,
+    "width": 1232,
+    "height": 40,
+    "tabOrder": 1
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_mine_incident"
-                    }
-                  },
-                  "Property": "Category Scope Label"
-                }
-              },
-              "queryRef": "fact_mine_incident.Category Scope Label",
-              "nativeQueryRef": "Category Scope Label"
-            }
-          ]
-        }
-      }
-    },
-    "drillFilterOtherVisuals": true,
+    "visualType": "textbox",
     "objects": {
-      "title": [
+      "general": [
         {
           "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Top 5 parent categories, 21 May 2018 onward — categories were not recorded before then. An incident with two categories counts once in each bar; do not add the bars together.",
+                    "textStyle": {
+                      "fontSize": "11px",
+                      "color": "#605E5C"
+                    }
+                  }
+                ]
               }
-            }
+            ]
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

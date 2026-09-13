@@ -3,9 +3,9 @@
   "name": "f0000000000000000053",
   "position": {
     "x": 1566,
-    "y": 754,
+    "y": 824,
     "z": 8300,
-    "height": 33,
+    "height": 42,
     "width": 300,
     "tabOrder": 8300
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Senior Auditor, Mine Audits Unit",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#013366"
                     }
                   }

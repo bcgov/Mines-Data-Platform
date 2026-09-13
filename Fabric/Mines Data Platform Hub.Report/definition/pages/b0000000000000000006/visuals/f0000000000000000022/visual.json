@@ -3,9 +3,9 @@
   "name": "f0000000000000000022",
   "position": {
     "x": 1520,
-    "y": 240,
+    "y": 278,
     "z": 3400,
-    "height": 33,
+    "height": 42,
     "width": 346,
     "tabOrder": 3400
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Raise it now",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

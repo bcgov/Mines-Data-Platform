@@ -3,9 +3,9 @@
   "name": "f000000000000000003e",
   "position": {
     "x": 992,
-    "y": 283,
+    "y": 300,
     "z": 6200,
-    "height": 33,
+    "height": 42,
     "width": 407,
     "tabOrder": 6200
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Permitting & Titles",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

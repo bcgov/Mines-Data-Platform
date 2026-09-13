@@ -3,9 +3,9 @@
   "name": "f0000000000000000057",
   "position": {
     "x": 1550,
-    "y": 802,
+    "y": 886,
     "z": 8700,
-    "height": 33,
+    "height": 42,
     "width": 284,
     "tabOrder": 8700
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "How data is certified",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "19px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

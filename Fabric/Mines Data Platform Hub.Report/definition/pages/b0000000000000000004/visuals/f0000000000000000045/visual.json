@@ -3,10 +3,10 @@
   "name": "f0000000000000000045",
   "position": {
     "x": 68,
-    "y": 811,
+    "y": 814,
     "z": 6900,
-    "height": 33,
-    "width": 154,
+    "height": 102,
+    "width": 136,
     "tabOrder": 6900
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Same period last fiscal year",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

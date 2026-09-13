@@ -3,9 +3,9 @@
   "name": "f0000000000000000079",
   "position": {
     "x": 406,
-    "y": 964,
+    "y": 954,
     "z": 12100,
-    "height": 33,
+    "height": 42,
     "width": 286,
     "tabOrder": 12100
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Fiscal calendar, and what each figure counts",
+                    "value": "Fiscal calendar and definitions",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

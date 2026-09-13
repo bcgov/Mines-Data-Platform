@@ -3,9 +3,9 @@
   "name": "f000000000000000003c",
   "position": {
     "x": 1294,
-    "y": 757,
+    "y": 849,
     "z": 6000,
-    "height": 33,
+    "height": 72,
     "width": 586,
     "tabOrder": 6000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Tenant settings block the Power Automate visual \u2014 falls back to the named owner's email.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#252423"
                     }
                   }

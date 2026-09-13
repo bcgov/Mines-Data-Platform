@@ -3,9 +3,9 @@
   "name": "f0000000000000000019",
   "position": {
     "x": 68,
-    "y": 401,
+    "y": 436,
     "z": 2500,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 2500
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Completed inspections against the Service Plan target",
+                    "value": "Completed inspections vs Service Plan target",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

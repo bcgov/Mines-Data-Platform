@@ -3,9 +3,9 @@
   "name": "f000000000000000003b",
   "position": {
     "x": 1294,
-    "y": 710,
+    "y": 798,
     "z": 5900,
-    "height": 33,
+    "height": 42,
     "width": 148,
     "tabOrder": 5900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Unavailable",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C",
                       "fontWeight": "bold"
                     }

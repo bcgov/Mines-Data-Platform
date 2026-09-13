@@ -3,9 +3,9 @@
   "name": "f0000000000000000017",
   "position": {
     "x": 519,
-    "y": 402,
+    "y": 457,
     "z": 2300,
-    "height": 54,
+    "height": 72,
     "width": 431,
     "tabOrder": 2300
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The owner recommends it, but it has not been through certification. For reports awaiting MDS sign-off.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#252423"
                     }
                   }

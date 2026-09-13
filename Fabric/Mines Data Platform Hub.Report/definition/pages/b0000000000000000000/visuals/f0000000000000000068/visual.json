@@ -3,9 +3,9 @@
   "name": "f0000000000000000068",
   "position": {
     "x": 1489,
-    "y": 647,
+    "y": 618,
     "z": 10400,
-    "height": 33,
+    "height": 42,
     "width": 373,
     "tabOrder": 10400
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Dictionary & lineage  \u2192",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#252423"
                     }
                   }

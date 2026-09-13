@@ -3,9 +3,9 @@
   "name": "f0000000000000000032",
   "position": {
     "x": 1294,
-    "y": 914,
+    "y": 978,
     "z": 5000,
-    "height": 33,
+    "height": 42,
     "width": 548,
     "tabOrder": 5000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Not current \u2014 verify against source before quoting.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

@@ -5,7 +5,7 @@
     "x": 190,
     "y": 50,
     "z": 600,
-    "height": 33,
+    "height": 42,
     "width": 520,
     "tabOrder": 600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Org app  \u00b7  Mining & Critical Minerals",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

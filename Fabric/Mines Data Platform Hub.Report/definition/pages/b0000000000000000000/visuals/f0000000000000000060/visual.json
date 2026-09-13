@@ -3,9 +3,9 @@
   "name": "f0000000000000000060",
   "position": {
     "x": 1481,
-    "y": 493,
+    "y": 508,
     "z": 9600,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 9600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Incidents and outcomes by period",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

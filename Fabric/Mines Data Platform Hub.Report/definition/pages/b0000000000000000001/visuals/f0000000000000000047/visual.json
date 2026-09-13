@@ -3,9 +3,9 @@
   "name": "f0000000000000000047",
   "position": {
     "x": 1566,
-    "y": 728,
+    "y": 820,
     "z": 7100,
-    "height": 33,
+    "height": 42,
     "width": 300,
     "tabOrder": 7100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Nhung Nguyen",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

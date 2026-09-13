@@ -3,9 +3,9 @@
   "name": "f0000000000000000074",
   "position": {
     "x": 70,
-    "y": 964,
+    "y": 954,
     "z": 11600,
-    "height": 33,
+    "height": 42,
     "width": 286,
     "tabOrder": 11600
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definitions, trust badges and sources",
+                    "value": "Definitions, badges and sources",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

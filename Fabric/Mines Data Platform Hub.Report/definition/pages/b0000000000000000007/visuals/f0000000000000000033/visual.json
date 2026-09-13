@@ -5,7 +5,7 @@
     "x": 30,
     "y": 1036,
     "z": 5100,
-    "height": 33,
+    "height": 42,
     "width": 1860,
     "tabOrder": 5100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Survey evidence: outdated data / unclear refresh scored 2.6 of 4 for severity, and 4 of 6 operational respondents verify figures by hand. Never show a stale number without saying it is stale \u2014 and never hide the tile.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#8A8886"
                     }
                   }

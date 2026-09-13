@@ -3,9 +3,9 @@
   "name": "f000000000000000004f",
   "position": {
     "x": 1010,
-    "y": 585,
+    "y": 620,
     "z": 7900,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 7900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Active titles, parcels and authorisations",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

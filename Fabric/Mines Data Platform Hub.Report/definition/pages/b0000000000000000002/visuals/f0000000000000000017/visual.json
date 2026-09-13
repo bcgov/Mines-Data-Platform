@@ -3,9 +3,9 @@
   "name": "f0000000000000000017",
   "position": {
     "x": 54,
-    "y": 412,
+    "y": 450,
     "z": 2300,
-    "height": 54,
+    "height": 72,
     "width": 554,
     "tabOrder": 2300
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "How many inspections have we completed, by type, region and inspector \u2014 and which sites are still unvisited this year?",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423"
                     }
                   }

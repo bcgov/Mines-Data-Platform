@@ -3,9 +3,9 @@
   "name": "f000000000000000002d",
   "position": {
     "x": 1310,
-    "y": 412,
+    "y": 450,
     "z": 4500,
-    "height": 33,
+    "height": 72,
     "width": 554,
     "tabOrder": 4500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "What titles, parcels and authorisations are currently active, and how do they relate to permitted sites?",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423"
                     }
                   }

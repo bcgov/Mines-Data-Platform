@@ -5,7 +5,7 @@
     "x": 30,
     "y": 1036,
     "z": 2600,
-    "height": 33,
+    "height": 42,
     "width": 1860,
     "tabOrder": 2600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Change a rule through Request a change so the definition, the report tooltip and this page stay in step.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#8A8886"
                     }
                   }

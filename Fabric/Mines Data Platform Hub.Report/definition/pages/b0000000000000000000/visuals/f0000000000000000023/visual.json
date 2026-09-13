@@ -3,9 +3,9 @@
   "name": "f0000000000000000023",
   "position": {
     "x": 68,
-    "y": 585,
+    "y": 620,
     "z": 3500,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 3500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Permits issued - new, amended, administrative",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

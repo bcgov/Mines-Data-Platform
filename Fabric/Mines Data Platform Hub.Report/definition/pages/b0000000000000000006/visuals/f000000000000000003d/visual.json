@@ -3,9 +3,9 @@
   "name": "f000000000000000003d",
   "position": {
     "x": 30,
-    "y": 814,
+    "y": 927,
     "z": 6100,
-    "height": 33,
+    "height": 42,
     "width": 1860,
     "tabOrder": 6100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The Power Automate visual is subject to a tenant setting we have not yet confirmed \u2014 the fallback path is designed for, not bolted on later.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#8A8886"
                     }
                   }

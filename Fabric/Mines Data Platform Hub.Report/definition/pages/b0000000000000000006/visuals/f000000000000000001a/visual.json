@@ -3,9 +3,9 @@
   "name": "f000000000000000001a",
   "position": {
     "x": 54,
-    "y": 437,
+    "y": 498,
     "z": 2600,
-    "height": 33,
+    "height": 42,
     "width": 26,
     "tabOrder": 2600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "3",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }

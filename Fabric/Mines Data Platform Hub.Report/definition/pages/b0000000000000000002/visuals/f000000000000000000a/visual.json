@@ -5,7 +5,7 @@
     "x": 56,
     "y": 114,
     "z": 1000,
-    "height": 33,
+    "height": 52,
     "width": 800,
     "tabOrder": 1000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Compliance & Enforcement view",
                     "textStyle": {
-                      "fontSize": "17px",
+                      "fontSize": "26px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

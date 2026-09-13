@@ -3,9 +3,9 @@
   "name": "f0000000000000000039",
   "position": {
     "x": 539,
-    "y": 585,
+    "y": 620,
     "z": 5700,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 5700
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Which sites to visit next, by risk and last visit",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

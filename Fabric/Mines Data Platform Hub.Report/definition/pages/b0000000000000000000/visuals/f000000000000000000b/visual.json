@@ -3,9 +3,9 @@
   "name": "f000000000000000000b",
   "position": {
     "x": 56,
-    "y": 149,
+    "y": 168,
     "z": 1100,
-    "height": 33,
+    "height": 42,
     "width": 1240,
     "tabOrder": 1100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Pick the view for your work, or go straight to a report. Every view has the same shape, so nothing has to be relearned when you move between them.",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423"
                     }
                   }

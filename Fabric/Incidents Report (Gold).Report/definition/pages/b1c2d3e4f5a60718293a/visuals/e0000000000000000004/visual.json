@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "e0000000000000000004",
   "position": {
-    "x": 450,
-    "y": 100,
+    "x": 440,
+    "y": 122,
     "z": 3,
-    "width": 380,
-    "height": 150,
+    "width": 400,
+    "height": 112,
     "tabOrder": 3
   },
   "visual": {
@@ -33,8 +33,7 @@
         }
       }
     },
-    "drillFilterOtherVisuals": true,
-    "objects": {
+    "visualContainerObjects": {
       "title": [
         {
           "properties": {
@@ -56,10 +55,25 @@
                   "Property": "Same Time Last FY Label"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
+                }
+              }
             }
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

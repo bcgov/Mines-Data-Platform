@@ -3,9 +3,9 @@
   "name": "f000000000000000004c",
   "position": {
     "x": 1550,
-    "y": 802,
+    "y": 886,
     "z": 7600,
-    "height": 33,
+    "height": 42,
     "width": 284,
     "tabOrder": 7600
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Definitions & data sources",
+                    "value": "Definitions and sources",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "19px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

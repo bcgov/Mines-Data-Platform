@@ -9,6 +9,15 @@
         "page": "2.3.1"
       },
       "type": "SharedResources"
+    },
+    "customTheme": {
+      "name": "BC_Design_System3835187669345729.json",
+      "reportVersionAtImport": {
+        "visual": "2.10.0",
+        "report": "3.4.0",
+        "page": "2.3.1"
+      },
+      "type": "RegisteredResources"
     }
   },
   "objects": {
@@ -27,6 +36,22 @@
     ]
   },
   "resourcePackages": [
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "BC_Design_System3835187669345729.json",
+          "path": "BC_Design_System3835187669345729.json",
+          "type": "Image"
+        },
+        {
+          "name": "Logo.png",
+          "path": "Logo.png",
+          "type": "Image"
+        }
+      ]
+    },
     {
       "name": "SharedResources",
       "type": "SharedResources",

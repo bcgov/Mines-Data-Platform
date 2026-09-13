@@ -3,9 +3,9 @@
   "name": "f0000000000000000014",
   "position": {
     "x": 250,
-    "y": 362,
+    "y": 425,
     "z": 2000,
-    "height": 54,
+    "height": 72,
     "width": 1420,
     "tabOrder": 2000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Mines Data Platform is organised into four audiences \u2014 Executive, Compliance & Enforcement, Permitting & Titles, and Audit & Analysis. Your account is not yet a member of any of them, so there is nothing to display.",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#605E5C"
                     }
                   }

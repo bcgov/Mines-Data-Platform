@@ -3,9 +3,9 @@
   "name": "f000000000000000003b",
   "position": {
     "x": 529,
-    "y": 757,
+    "y": 709,
     "z": 5900,
-    "height": 33,
+    "height": 42,
     "width": 391,
     "tabOrder": 5900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Open this view  \u2192",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#FFFFFF",
                       "fontWeight": "bold"
                     }

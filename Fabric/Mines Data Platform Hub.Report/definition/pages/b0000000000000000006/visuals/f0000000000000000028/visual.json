@@ -3,9 +3,9 @@
   "name": "f0000000000000000028",
   "position": {
     "x": 1520,
-    "y": 419,
+    "y": 514,
     "z": 4000,
-    "height": 33,
+    "height": 42,
     "width": 346,
     "tabOrder": 4000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Prefer to ask a person first?",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

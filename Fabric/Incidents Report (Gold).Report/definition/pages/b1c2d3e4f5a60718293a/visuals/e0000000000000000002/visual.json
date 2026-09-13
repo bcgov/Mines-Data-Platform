@@ -2,46 +2,102 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "e0000000000000000002",
   "position": {
-    "x": 870,
-    "y": 30,
+    "x": 24,
+    "y": 70,
     "z": 1,
-    "width": 370,
-    "height": 40,
+    "width": 1232,
+    "height": 44,
     "tabOrder": 1
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_mine_incident"
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Source: Core / NRIS (MCM Database)        |        ",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#605E5C"
                     }
                   },
-                  "Property": "Data As Of Label"
-                }
-              },
-              "queryRef": "fact_mine_incident.Data As Of Label",
-              "nativeQueryRef": "Data As Of Label"
-            }
-          ]
+                  {
+                    "value": "Incident date basis: effective date (24-hour rule)",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "        |        Data contacts: Rajneesh · Nhung",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#605E5C"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
         }
-      }
+      ]
     },
     "drillFilterOtherVisuals": true,
-    "objects": {
-      "title": [
+    "visualContainerObjects": {
+      "background": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
                   "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
                 }
               }
             }

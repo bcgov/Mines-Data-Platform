@@ -3,9 +3,9 @@
   "name": "f0000000000000000037",
   "position": {
     "x": 547,
-    "y": 555,
+    "y": 586,
     "z": 5500,
-    "height": 33,
+    "height": 42,
     "width": 373,
     "tabOrder": 5500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Inspection planning map  \u2192",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#252423"
                     }
                   }

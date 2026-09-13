@@ -3,9 +3,9 @@
   "name": "f0000000000000000032",
   "position": {
     "x": 1740,
-    "y": 516,
+    "y": 597,
     "z": 5000,
-    "height": 33,
+    "height": 42,
     "width": 116,
     "tabOrder": 5000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Open  \u2192",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

@@ -3,9 +3,9 @@
   "name": "f0000000000000000078",
   "position": {
     "x": 406,
-    "y": 940,
+    "y": 912,
     "z": 12000,
-    "height": 33,
+    "height": 42,
     "width": 286,
     "tabOrder": 12000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Counting rules",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

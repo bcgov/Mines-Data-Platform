@@ -3,9 +3,9 @@
   "name": "f0000000000000000010",
   "position": {
     "x": 240,
-    "y": 224,
+    "y": 232,
     "z": 1600,
-    "height": 33,
+    "height": 42,
     "width": 700,
     "tabOrder": 1600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Four audiences. Same layout, different content.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

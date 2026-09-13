@@ -3,9 +3,9 @@
   "name": "f000000000000000001a",
   "position": {
     "x": 984,
-    "y": 402,
+    "y": 457,
     "z": 2600,
-    "height": 54,
+    "height": 72,
     "width": 431,
     "tabOrder": 2600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Definition not yet agreed, or the source is behind. Visible and labelled \u2014 never hidden.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#252423"
                     }
                   }

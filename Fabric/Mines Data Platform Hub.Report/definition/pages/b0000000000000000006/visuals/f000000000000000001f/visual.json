@@ -3,9 +3,9 @@
   "name": "f000000000000000001f",
   "position": {
     "x": 100,
-    "y": 515,
+    "y": 589,
     "z": 3100,
-    "height": 33,
+    "height": 42,
     "width": 600,
     "tabOrder": 3100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The outcome is published",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

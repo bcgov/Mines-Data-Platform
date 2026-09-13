@@ -3,9 +3,9 @@
   "name": "f000000000000000004a",
   "position": {
     "x": 1010,
-    "y": 493,
+    "y": 528,
     "z": 7400,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 7400
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Application to decision, and where the backlog sits",
+                    "value": "Application to decision, and the backlog",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

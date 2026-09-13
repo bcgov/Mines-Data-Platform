@@ -3,9 +3,9 @@
   "name": "f0000000000000000014",
   "position": {
     "x": 100,
-    "y": 311,
+    "y": 358,
     "z": 2000,
-    "height": 33,
+    "height": 42,
     "width": 1346,
     "tabOrder": 2000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Report, figure, and what you expected instead. The current filter context and \"data as at\" date are attached automatically.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

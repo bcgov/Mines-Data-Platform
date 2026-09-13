@@ -3,9 +3,9 @@
   "name": "f000000000000000002f",
   "position": {
     "x": 1316,
-    "y": 786,
+    "y": 851,
     "z": 4700,
-    "height": 33,
+    "height": 42,
     "width": 518,
     "tabOrder": 4700
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Notice of Work",
                     "textStyle": {
-                      "fontSize": "11px",
+                      "fontSize": "17px",
                       "color": "#605E5C",
                       "fontWeight": "bold"
                     }

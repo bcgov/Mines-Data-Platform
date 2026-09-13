@@ -3,9 +3,9 @@
   "name": "f000000000000000002f",
   "position": {
     "x": 539,
-    "y": 401,
+    "y": 436,
     "z": 4700,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 4700
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "By type, region and inspector; sites not yet visited",
+                    "value": "By type, region and inspector",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

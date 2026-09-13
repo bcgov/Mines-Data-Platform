@@ -3,9 +3,9 @@
   "name": "f0000000000000000038",
   "position": {
     "x": 674,
-    "y": 710,
+    "y": 798,
     "z": 5600,
-    "height": 33,
+    "height": 42,
     "width": 148,
     "tabOrder": 5600
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Sent",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#107C41",
                       "fontWeight": "bold"
                     }

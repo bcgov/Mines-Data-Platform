@@ -3,9 +3,9 @@
   "name": "f000000000000000000f",
   "position": {
     "x": 30,
-    "y": 226,
+    "y": 264,
     "z": 1500,
-    "height": 33,
+    "height": 42,
     "width": 800,
     "tabOrder": 1500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "STATE 1 \u2014 user has no audience membership",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#D83B01",
                       "fontWeight": "bold"
                     }

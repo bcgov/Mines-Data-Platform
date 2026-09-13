@@ -3,9 +3,9 @@
   "name": "f0000000000000000073",
   "position": {
     "x": 70,
-    "y": 940,
+    "y": 912,
     "z": 11500,
-    "height": 33,
+    "height": 42,
     "width": 286,
     "tabOrder": 11500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "How to read these reports",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

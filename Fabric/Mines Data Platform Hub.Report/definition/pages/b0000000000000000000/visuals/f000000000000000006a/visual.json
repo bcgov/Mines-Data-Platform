@@ -3,9 +3,9 @@
   "name": "f000000000000000006a",
   "position": {
     "x": 1481,
-    "y": 677,
+    "y": 652,
     "z": 10600,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 10600
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Where each measure comes from, and who validated it",
+                    "value": "Where each measure comes from",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

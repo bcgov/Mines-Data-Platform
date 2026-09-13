@@ -3,9 +3,9 @@
   "name": "f0000000000000000065",
   "position": {
     "x": 1481,
-    "y": 585,
+    "y": 580,
     "z": 10100,
-    "height": 33,
+    "height": 42,
     "width": 389,
     "tabOrder": 10100
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Permits issued by type and period",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

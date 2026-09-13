@@ -3,9 +3,9 @@
   "name": "f0000000000000000055",
   "position": {
     "x": 1463,
-    "y": 318,
+    "y": 344,
     "z": 8500,
-    "height": 33,
+    "height": 42,
     "width": 407,
     "tabOrder": 8500
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "All three reports, with lineage and export",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

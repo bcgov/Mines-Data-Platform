@@ -3,9 +3,9 @@
   "name": "f000000000000000001b",
   "position": {
     "x": 100,
-    "y": 437,
+    "y": 502,
     "z": 2700,
-    "height": 33,
+    "height": 42,
     "width": 600,
     "tabOrder": 2700
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "The section owner reviews it",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

@@ -3,9 +3,9 @@
   "name": "f0000000000000000034",
   "position": {
     "x": 54,
-    "y": 639,
+    "y": 696,
     "z": 5200,
-    "height": 33,
+    "height": 42,
     "width": 760,
     "tabOrder": 5200
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Curated commentary \u2014 written for permitting staff",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

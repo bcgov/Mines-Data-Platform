@@ -3,10 +3,10 @@
   "name": "f0000000000000000018",
   "position": {
     "x": 978,
-    "y": 431,
+    "y": 508,
     "z": 2400,
-    "height": 33,
-    "width": 164,
+    "height": 42,
+    "width": 214,
     "tabOrder": 2400
   },
   "visual": {
@@ -21,7 +21,7 @@
                   {
                     "value": "Who should I ask?",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "21px",
                       "color": "#013366",
                       "fontWeight": "bold"
                     }

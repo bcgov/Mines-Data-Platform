@@ -3,9 +3,9 @@
   "name": "f000000000000000003f",
   "position": {
     "x": 54,
-    "y": 627,
+    "y": 654,
     "z": 6300,
-    "height": 33,
+    "height": 42,
     "width": 620,
     "tabOrder": 6300
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Saved audit windows",
                     "textStyle": {
-                      "fontSize": "12px",
+                      "fontSize": "19px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

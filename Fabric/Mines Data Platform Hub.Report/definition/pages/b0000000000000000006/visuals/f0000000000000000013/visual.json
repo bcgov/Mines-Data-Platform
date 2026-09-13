@@ -3,9 +3,9 @@
   "name": "f0000000000000000013",
   "position": {
     "x": 100,
-    "y": 281,
+    "y": 328,
     "z": 1900,
-    "height": 33,
+    "height": 42,
     "width": 600,
     "tabOrder": 1900
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "You describe the issue",
                     "textStyle": {
-                      "fontSize": "10px",
+                      "fontSize": "16px",
                       "color": "#252423",
                       "fontWeight": "bold"
                     }

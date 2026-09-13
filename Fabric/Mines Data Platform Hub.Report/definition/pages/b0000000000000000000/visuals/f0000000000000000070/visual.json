@@ -3,9 +3,9 @@
   "name": "f0000000000000000070",
   "position": {
     "x": 54,
-    "y": 875,
+    "y": 840,
     "z": 11200,
-    "height": 33,
+    "height": 42,
     "width": 900,
     "tabOrder": 11200
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Definitions, counting rules and change requests.",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

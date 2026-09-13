@@ -3,9 +3,9 @@
   "name": "f0000000000000000083",
   "position": {
     "x": 1078,
-    "y": 964,
+    "y": 954,
     "z": 13100,
-    "height": 33,
+    "height": 42,
     "width": 286,
     "tabOrder": 13100
   },
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "What you see with no access, or stale data",
+                    "value": "No-access and stale-data states",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "15px",
                       "color": "#605E5C"
                     }
                   }

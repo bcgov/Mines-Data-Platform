@@ -765,7 +765,7 @@ def persona_page(pid, display, title, body, cards, comm_head, comm_sub, comm_row
     chrome(pid)
     intro_bottom = intro_tile(title, body)
     cards_bottom = report_cards(cards, top=intro_bottom + 12 + 33 + 8)
-    py = cards_bottom + 16
+    py = cards_bottom + 10
     ph = (H - 44 - 12) - py
     commentary_panel(comm_head, comm_sub, comm_rows, py, ph)
     contacts_panel(contacts, links, py, ph)

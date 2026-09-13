@@ -84,9 +84,16 @@ def wrap_lines(txt, usable_w, font_px, bold=False):
     return lines
 
 
+def line_box(font_px):
+    """The Service's paragraph line box. Flat TB_LINE up to ~22px, then it grows
+    with the font - a 26px heading in a 30px box overflows and the Service adds a
+    scrollbar (seen in Desktop on the two 26px headings, 2026-09-13)."""
+    return max(TB_LINE, int(math.ceil(font_px * 1.35)))
+
+
 def tb_height(txt, box_w, font_px, bold=False, lines=None):
     n = lines if lines is not None else wrap_lines(txt, box_w - TB_HPAD, font_px, bold)
-    return TB_LINE * n + TB_VPAD
+    return line_box(font_px) * n + TB_VPAD
 
 
 # --- card sizing -------------------------------------------------------------

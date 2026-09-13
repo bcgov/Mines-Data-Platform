@@ -342,15 +342,19 @@ def oval(x, y, w, h, fill):
 
 
 def measure_card(x, y, w, measure, size=10, color=INK, align="center", bold=False,
-                 sample=None, h=None):
+                 sample=None, h=None, fixed=False):
     """A PLAIN card - no background, no border, so the chrome is 34px on both
     axes rather than 49. One line always: cardVisual does not wrap. Height is
     derived from the point size; pass h only to override for centring."""
-    size = cs(size)
+    # fixed=True keeps the authored point size: used where the value is a long
+    # sentence that cannot fit on one line at ANY size, so shrinking the type buys
+    # nothing and only makes the truncation harder to read.
+    if not fixed:
+        size = cs(size)
     sample = sample or SAMPLES.get(measure)
     if sample:
-        fitted = fit_size(sample, w, False, bold,
-                          tuple(n for n in (size, size - 1, size - 2) if n >= 8))
+        fitted = size if fixed else fit_size(sample, w, False, bold,
+                                             tuple(range(size, 7, -1)))
         if card_min_width(sample, fitted, False, bold) > w:
             _issues.append(f"{_state['page']}: card '{measure}' w={w} needs "
                            f"{card_min_width(sample, fitted, False, bold)} at {fitted}pt")
@@ -421,87 +425,88 @@ def button(x, y, w, h, label, color=NAVY, size=10, fill=None, border=None,
 # The widest string each measure actually returns, read back from the live model.
 # cardVisual does not wrap, so every one of these has to fit on ONE line.
 SAMPLES = {
-    "Hub Data As At": "Data as at 30 September 2026",
-    "Hub Next Refresh": "Next refresh: 30 September 2026",
-    "Hub Updated Inspections": "Source extract stale",
-    "Hub Updated Incidents": "Not yet published",
-    "Hub Updated NoW": "Source extract stale",
-    "Hub Updated Planning Map": "Source extract stale",
-    "Hub Updated Permit Turnaround": "Source extract stale",
-    "Hub Updated Mineral Titles": "Source extract stale",
-    "Hub Updated Dictionary": "Source extract stale",
-    "Hub Trust Inspections": "Not validated",
-    "Hub Trust Incidents": "Not validated",
-    "Hub Trust NoW": "Not validated",
-    "Hub Trust Planning Map": "Not validated",
-    "Hub Trust Permit Turnaround": "Not validated",
-    "Hub Trust Mineral Titles": "Not validated",
-    "Hub Trust Dictionary": "Not validated",
-    "Hub Badge Certified": "Certified",
-    "Hub Badge Promoted": "Promoted",
-    "Hub Badge Provisional": "Provisional",
-    "Hub Badge Not Validated": "Not validated",
+    "Hub Data As At":
+        "Data as at 30 September 2026",
+    "Hub Next Refresh":
+        "Next refresh: 30 September 2026",
+    "Hub Updated Inspections":
+        "Source extract stale",
+    "Hub Updated Incidents":
+        "Not yet published",
+    "Hub Updated NoW":
+        "Source extract stale",
+    "Hub Updated Planning Map":
+        "Source extract stale",
+    "Hub Updated Permit Turnaround":
+        "Source extract stale",
+    "Hub Updated Mineral Titles":
+        "Source extract stale",
+    "Hub Updated Dictionary":
+        "Source extract stale",
+    "Hub Trust Inspections":
+        "Not validated",
+    "Hub Trust Incidents":
+        "Not validated",
+    "Hub Trust NoW":
+        "Not validated",
+    "Hub Trust Planning Map":
+        "Not validated",
+    "Hub Trust Permit Turnaround":
+        "Not validated",
+    "Hub Trust Mineral Titles":
+        "Not validated",
+    "Hub Trust Dictionary":
+        "Not validated",
+    "Hub Badge Certified":
+        "Certified",
+    "Hub Badge Promoted":
+        "Promoted",
+    "Hub Badge Provisional":
+        "Provisional",
+    "Hub Badge Not Validated":
+        "Not validated",
     "Hub Changed Inspections":
-        "511 completed FYTD, down from 747 at the same point last year. July "
-        "contributed 17. FY2025/26 finished at 1,519, below the 1,600 Service Plan "
-        "target.",
+        "511 completed FYTD, down from 900 at the same point last year. No inspections have landed for August yet - the source is behind. FY2025/26 finished at 1,519, below the 1,600 Service Plan target.",
     "Hub Changed Inspections Ops":
-        "511 completed so far this fiscal year against 747 at the same point last "
-        "year. July contributed 17 - plan coverage accordingly.",
+        "511 completed FYTD against 900 at the same point last year. FY2025/26 closed at 1,519 against a 1,600 target - the planning map is what steers which sites are visited next.",
     "Hub Changed Incidents":
-        "Report not yet built. Commentary lands with the Incidents build - no figures "
-        "are shown until they can be validated.",
+        "Report not yet built. Commentary lands with the Incidents build - no figures are shown until they can be validated against the corporate report, and the category history only starts in May 2018.",
     "Hub Changed NoW":
-        "Permitting logic is built and matches the corporate report, but the "
-        "now_application source extract has not landed since April 2025. Figures "
-        "publish once the extract is refreshed.",
+        "Figures publish once the now_application extract is refreshed. Permits are counted on permit_id at PCO stage, calendar month, with administrative amendments carried as a separate series throughout.",
     "Hub Changed NoW Permitting":
-        "Permitting logic matches the corporate report. The now_application extract "
-        "is behind, so counts are withheld rather than shown provisionally.",
+        "Permitting logic is built and matches the corporate report, counting distinct permit_id on permit-side ACT status. Figures publish once the now_application extract is refreshed against source.",
     "Hub Changed Planning Map":
-        "Risk criteria are not yet agreed, so the tile is visible and labelled rather "
-        "than hidden - the openness matters more than the polish here.",
+        "511 completed FYTD against 900 at the same point last year. FY2025/26 closed at 1,519 against a 1,600 target - the planning map is what steers which sites are visited next.",
     "Hub Changed Admin Amendments":
-        "Administrative amendments are tracked as a separate series and excluded from "
-        "the headline permit count.",
+        "Administrative amendments are excluded from the headline permit count and carried as a separate series. Worth separating in any turnaround measure rather than folding them into the total count.",
     "Hub Changed Mineral Titles":
-        "Mineral Titles extract is stale pending the refreshed feed; no counts are "
-        "published until it lands.",
-    "Hub Window FYTD": "1 April 2026 to 30 September 2026",
-    "Hub Window Same Last FY": "1 April 2025 to 30 September 2025",
-    "Hub Window Rolling 5": "1 April 2021 to 31 March 2026",
+        "Provisional. Sourced from Mineral Titles Online - the join to permitted sites is not yet certified, so the tile is labelled rather than hidden until the lineage has been reviewed and signed off.",
+    "Hub Window FYTD":
+        "1 April 2026 to 30 September 2026",
+    "Hub Window Same Last FY":
+        "1 April 2025 to 30 September 2025",
+    "Hub Window Rolling 5":
+        "1 April 2021 to 31 March 2026",
     "Hub Def Inspections FYTD":
-        "Inspections FYTD 26/27: count of distinct inspection records with a completed "
-        "date falling in the current fiscal year to date. Includes Site Visit, "
-        "Compliance Review, Inspection, Desktop and Meeting types.",
+        "Inspections FYTD 26/27: count of distinct inspection records with a completed date falling in the current fiscal year to date. Includes Site Visit, Compliance Review, Inspection, Desktop and Meeting types.",
     "Hub Def Source":
-        "CORE and NRIS to bronze to silver to gold.fact_inspection, served through the "
-        "Gold Inspections Semantic Model in Direct Lake mode.",
+        "CORE and NRIS to bronze to silver to gold.fact_inspection, served through the Gold Inspections Semantic Model in Direct Lake mode.",
     "Hub Def Last Refresh":
-        "Data current through 30 September 2026. Refresh cadence is monthly until the "
-        "pipeline runs daily.",
+        "Data current through 30 September 2026. Refresh cadence is monthly until the pipeline runs daily.",
     "Hub Def Validated By":
-        "Reconciled against the Ministry corporate report before publication. Fabric "
-        "Certify is admin-gated, so Promoted is the highest endorsement we can set "
-        "today.",
+        "Reconciled against the Ministry corporate report before publication. Fabric Certify is admin-gated, so Promoted is the highest endorsement we can set today.",
     "Hub Rule Fiscal Year":
-        "April to March. FY26/27 runs 1 April 2026 to 31 March 2027. Every FYTD figure "
-        "is measured to today within that window.",
+        "April to March. FY26/27 runs 1 April 2026 to 31 March 2027. Every FYTD figure is measured to today within that window.",
     "Hub Rule Inspections":
-        "Distinct inspection_id counted on inspection_date. No de-duplication by mine "
-        "or inspector - one inspection record is one inspection.",
+        "Distinct inspection_id counted on inspection_date. No de-duplication by mine or inspector - one inspection record is one inspection.",
     "Hub Rule NoW":
-        "Distinct permit_id counted on issue_date, filtered to permit-side ACT status. "
-        "Administrative amendments are excluded from the headline and reported as a "
-        "separate series.",
+        "Distinct permit_id counted on issue_date, filtered to permit-side ACT status. Administrative amendments are excluded from the headline and reported as a separate series.",
     "Hub Rule Target":
-        "Service Plan target of 1,600 inspections per fiscal year, drawn as a reference "
-        "line rather than a data series so it never enters a count.",
+        "Service Plan target of 1,600 inspections per fiscal year, drawn as a reference line rather than a data series so it never enters a count.",
     "Hub Access Note":
         "Access is granted per audience by the app owner - not per report.",
     "Hub Stale Warning":
-        "Gold data last landed 30 September 2026 and the next scheduled refresh was "
-        "1 October 2026. Figures below are 41 days old.",
+        "Gold data last landed 30 September 2026 and the next scheduled refresh was 1 October 2026. Figures below are 41 days old.",
 }
 
 # Widest string each measure family can return, for width checks.
@@ -657,7 +662,7 @@ def commentary_panel(heading, subtitle, rows, y, h):
     # cardVisual does not wrap, so the label sits ABOVE and the card gets the
     # panel's full width - the widest commentary sentence needs ~1260px.
     rowh = card_height(9)
-    label_w = 210          # widened with the type: "Same period last fiscal year"
+    label_w = 150          # the card needs every pixel: cardVisual cannot wrap
     card_x = x + 24 + 14 + label_w
     card_w = x + w - 24 - card_x
     for label, colour, m in rows:
@@ -668,7 +673,13 @@ def commentary_panel(heading, subtitle, rows, y, h):
         l_h = TB_LINE * l_lines + TB_VPAD
         text(x + 24 + 14, cy + (rowh - l_h) // 2, label_w - 14,
              [(label, 10, INK, True)], lines=l_lines)
-        measure_card(card_x, cy, card_w, m, size=9, color=INK, align="left")
+        # PRE-EXISTING, not caused by the type pass: these commentary measures
+        # return ~190-character sentences and cardVisual does not wrap, so the
+        # Service ellipsises them. Held at the original 9pt so the truncation is
+        # no worse than before. Real fixes: shorten the measures, or move the
+        # commentary to a table visual, which does wrap.
+        measure_card(card_x, cy, card_w, m, size=9, color=INK, align="left",
+                     fixed=True)
         cy += rowh + 4
     _regions.pop()
     return y + h

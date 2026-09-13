@@ -88,7 +88,9 @@ def line_box(font_px):
     """The Service's paragraph line box. Flat TB_LINE up to ~22px, then it grows
     with the font - a 26px heading in a 30px box overflows and the Service adds a
     scrollbar (seen in Desktop on the two 26px headings, 2026-09-13)."""
-    return max(TB_LINE, int(math.ceil(font_px * 1.35)))
+    if font_px <= 22:
+        return TB_LINE
+    return int(math.ceil(font_px * 1.35)) + 4   # +4 slack: 48 was an exact fit
 
 
 def tb_height(txt, box_w, font_px, bold=False, lines=None):

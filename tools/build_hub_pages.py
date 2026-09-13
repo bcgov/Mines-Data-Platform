@@ -581,7 +581,7 @@ def intro_tile(title, body, pill="Hub Data As At", refresh="Hub Next Refresh"):
     th = tb_height(title, 800, 17, True)
     bh = tb_height(body, body_w, 10)
     stack_h = card_height(10)          # both pills sit on ONE row
-    tile_h = 14 + max(th + 2 + bh, stack_h) + 14
+    tile_h = 11 + max(th + 2 + bh, stack_h) + 11
     rect(MARGIN, INTRO_Y, CONTENT_W, tile_h, fill=WHITE, border=LINE)
     with region(MARGIN, INTRO_Y, CONTENT_W, tile_h, "intro tile"):
         text(MARGIN + 26, INTRO_Y + 14, 800, [(title, 17, NAVY, True)])

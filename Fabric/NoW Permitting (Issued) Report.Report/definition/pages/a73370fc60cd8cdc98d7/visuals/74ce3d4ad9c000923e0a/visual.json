@@ -5,7 +5,7 @@
     "x": 442,
     "y": 352,
     "z": 6,
-    "height": 112,
+    "height": 118,
     "width": 397,
     "tabOrder": 6
   },
@@ -75,7 +75,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "44D"
+                  "Value": "40D"
                 }
               }
             },
@@ -143,6 +143,63 @@
               "expr": {
                 "Literal": {
                   "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_now_permit"
+                    }
+                  },
+                  "Property": "Lbl NoW Same Last FY"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#000000'"
+                    }
+                  }
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

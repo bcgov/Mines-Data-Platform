@@ -53,14 +53,6 @@
               {
                 "textRuns": [
                   {
-                    "value": "Data current as of 7 July 2026 - gold layer refreshed; fiscal-year figures are up to date.",
-                    "textStyle": {
-                      "fontWeight": "bold",
-                      "fontSize": "12px",
-                      "color": "#8a6d1a"
-                    }
-                  },
-                  {
                     "value": "Contact Raj (Rajneesh.1.Gulati@gov.bc.ca) or Nhung (Nhung.Nguyen@gov.bc.ca) for more information.",
                     "textStyle": {
                       "fontSize": "12px",

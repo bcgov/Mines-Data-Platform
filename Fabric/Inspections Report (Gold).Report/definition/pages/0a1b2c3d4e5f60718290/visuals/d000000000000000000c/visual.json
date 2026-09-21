@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Number of Inspections Last Month June FY 26/27",
+                    "value": "Number of Inspections in the Previous 30 Days",
                     "textStyle": {
                       "fontSize": "15px",
                       "color": "#252423"

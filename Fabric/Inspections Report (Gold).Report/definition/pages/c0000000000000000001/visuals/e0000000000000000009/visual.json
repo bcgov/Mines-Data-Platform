@@ -3,10 +3,10 @@
   "name": "e0000000000000000009",
   "position": {
     "x": 649.5167286245354,
-    "y": 441.33828996282529,
+    "y": 441.3382899628253,
     "z": 8000,
     "height": 107.06319702602231,
-    "width": 606.69144981412637,
+    "width": 606.6914498141264,
     "tabOrder": 8000
   },
   "visual": {
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Annual line chart: FY2019-FY2025 + Service Plan Target dashed line at 1,600",
+                    "value": "Annual line chart: FY2019-FY2025",
                     "textStyle": {
                       "fontSize": "11px",
                       "color": "#252423"

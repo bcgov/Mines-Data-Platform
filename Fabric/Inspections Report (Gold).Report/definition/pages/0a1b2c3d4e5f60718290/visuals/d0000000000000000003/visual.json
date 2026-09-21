@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "All inspection types are included: Site Visit, Compliance Review, Inspection, Desktop, Meeting. Counts are distinct inspections based on inspection date. Meetings are not counted toward the Service Plan Target.",
+                    "value": "All inspection types are included: Site Visit, Compliance Review, Inspection, Desktop, Meeting. Counts are distinct inspections based on inspection date.",
                     "textStyle": {
                       "fontSize": "12px",
                       "color": "#252423"
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "The line chart shows inspections per fiscal year (FY2019-FY2026), with the Service Plan Target (1,600/yr) as a dashed line. The bar chart shows inspections by fiscal month from April 2022, broken down by inspection type.",
+                    "value": "The line chart shows inspections per fiscal year (FY2019-FY2026). The bar chart shows inspections by fiscal month from April 2022, broken down by inspection type.",
                     "textStyle": {
                       "fontSize": "12px",
                       "color": "#252423"
@@ -52,14 +52,6 @@
               },
               {
                 "textRuns": [
-                  {
-                    "value": "Data current as of 7 July 2026 - gold layer refreshed; fiscal-year figures are up to date.",
-                    "textStyle": {
-                      "fontWeight": "bold",
-                      "fontSize": "12px",
-                      "color": "#8a6d1a"
-                    }
-                  },
                   {
                     "value": "Contact Raj (Rajneesh.1.Gulati@gov.bc.ca) or Nhung (Nhung.Nguyen@gov.bc.ca) for more information.",
                     "textStyle": {

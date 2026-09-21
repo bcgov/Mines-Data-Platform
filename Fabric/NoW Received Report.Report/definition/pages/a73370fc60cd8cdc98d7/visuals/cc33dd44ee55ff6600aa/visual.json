@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "1. NoWs Received FYTD  2. NoWs Received same time last FY  3. NoWs Received in the last complete month — all three anchored to the latest fiscal year that actually carries data (shown in each card title).",
+                    "value": "1. Number of NoWs Received in FY 26/27      2. NoWs Received same time last FY 25/26      3. NoWs Received in the last month of current FY 26/27",
                     "textStyle": {
                       "fontWeight": "bold",
                       "fontSize": "12px",
@@ -44,23 +44,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "The left chart shows NoWs received per fiscal year (FY2016/17–FY2020/21). The right charts show NoWs received by fiscal month across FY2018/19–FY2020/21, broken down by type and by commodity. Type splits into two series: New Permit and Amendments.",
+                    "value": "The left chart shows NoWs received per fiscal year (FY2021/22–FY2025/26). The right chart shows NoWs received by fiscal month from April 2023, broken down by type. Both split into two series: New Permit and Amendments.",
                     "textStyle": {
                       "fontSize": "12px",
                       "color": "#252423",
-                      "fontFamily": "BC Sans"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Data reflects the current gold layer. Received-application volumes collapse from FY2021/22 onward, so all figures are anchored to FY2020/21 — the latest complete fiscal year — and will move forward automatically once the now_application source is refreshed.",
-                    "textStyle": {
-                      "fontWeight": "bold",
-                      "fontSize": "12px",
-                      "color": "#8a6d1a",
                       "fontFamily": "BC Sans"
                     }
                   }

@@ -62,8 +62,20 @@ TARGET_TABLE = f"{STG_SCHEMA}.{OBJECT_NAME}"
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {STG_SCHEMA}")
 
 # Silver + gold.dim_mine are all in the same (default) lakehouse -> read by table name.
-spark.table("silver.nris_inspection").createOrReplaceTempView("src_inspection")
-spark.table("silver.mine").createOrReplaceTempView("src_mine")
+# Dedupe: NRIS tables are full loads with no watermark, so silver.nris_inspection can hold
+# one copy per run (2 copies on 18 Sep). silver.mine has 18 mine_no values shared by 2 mines
+# (test mines). Keep one row per inspection_id and one mine per mine_no.
+from pyspark.sql import Window
+w_i = Window.partitionBy("inspection_id").orderBy(F.col("silver_load_ts").desc())
+(spark.table("silver.nris_inspection")
+    .withColumn("_rn", F.row_number().over(w_i)).filter("_rn = 1").drop("_rn")
+    .createOrReplaceTempView("src_inspection"))
+
+w_m = Window.partitionBy("mine_no").orderBy(F.col("create_timestamp").asc(), F.col("mine_guid"))
+(spark.table("silver.mine")
+    .withColumn("_rn", F.row_number().over(w_m)).filter("_rn = 1").drop("_rn")
+    .createOrReplaceTempView("src_mine"))
+
 spark.table("gold.dim_mine").createOrReplaceTempView("gold_dim_mine")
 
 DERIVED = {"mine_guid", "mine_sk", "inspection_date_key"}

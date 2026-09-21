@@ -107,25 +107,6 @@
               {
                 "textRuns": [
                   {
-                    "value": "vs Service Plan Target",
-                    "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
-                    }
-                  },
-                  {
-                    "value": "  - 1,600 / yr (dashed line); meetings excluded",
-                    "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#252423"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
                     "value": "YoY delta",
                     "textStyle": {
                       "fontSize": "11px",

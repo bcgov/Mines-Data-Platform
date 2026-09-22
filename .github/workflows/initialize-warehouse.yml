@@ -38,7 +38,8 @@ jobs:
           curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
             | gpg --batch --yes --dearmor \
             | sudo tee /usr/share/keyrings/microsoft-prod.gpg > /dev/null
-          curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list \
+          # Runner is ubuntu-latest (24.04); point apt at the matching repo and the key saved above
+          echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main" \
             | sudo tee /etc/apt/sources.list.d/msprod.list > /dev/null
           sudo apt-get update -q
           sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev jq python3-pip

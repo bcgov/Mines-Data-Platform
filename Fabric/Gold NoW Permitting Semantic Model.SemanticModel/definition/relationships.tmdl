@@ -1,0 +1,4 @@
+relationship fact_now_permit_issue_date_key_dim_date_full_date
+	fromColumn: fact_now_permit.issue_date_key
+	toColumn: dim_date.full_date
+

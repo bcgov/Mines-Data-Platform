@@ -1,0 +1,325 @@
+table fact_mine_incident
+	lineageTag: eb257beb-5cd7-413a-96b9-b745a4fcaa17
+	sourceLineageTag: [gold].[fact_mine_incident]
+
+	/// All-time distinct count of incidents in gold. Base measure.
+	measure 'Incidents Total' = DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] )
+		formatString: #,##0
+		displayFolder: Incidents KPIs
+		lineageTag: a2c06b29-29e2-4ecd-a7db-82a219aada07
+
+	/// KPI card 1. Current BC fiscal year (1 Apr -> today inclusive) on the EFFECTIVE date: Rajneesh's rule - if an incident was reported more than 24h after it happened, the incident time is used instead of the reported time. Mirrors Metabase question 3284.
+	measure 'Incidents FYTD' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[effective_date] >= DATE ( fyStart, 4, 1 ), fact_mine_incident[effective_date] < d + 1 )
+		formatString: #,##0
+		displayFolder: Incidents KPIs
+		lineageTag: df06b020-8c0e-4571-824f-e1abe7370aa8
+
+	/// KPI card 2. Previous FY from 1 Apr to the same calendar day one year ago, effective date. Mirrors Metabase 3285 but uses the fiscal-year-safe window (the Metabase version mis-computes the window from January to March).
+	measure 'Incidents Same Time Last FY' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR lastStart = DATE ( fyStart - 1, 4, 1 ) VAR lastSame = DATE ( YEAR ( d ) - 1, MONTH ( d ), DAY ( d ) ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[effective_date] >= lastStart, fact_mine_incident[effective_date] < lastSame + 1 )
+		formatString: #,##0
+		displayFolder: Incidents KPIs
+		lineageTag: c30f3a35-310c-40c7-80c4-10bb48140be0
+
+	/// KPI card 3. LAST COMPLETED CALENDAR MONTH on the effective date (not rolling 30 days - incidents and NoW use the calendar month; Inspections uses rolling 30). Mirrors Metabase 3288 without its 31st-of-month zero bug.
+	measure 'Incidents Last Month' = VAR d = TODAY() VAR mStart = EOMONTH ( d, -2 ) + 1 VAR mEnd = EOMONTH ( d, -1 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[effective_date] >= mStart, fact_mine_incident[effective_date] < mEnd )
+		formatString: #,##0
+		displayFolder: Incidents KPIs
+		lineageTag: a07b85b7-888e-4b77-8c7a-3138fdb2c544
+
+	/// FYTD minus same time last FY. Comparable windows.
+	measure 'Incidents YoY Delta' = [Incidents FYTD] - [Incidents Same Time Last FY]
+		formatString: +#,##0;-#,##0;0
+		displayFolder: Incidents KPIs
+		lineageTag: 5cdd559b-40dc-4532-b778-fecdcab38bbe
+
+	/// FYTD change versus same time last FY, as a percentage.
+	measure 'Incidents YoY Delta %' = DIVIDE ( [Incidents FYTD] - [Incidents Same Time Last FY], [Incidents Same Time Last FY] )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Incidents KPIs
+		lineageTag: 9615b51b-e449-4dae-b484-2be261604494
+
+	/// Chart 1, green bars. Last 5 COMPLETED fiscal years on the EFFECTIVE date, current FY excluded. Window matches Metabase 3287; the date basis follows Rajneesh 10 Sep 2026 - the 24-hour rule applies to charts as well as cards, per Caroline. Axis: dim_date[fiscal_year_label].
+	measure 'Incidents per Fiscal Year' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[effective_date] < DATE ( fyStart, 4, 1 ) )
+		formatString: #,##0
+		displayFolder: Incidents Trend
+		lineageTag: ddd78c25-f888-47b8-8917-d3a482ec3e83
+
+	/// Chart 1, blue bars. Dangerous Occurrences (determination_type_code = 'DO') in the same window, effective date.
+	measure 'DOs per Fiscal Year' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[effective_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[effective_date] < DATE ( fyStart, 4, 1 ) )
+		formatString: #,##0
+		displayFolder: Incidents Trend
+		lineageTag: a687b739-6d65-4d9a-8f0a-0638f334d6ae
+
+	/// Chart 2 series 1. Monthly incidents on the EFFECTIVE date, trailing 4 years including the current partial month - exactly Metabase 3289 (titled 'last 3 years' there, but the SQL is 4). Axis: dim_date[fiscal_month_label].
+	measure 'Incidents per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Incidents Trend
+		lineageTag: 72404477-20f0-436c-9024-37a7cf20516c
+
+	/// Chart 2 series 2. Dangerous Occurrences per month.
+	measure 'DOs per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Incidents Trend
+		lineageTag: d0f0160e-f7c4-43ff-9424-c0736cecd459
+
+	/// Chart 2 series 3. SUM of number_of_injuries (not a count of incidents).
+	measure 'Injuries per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_injuries] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Incidents Trend
+		lineageTag: dd44daac-b7c7-4b75-8497-80a550fe7f27
+
+	/// Chart 2 series 4. SUM of number_of_fatalities.
+	measure 'Fatalities per Month' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_fatalities] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Incidents Trend
+		lineageTag: 70a2bc01-64ab-4f96-9c8b-ae12480f99be
+
+	/// Distinct incidents flagged DO in the current filter context.
+	measure 'DOs Total' = CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[is_dangerous_occurrence] = 1 )
+		formatString: #,##0
+		displayFolder: Dangerous Occurrences
+		lineageTag: 4d1a4dca-e46b-47ea-b126-d39e04c0446c
+
+	/// Share of incidents that are Dangerous Occurrences. Colin's steer (17 Jul): DOs, not raw volume, are what the Chief Inspector watches.
+	measure 'DO Share %' = DIVIDE ( [DOs Total], [Incidents Total] )
+		formatString: 0.0%
+		displayFolder: Dangerous Occurrences
+		lineageTag: 7e3d4cb9-1982-4a0b-a702-59bb27c96db1
+
+	/// Distinct incidents per category via bridge_incident_category. An incident with two categories counts once in each and once in the total - do not SUM this across categories. Axis: dim_incident_category[category_group].
+	measure 'Incidents by Category' = DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] )
+		formatString: #,##0
+		displayFolder: By Category
+		lineageTag: 40972968-6741-45d0-a875-97827db4f1f7
+
+	/// Same, excluding the explicit Uncategorised member. Only ~47% of incidents carry a category at source.
+	measure 'Incidents by Category (categorised only)' = CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), bridge_incident_category[is_uncategorised] = 0 )
+		formatString: #,##0
+		displayFolder: By Category
+		lineageTag: 0a7e10db-434c-47db-b3b6-9313d6d109a6
+
+	/// Share of incidents with no category at all. Design question for Caroline / Romil.
+	measure 'Uncategorised Share %' = DIVIDE ( CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), bridge_incident_category[is_uncategorised] = 1 ), [Incidents Total] )
+		formatString: 0.0%
+		displayFolder: By Category
+		lineageTag: c9c786f6-fed0-4e67-8638-0c773c068aea
+
+	/// Reconciliation only. Same window as 'Incidents per Fiscal Year' but on the RAW reported date - i.e. what Metabase 3287 returns today. Keep for tie-outs against the Metabase report; not for the published visual.
+	measure 'Incidents per Fiscal Year (Reported Date)' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[reported_date] >= DATE ( fyStart - 5, 4, 1 ), fact_mine_incident[reported_date] < DATE ( fyStart, 4, 1 ) )
+		formatString: #,##0
+		displayFolder: Incidents Trend
+		lineageTag: 1afea0d6-7624-4fdd-bf72-07f2c6aff7c8
+
+	/// Chart 3 value. Distinct incidents per PARENT category group, on the effective date, scoped to 21 May 2018 onward and excluding the Uncategorised member. Verified at source 10 Sep 2026: categorisation begins 21 May 2018 - zero categorised incidents before that date, 93% after - so an all-history view would be 50% Uncategorised for reasons that have nothing to do with data quality. Self-trimming: returns BLANK outside the top 5, so the visual needs no filter of its own. An incident with two categories counts once in each group; do not SUM across groups.
+	measure 'Incidents by Category (Top 5)' = VAR Base = CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( 2018, 5, 21 ), bridge_incident_category[is_uncategorised] = 0 ) VAR Ranked = RANKX ( ALLSELECTED ( dim_incident_category[category_group] ), CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( 2018, 5, 21 ), bridge_incident_category[is_uncategorised] = 0 ), , DESC, DENSE ) RETURN IF ( ISBLANK ( Ranked ) || Ranked <= 5, Base )
+		formatString: #,##0
+		displayFolder: By Category
+		lineageTag: a76c4601-fe7d-4e4d-b5eb-2d61aa391900
+
+	/// Hidden 1/0 flag. Ranks the parent category groups by incident count and keeps the top 5 - Rajneesh 10 Sep 2026. Apply as a visual-level filter (is 1) on the category chart.
+	measure 'Is Top 5 Category' = VAR cat = SELECTEDVALUE ( dim_incident_category[category_group] ) VAR r = RANKX ( ALLSELECTED ( dim_incident_category[category_group] ), [Incidents by Category (Top 5)], , DESC, DENSE ) RETURN IF ( NOT ISBLANK ( cat ) && NOT ISBLANK ( r ) && r <= 5, 1, 0 )
+		formatString: 0
+		isHidden
+		lineageTag: 81f80553-8c4d-4fb1-8b16-c63d33d80bd4
+
+	/// Subtitle for the category chart. States the 2018 scope so nobody reads the chart as all-history.
+	measure 'Category Scope Label' = "Top 5 categories, May 2018 onward - categories were not recorded before then"
+		displayFolder: Card Labels
+		lineageTag: 9b32df5b-20c1-4fc1-af16-0143aa8bfc02
+
+	/// Freshness label. Latest reported date in gold, ignoring future-dated records - one incident is keyed 22 Aug 2040 at source. Never typed in.
+	measure 'Data As Of Label' = VAR latest = CALCULATE ( MAX ( fact_mine_incident[reported_date] ), fact_mine_incident[reported_date] <= TODAY() ) RETURN "Data current through " & FORMAT ( latest, "d MMM yyyy" )
+		displayFolder: Card Labels
+		lineageTag: d4adbf4c-49e2-49e1-9c5e-a1d9fe27c51d
+
+	/// Card 1 title, e.g. 'Number of Incidents FYTD 26/27'.
+	measure 'FYTD Label' = VAR d = TODAY() VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "Number of Incidents FYTD " & RIGHT ( fy, 2 ) & "/" & RIGHT ( fy + 1, 2 )
+		displayFolder: Card Labels
+		lineageTag: 62b195f1-17a3-4e84-8e4a-a2a72e9da076
+
+	/// Card 2 title.
+	measure 'Same Time Last FY Label' = VAR d = TODAY() VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "Number of Incidents same time last FY " & RIGHT ( fy - 1, 2 ) & "/" & RIGHT ( fy, 2 )
+		displayFolder: Card Labels
+		lineageTag: 807a05b4-3411-4dd9-8678-af524011d67d
+
+	/// Card 3 title, derived from the calendar - the Metabase card is hand-titled and goes stale.
+	measure 'Last Month Label' = VAR lm = EOMONTH ( TODAY(), -1 ) VAR fy = IF ( MONTH ( lm ) >= 4, YEAR ( lm ), YEAR ( lm ) - 1 ) RETURN "Number of Incidents Last Month " & FORMAT ( lm, "MMMM" ) & " FY " & RIGHT ( fy, 2 ) & "/" & RIGHT ( fy + 1, 2 )
+		displayFolder: Card Labels
+		lineageTag: 5fe9756c-aae0-4923-89f1-f97896e6405f
+
+	/// Hidden 1/0 flag: fiscal year is one of the 5 completed FYs. Visual-level filter for chart 1's axis.
+	measure 'Is Last 5 FY' = VAR curFY = YEAR ( TODAY() ) - IF ( MONTH ( TODAY() ) >= 4, 0, 1 ) VAR fy = SELECTEDVALUE ( dim_date[fiscal_year] ) RETURN IF ( NOT ISBLANK ( fy ) && fy >= curFY - 5 && fy < curFY, 1, 0 )
+		formatString: 0
+		isHidden
+		lineageTag: 8929bfaf-b4a8-4c60-8a15-27f49e2eae78
+
+	/// Hidden 1/0 flag for chart 2's month axis (trailing 4 years, current partial month included). Works off dim_date[full_date] so it does not depend on how fiscal_year_month_key is encoded. The measures themselves are windowed on the fact - this only trims empty axis members.
+	measure 'Is Last 4 Years Month' = VAR d = TODAY() VAR firstDay = MIN ( dim_date[full_date] ) RETURN IF ( NOT ISBLANK ( firstDay ) && firstDay >= DATE ( YEAR ( d ) - 4, MONTH ( d ), 1 ) && firstDay <= d, 1, 0 )
+		formatString: 0
+		isHidden
+		lineageTag: 35fe75f7-7354-4650-88cb-63529f8ec926
+
+	column mine_incident_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 7fef15af-464a-4937-9d6e-043f1ebc4f80
+		sourceLineageTag: mine_incident_id
+		summarizeBy: none
+		sourceColumn: mine_incident_id
+
+		annotation SummarizationSetBy = Automatic
+	column mine_incident_no
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: fc097dfd-a7d3-4a0d-a9b1-e5259b0b0a13
+		sourceLineageTag: mine_incident_no
+		summarizeBy: none
+		sourceColumn: mine_incident_no
+
+		annotation SummarizationSetBy = Automatic
+	column Mine_SK
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: bigint
+		lineageTag: 895e65e2-6e43-43bf-8507-2b8b48958ac1
+		sourceLineageTag: Mine_SK
+		summarizeBy: none
+		sourceColumn: Mine_SK
+
+		annotation SummarizationSetBy = Automatic
+	column Reported_Date_SK
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: int
+		lineageTag: 246c413b-b8bb-4c8c-ae10-1c59da2c8fb2
+		sourceLineageTag: Reported_Date_SK
+		summarizeBy: none
+		sourceColumn: Reported_Date_SK
+
+		annotation SummarizationSetBy = Automatic
+	column Incident_Date_SK
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: int
+		lineageTag: 0f11a4e8-ea67-424a-a3ab-7314877410a6
+		sourceLineageTag: Incident_Date_SK
+		summarizeBy: none
+		sourceColumn: Incident_Date_SK
+
+		annotation SummarizationSetBy = Automatic
+	column Effective_Date_SK
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		sourceProviderType: int
+		lineageTag: cabd404d-1bf6-4450-aeb0-ac8fa304ee3c
+		sourceLineageTag: Effective_Date_SK
+		summarizeBy: none
+		sourceColumn: Effective_Date_SK
+
+		annotation SummarizationSetBy = Automatic
+	column reported_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: date
+		lineageTag: 180f51e9-6c36-48c0-8ba0-aee7e453095a
+		sourceLineageTag: reported_date
+		summarizeBy: none
+		sourceColumn: reported_date
+
+		annotation SummarizationSetBy = Automatic
+	column incident_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: date
+		lineageTag: d6e3bce7-8364-4e53-84a9-a4a5f45629b3
+		sourceLineageTag: incident_date
+		summarizeBy: none
+		sourceColumn: incident_date
+
+		annotation SummarizationSetBy = Automatic
+	column effective_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: date
+		lineageTag: bb62c974-1224-441f-90b3-e5355f915d00
+		sourceLineageTag: effective_date
+		summarizeBy: none
+		sourceColumn: effective_date
+
+		annotation SummarizationSetBy = Automatic
+	column is_late_report
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 975bd3e1-5484-4c25-9677-5955d387b715
+		sourceLineageTag: is_late_report
+		summarizeBy: none
+		sourceColumn: is_late_report
+
+		annotation SummarizationSetBy = Automatic
+	column number_of_injuries
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 3d75ad38-dc84-4f29-a93b-b8ac048ad954
+		sourceLineageTag: number_of_injuries
+		summarizeBy: sum
+		sourceColumn: number_of_injuries
+
+		annotation SummarizationSetBy = Automatic
+	column number_of_fatalities
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: f06b2519-33ff-4d3e-879a-b72b5db22637
+		sourceLineageTag: number_of_fatalities
+		summarizeBy: sum
+		sourceColumn: number_of_fatalities
+
+		annotation SummarizationSetBy = Automatic
+	column determination_type_code
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 6287d9b7-f811-45c4-b4b7-0ce4cb566b39
+		sourceLineageTag: determination_type_code
+		summarizeBy: none
+		sourceColumn: determination_type_code
+
+		annotation SummarizationSetBy = Automatic
+	column status_code
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 42db9b9a-5bd8-4832-8fb4-afba3076aa71
+		sourceLineageTag: status_code
+		summarizeBy: none
+		sourceColumn: status_code
+
+		annotation SummarizationSetBy = Automatic
+	column is_dangerous_occurrence
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: cb1096e3-6377-4251-b190-45f8730cc911
+		sourceLineageTag: is_dangerous_occurrence
+		summarizeBy: none
+		sourceColumn: is_dangerous_occurrence
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_mine_incident = entity
+		mode: directLake
+		source
+			entityName: fact_mine_incident
+			schemaName: gold
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table

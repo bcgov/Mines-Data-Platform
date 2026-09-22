@@ -1,0 +1,48 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "bb22cc33dd44ee55ff66",
+  "position": {
+    "x": 200,
+    "y": 26,
+    "z": 11,
+    "height": 42,
+    "width": 1056,
+    "tabOrder": 11
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Ministry of Mining & Critical Minerals",
+                    "textStyle": {
+                      "fontSize": "20px",
+                      "color": "#013366",
+                      "fontWeight": "bold",
+                      "fontFamily": "BC Sans"
+                    }
+                  },
+                  {
+                    "value": "   —   Notice of Work Permitting (Issued)",
+                    "textStyle": {
+                      "fontSize": "15px",
+                      "color": "#605E5C",
+                      "fontFamily": "BC Sans"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "e0000000000000000003",
+  "position": {
+    "x": 23.791821561338292,
+    "y": 72.565055762081784,
+    "z": 2000,
+    "height": 45.204460966542754,
+    "width": 1232.4163568773236,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "INS   ",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "13px",
+                      "color": "#3470b1"
+                    }
+                  },
+                  {
+                    "value": "Inspection",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "13px",
+                      "color": "#013366"
+                    }
+                  },
+                  {
+                    "value": "   —   Field or desktop inspection event at a mine",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#605e5c"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/variableLibrary/definition/variables/1.0.0/schema.json",
+  "variables": [
+    { "name": "environment",    "note": "dev | test | prod",                                          "type": "String", "value": "dev" },
+    { "name": "lakehouse_name", "note": "The one lakehouse per environment (bronze/silver/gold/stg schemas)", "type": "String", "value": "mcm_mdp_lh1_dev" },
+    { "name": "warehouse_name", "note": "Warehouse holding app.* control and log tables",              "type": "String", "value": "mcm-mdp-fabwh1-dev" },
+    { "name": "raw_root_path",  "note": "Where Sebastian's pipeline lands raw parquet (relative to the default lakehouse)", "type": "String", "value": "Files/raw/parquet" }
+  ]
+}

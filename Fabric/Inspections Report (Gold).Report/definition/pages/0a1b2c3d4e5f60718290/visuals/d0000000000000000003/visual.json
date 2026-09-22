@@ -1,0 +1,128 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "d0000000000000000003",
+  "position": {
+    "x": 23.59447004608295,
+    "y": 77.665130568356375,
+    "z": 2000,
+    "height": 140.58371735791093,
+    "width": 1232.8110599078343,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "1. Number of inspections in FY 26/27      2. Number of Inspections same time last FY 25/26      3. Number of Inspections in the last month of current FY 26/27",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "12px",
+                      "color": "#013366"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "All inspection types are included: Site Visit, Compliance Review, Inspection, Desktop, Meeting. Counts are distinct inspections based on inspection date.",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "The line chart shows inspections per fiscal year (FY2019-FY2026). The bar chart shows inspections by fiscal month from April 2022, broken down by inspection type.",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#252423"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Contact Raj (Rajneesh.1.Gulati@gov.bc.ca) or Nhung (Nhung.Nguyen@gov.bc.ca) for more information.",
+                    "textStyle": {
+                      "fontSize": "12px",
+                      "color": "#605e5c"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F3F2F1'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,672 @@
+table fact_inspection
+	lineageTag: 23b32cd6-cb03-4d41-b142-017e180a7fdf
+	sourceLineageTag: [gold].[fact_inspection]
+
+	/// All-time distinct count of inspections. Base measure.
+	measure 'Inspections Total' = DISTINCTCOUNT(fact_inspection[inspection_id])
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: b704fa70-290d-4ac4-b33a-7376a1ccdaa9
+
+	/// Inspections FYTD: current BC fiscal year (Apr 1 -> today, inclusive of all of today regardless of time-of-day), auto-detects current FY from today's date. Per Method Statement handout item 1.
+	measure 'Inspections FYTD' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR FYStart = DATE ( FYStartYear, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= FYStart, fact_inspection[inspection_date] < CurrentDate + 1 )
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: 310b24ee-f5f4-4613-83ba-967539d14d27
+
+	/// Inspections same time last FY: previous FY window Apr 1 (FY-1) to exactly one year ago from today (inclusive of that full day). Per Method Statement handout item 2.
+	measure 'Inspections Same Time Last FY' = VAR CurrentDate = TODAY() VAR FYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR LastFYStart = DATE ( FYStartYear - 1, 4, 1 ) VAR LastFYSameDate = DATE ( YEAR ( CurrentDate ) - 1, MONTH ( CurrentDate ), DAY ( CurrentDate ) ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= LastFYStart, fact_inspection[inspection_date] < LastFYSameDate + 1 )
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: f0bdb947-cb2e-4ace-a367-37588dad19d1
+
+	/// Inspections in the rolling PREVIOUS 30 DAYS (>= TODAY-30 and < TODAY), matching Rajneesh's Metabase 'Inspection Date Previous 30 Days' filter. NOTE: reads low until the gold pipeline is current, since it only counts inspection dates present in gold.
+	measure 'Inspections Last Month' = VAR CurrentDate = TODAY() RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= CurrentDate - 30, fact_inspection[inspection_date] < CurrentDate )
+		formatString: #,##0
+		displayFolder: Inspections KPIs
+		lineageTag: b13c9a17-ddf6-43d9-bde7-1a5e3c9940b3
+
+	/// Inspections per fiscal year trend. About 7 fiscal years back up to (exclusive of) Apr 1 of the current in-progress fiscal year. Per Method Statement handout item 4. Use with dim_date[fiscal_year_label] on the axis.
+	measure 'Inspections per Fiscal Year' = VAR CurrentDate = TODAY() VAR CurrentFYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR CutoffDate = DATE ( CurrentFYStartYear, 4, 1 ) VAR WindowStart = DATE ( CurrentFYStartYear - 7, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= WindowStart, fact_inspection[inspection_date] < CutoffDate )
+		formatString: #,##0
+		displayFolder: Inspections Trend
+		lineageTag: eb979d2f-1d2f-4c68-9706-43ccde249acd
+
+	/// Inspections per fiscal month and type, last ~5 fiscal years (Apr 1 of CurrentFY-4) to today inclusive. Window starts Apr 2022 to match Rajneesh's Metabase bar chart. Use with dim_date[fiscal_year_label]/[fiscal_month_label] on axis and dim_inspection_type[inspection_type_name] as legend.
+	measure 'Inspections per Fiscal Month and Type' = VAR CurrentDate = TODAY() VAR CurrentFYStartYear = IF ( MONTH ( CurrentDate ) >= 4, YEAR ( CurrentDate ), YEAR ( CurrentDate ) - 1 ) VAR WindowStart = DATE ( CurrentFYStartYear - 4, 4, 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= WindowStart, fact_inspection[inspection_date] < CurrentDate + 1 )
+		formatString: #,##0
+		displayFolder: Inspections Trend
+		lineageTag: 49a67126-e61d-4646-81e5-2db9273af700
+
+	/// Dynamic KPI card label for FYTD, auto-updates fiscal year.
+	measure 'Lbl FYTD' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) RETURN "Number of Inspections FYTD " & fy
+		displayFolder: Card Labels
+		lineageTag: 0e23c59e-8595-4c14-8880-ce19d8153443
+
+	/// Dynamic KPI card label for same-time-last-FY.
+	measure 'Lbl Same Last FY' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fyp = FORMAT ( s - 1, "0000" ) & "/" & RIGHT ( FORMAT ( s, "0000" ), 2 ) RETURN "Number of Inspections same time Last FY " & fyp
+		displayFolder: Card Labels
+		lineageTag: 2e1e68bf-2b0c-4f14-b05b-04d1a51a0164
+
+	/// Dynamic KPI card label for the rolling previous-30-days KPI.
+	measure 'Lbl Last Month' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( s, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( s + 1, "0000" ), 2 ) RETURN "Number of Inspections (Previous 30 Days) FY " & fy
+		displayFolder: Card Labels
+		lineageTag: 4e4e03e9-2df6-4734-b69b-b827c25510a5
+
+	/// Annual Service Plan target for inspections (static 1,600/yr as of FY26/27). OPEN: confirm whether static every year or tied to Service Plan cycle.
+	measure 'Inspections Service Plan Target' = 1600
+		formatString: #,0
+		displayFolder: Inspections KPIs
+		lineageTag: dcca6c58-2b1d-47ee-ab29-8b485adf5ac3
+
+	/// Dynamic flag (1/0): 1 when the current context's fiscal year is within the most recent 7 fiscal years (CurrentFY-6..CurrentFY), else 0. Uses TODAY() so it rolls forward automatically. Used as a visual-level filter to drive the dynamic last-7-fiscal-years window on the Inspection Report.
+	measure 'Is Last 7 FY' = VAR CurFY = YEAR(TODAY()) - IF(MONTH(TODAY())>=4,0,1) VAR FY = SELECTEDVALUE(dim_date[fiscal_year]) RETURN IF(NOT ISBLANK(FY) && FY >= CurFY-6 && FY <= CurFY, 1, 0)
+		formatString: 0
+		isHidden
+		lineageTag: fac82391-39cc-42b7-b8ca-af1d9f786228
+
+	/// Year-over-year change: FYTD minus same-time-last-FY (apples-to-apples comparable windows).
+	measure 'Inspections YoY Delta' = [Inspections FYTD] - [Inspections Same Time Last FY]
+		formatString: +#,0;-#,0;0
+		displayFolder: Inspections KPIs
+		lineageTag: 3c36a88d-0e9d-4b65-9f13-323e84222cab
+
+	/// Year-over-year percentage change vs same time last FY.
+	measure 'Inspections YoY Delta %' = DIVIDE([Inspections YoY Delta], [Inspections Same Time Last FY])
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Inspections KPIs
+		lineageTag: 39b69dbc-8a71-4542-8f00-87d577145c59
+
+	/// Dynamic data-freshness label = latest inspection date in the gold data. Auto-updates when the pipeline refreshes.
+	measure 'Data As Of Label' = "Data current through " & FORMAT(MAX(fact_inspection[inspection_date]), "d MMM yyyy")
+		displayFolder: Card Labels
+		lineageTag: 59c9a0e9-92f7-4993-ac70-8b2e8874ad3d
+
+	/// Total inspections in the last completed fiscal year. Feeds the hub 'what changed' narrative.
+	measure 'Inspections Prev FY Total' = VAR d = TODAY() VAR s = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= DATE ( s - 1, 4, 1 ), fact_inspection[inspection_date] < DATE ( s, 4, 1 ) )
+		formatString: #,0
+		displayFolder: Hub
+		lineageTag: 07b186af-8609-47af-96ca-0d044c3e2b40
+
+	/// Freshness pill on the hub intro tile. Latest inspection date in gold - never typed in.
+	measure 'Hub Data As At' = "Data as at " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMMM yyyy" )
+		displayFolder: Hub
+		lineageTag: 99752c34-26c7-4c09-9b38-462fc63748c7
+
+	/// Interim next-refresh line on the hub intro tile (monthly cadence until the pipeline runs daily).
+	measure 'Hub Next Refresh' = "Next refresh: " & FORMAT ( EOMONTH ( TODAY (), 0 ) + 1, "d MMMM yyyy" )
+		displayFolder: Hub
+		lineageTag: 46a4015d-4f37-4d31-9de5-bd0b6bf373b9
+
+	/// Footer line on the Inspections report card in the hub.
+	measure 'Hub Updated Inspections' = "Updated " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMM yyyy" )
+		displayFolder: Hub
+		lineageTag: 2be42d0f-39b6-47f3-8c6a-9aab9c724fa6
+
+	/// Trust-tag state for the Inspections card. Single point of change until the validation/metadata layer lands.
+	measure 'Hub Trust Inspections' = "Certified"
+		displayFolder: Hub
+		lineageTag: 15d9043d-cdf7-4180-8ac9-cb1c5bc782ce
+
+	/// Hub 'what changed this month' narrative for Inspections. Every figure is a live measure. Computes last calendar month itself so the month name and the number always agree, and says so plainly when nothing has landed yet.
+	measure 'Hub Changed Inspections' = VAR d = TODAY () VAR f = [Inspections FYTD] VAR p = [Inspections Same Time Last FY] VAR pf = [Inspections Prev FY Total] VAR t = [Inspections Service Plan Target] VAR mStart = DATE ( YEAR ( d ), MONTH ( d ), 1 ) VAR lmStart = EDATE ( mStart, -1 ) VAR lm = CALCULATE ( DISTINCTCOUNT ( fact_inspection[inspection_id] ), fact_inspection[inspection_date] >= lmStart, fact_inspection[inspection_date] < mStart ) VAR mth = FORMAT ( lmStart, "MMMM" ) VAR dlt = f - p VAR pct = DIVIDE ( dlt, p ) VAR dir = SWITCH ( TRUE (), ABS ( pct ) < 0.02, "effectively flat against", dlt > 0, "up from", "down from" ) VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR pfy = "FY" & FORMAT ( sy - 1, "0000" ) & "/" & RIGHT ( FORMAT ( sy, "0000" ), 2 ) VAR vt = IF ( pf >= t, "at or above", "below" ) VAR mthTxt = IF ( COALESCE ( lm, 0 ) = 0, "No inspections have landed for " & mth & " yet - the source is behind. ", mth & " contributed " & FORMAT ( lm, "#,0" ) & ". " ) RETURN FORMAT ( f, "#,0" ) & " completed FYTD, " & dir & " " & FORMAT ( p, "#,0" ) & " at the same point last year. " & mthTxt & pfy & " finished at " & FORMAT ( pf, "#,0" ) & ", " & vt & " the " & FORMAT ( t, "#,0" ) & " Service Plan target."
+		displayFolder: Hub
+		lineageTag: 7d044269-be38-46a4-889e-acb56de01493
+
+	/// Trust-tag state for the Incidents card. Provisional until the Incidents report is built and validated.
+	measure 'Hub Trust Incidents' = "Provisional"
+		displayFolder: Hub
+		lineageTag: 4daf75d5-6ebc-4300-a91e-19d3d980bb0d
+
+	/// Trust-tag state for the Notice of Work card. Provisional while the now_application source extract is stale.
+	measure 'Hub Trust NoW' = "Provisional"
+		displayFolder: Hub
+		lineageTag: ee5f6af2-7120-4f63-87e1-dbb4f5ac4d2b
+
+	/// Footer line on the Incidents report card in the hub.
+	measure 'Hub Updated Incidents' = "Not yet published"
+		displayFolder: Hub
+		lineageTag: 3070ba27-16dd-4a15-a360-37ce0f613d4c
+
+	/// Footer line on the Notice of Work report card in the hub.
+	measure 'Hub Updated NoW' = "Source extract stale"
+		displayFolder: Hub
+		lineageTag: 7573e029-7a1b-496b-a6fa-13b328678615
+
+	/// Hub 'what changed' text for Incidents. Honest placeholder rather than an empty card.
+	measure 'Hub Changed Incidents' = "Report not yet built. Commentary lands with the Incidents build - no figures are shown until they can be validated."
+		displayFolder: Hub
+		lineageTag: 76758f22-8a28-445b-86a1-c586681836ac
+
+	/// Hub 'what changed' text for Notice of Work. Honest placeholder rather than an empty card.
+	measure 'Hub Changed NoW' = "Permitting logic is built and matches the corporate report, but the now_application source extract has not landed since April 2025. Figures publish once the full extract is refreshed."
+		displayFolder: Hub
+		lineageTag: b40ef8d5-d493-4287-aa9b-c141ff10a9b4
+
+	/// Trust-badge label - validated and approved.
+	measure 'Hub Badge Certified' = "Certified"
+		displayFolder: Hub
+		lineageTag: 18eff42a-c2c5-4911-8226-5b67ecc7801b
+
+	/// Trust-badge label - owner recommends, not yet certified.
+	measure 'Hub Badge Promoted' = "Promoted"
+		displayFolder: Hub
+		lineageTag: 01dc123c-2c20-4a49-b539-94e3dfd47294
+
+	/// Trust-badge label - visible but not yet validated.
+	measure 'Hub Badge Provisional' = "Provisional"
+		displayFolder: Hub
+		lineageTag: 07d04935-79cf-407f-b538-6527bd6c8ffa
+
+	/// Trust-badge label - ad-hoc or user-built content.
+	measure 'Hub Badge Not Validated' = "Not validated"
+		displayFolder: Hub
+		lineageTag: dd104d71-3ef1-429f-93e4-f0408d4baae5
+
+	/// Trust state for the Inspection planning map card.
+	measure 'Hub Trust Planning Map' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: 608d8013-f5b7-453c-b82e-1606350ac884
+
+	/// Trust state for the Permit turnaround card.
+	measure 'Hub Trust Permit Turnaround' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: 9f210646-d332-4593-b928-71233b2774b8
+
+	/// Trust state for the Mineral Titles extract card.
+	measure 'Hub Trust Mineral Titles' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: d12aaed9-fde3-4fe0-9bd9-016386b4d634
+
+	/// Trust state for the Dictionary and lineage card.
+	measure 'Hub Trust Dictionary' = [Hub Badge Provisional]
+		displayFolder: Hub
+		lineageTag: 9a93d5bb-2da4-45ec-8b44-72c58235e4e6
+
+	/// Footer line on the Inspection planning map card.
+	measure 'Hub Updated Planning Map' = "In design - GIS team"
+		displayFolder: Hub
+		lineageTag: 78d606ad-e120-4944-92b6-828091f23aae
+
+	/// Footer line on the Permit turnaround card.
+	measure 'Hub Updated Permit Turnaround' = "In design"
+		displayFolder: Hub
+		lineageTag: 2e1e6ee0-5367-4384-b3df-eecf18f7a6a1
+
+	/// Footer line on the Mineral Titles extract card.
+	measure 'Hub Updated Mineral Titles' = "Source: Mineral Titles Online"
+		displayFolder: Hub
+		lineageTag: 3965db98-4b28-4c4f-814d-a87e723d1bef
+
+	/// Footer line on the Dictionary and lineage card.
+	measure 'Hub Updated Dictionary' = "Maintained by MDS"
+		displayFolder: Hub
+		lineageTag: 4b99223e-5959-402a-8b58-95d45f20d9ab
+
+	/// Hub what-changed line for Inspections, written for field and planning use.
+	measure 'Hub Changed Inspections Ops' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR pfy = "FY" & FORMAT ( sy - 1, "0000" ) & "/" & RIGHT ( FORMAT ( sy, "0000" ), 2 ) RETURN FORMAT ( [Inspections FYTD], "#,0" ) & " completed FYTD against " & FORMAT ( [Inspections Same Time Last FY], "#,0" ) & " at the same point last year. " & pfy & " closed at " & FORMAT ( [Inspections Prev FY Total], "#,0" ) & " against a " & FORMAT ( [Inspections Service Plan Target], "#,0" ) & " target - the planning map is what steers which sites are visited next."
+		displayFolder: Hub
+		lineageTag: cdd90d85-1b08-41d7-9008-e6f888458906
+
+	/// Hub what-changed line for the Inspection planning map.
+	measure 'Hub Changed Planning Map' = "Provisional. Risk criteria are not yet agreed, so the tile is visible and labelled rather than hidden - the operational tier explicitly rejected hiding unvalidated metrics."
+		displayFolder: Hub
+		lineageTag: a03f3563-517c-4a8f-b414-7d2abac1a518
+
+	/// Hub what-changed line for Notice of Work, written for permitting staff.
+	measure 'Hub Changed NoW Permitting' = "Permitting logic is built and matches the corporate report, counting distinct permit_id on permit-side ACT status. Figures publish once the now_application extract is current."
+		displayFolder: Hub
+		lineageTag: 3e46207b-14a6-448c-8cdd-d7d913482227
+
+	/// Hub what-changed line for administrative amendments.
+	measure 'Hub Changed Admin Amendments' = "Administrative amendments are excluded from the headline permit count and carried as a separate series. Worth separating in any turnaround measure rather than folding them in."
+		displayFolder: Hub
+		lineageTag: 63623fc5-a1cd-47f6-8b0f-541261c3199f
+
+	/// Hub what-changed line for the Mineral Titles extract.
+	measure 'Hub Changed Mineral Titles' = "Provisional. Sourced from Mineral Titles Online - the join to permitted sites is not yet certified, so the tile is labelled rather than hidden."
+		displayFolder: Hub
+		lineageTag: b64f2f02-5f52-47bf-9de8-0bb14c64d9d7
+
+	/// Saved audit window - current fiscal year to date. Dates recalculate.
+	measure 'Hub Window FYTD' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "1 April " & FORMAT ( sy, "0000" ) & " to " & FORMAT ( d, "d MMMM yyyy" ) & " - all three reports, applied at page level and overridable per visual."
+		displayFolder: Hub
+		lineageTag: d6bce1de-4f1c-4fb7-908b-6e349692621f
+
+	/// Saved audit window - same period last fiscal year. Dates recalculate.
+	measure 'Hub Window Same Last FY' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "1 April " & FORMAT ( sy - 1, "0000" ) & " to " & FORMAT ( DATE ( YEAR ( d ) - 1, MONTH ( d ), DAY ( d ) ), "d MMMM yyyy" ) & " - the comparison behind every same time last FY figure on the executive view."
+		displayFolder: Hub
+		lineageTag: e40b4a3a-6a14-4d77-849f-21fd4cf1168e
+
+	/// Saved audit window - rolling five fiscal years. Dates recalculate.
+	measure 'Hub Window Rolling 5' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "FY" & FORMAT ( sy - 5, "0000" ) & "/" & RIGHT ( FORMAT ( sy - 4, "0000" ), 2 ) & " to FY" & FORMAT ( sy - 1, "0000" ) & "/" & RIGHT ( FORMAT ( sy, "0000" ), 2 ) & " - the window behind the Service Plan target trend and the NoW type mix."
+		displayFolder: Hub
+		lineageTag: 610220d1-ab30-4396-aff1-a11767042329
+
+	/// Definitions page - the DEFINITION line of the worked example.
+	measure 'Hub Def Inspections FYTD' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR fy = RIGHT ( FORMAT ( sy, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( sy + 1, "0000" ), 2 ) RETURN "Inspections FYTD " & fy & ": count of distinct inspection records with a completed date falling in the current fiscal year to date. Includes Site Visit, Compliance Review, Inspection, Desktop and Meeting types."
+		displayFolder: Hub
+		lineageTag: a14d0751-06c1-4ffa-a597-e18273295779
+
+	/// Definitions page - the SOURCE line of the worked example.
+	measure 'Hub Def Source' = "CORE and NRIS to bronze to silver to gold.fact_inspection, served through the Gold Inspections Semantic Model in Direct Lake mode."
+		displayFolder: Hub
+		lineageTag: 4e5f8b1d-435b-4b27-b6ba-fd51e31176d7
+
+	/// Definitions page - the LAST REFRESH line. Reads the data, not a typed date.
+	measure 'Hub Def Last Refresh' = "Data current through " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMMM yyyy" ) & ". Refresh cadence is monthly until the pipeline runs daily."
+		displayFolder: Hub
+		lineageTag: 10815d6c-2996-4b57-be0a-9095af96a2e0
+
+	/// Definitions page - the VALIDATED BY line.
+	measure 'Hub Def Validated By' = "Reconciled against the Ministry corporate report before publication. Fabric Certify is admin-gated, so Promoted is the highest endorsement we can set today."
+		displayFolder: Hub
+		lineageTag: 7a535d55-192c-4087-8303-052f84f9fed8
+
+	/// Definitions page - fiscal calendar rule. Recalculates each year.
+	measure 'Hub Rule Fiscal Year' = VAR d = TODAY () VAR sy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "April to March. FY" & RIGHT ( FORMAT ( sy, "0000" ), 2 ) & "/" & RIGHT ( FORMAT ( sy + 1, "0000" ), 2 ) & " runs 1 April " & FORMAT ( sy, "0000" ) & " to 31 March " & FORMAT ( sy + 1, "0000" ) & ". Every FYTD figure is measured to today within that window."
+		displayFolder: Hub
+		lineageTag: 6991e367-20ae-481d-ae64-67c7330aa8ee
+
+	/// Definitions page - inspection counting rule.
+	measure 'Hub Rule Inspections' = "Distinct inspection_id counted on inspection_date. No de-duplication by mine or inspector - one inspection record is one inspection."
+		displayFolder: Hub
+		lineageTag: dba24731-9e4e-476c-b61e-3efe9437d08a
+
+	/// Definitions page - Notice of Work counting rule.
+	measure 'Hub Rule NoW' = "Distinct permit_id counted on issue_date, filtered to permit-side ACT status. Administrative amendments are excluded from the headline and reported as a separate series."
+		displayFolder: Hub
+		lineageTag: ccd692d5-85ad-4600-95bc-509be7c97a02
+
+	/// Definitions page - Service Plan target rule.
+	measure 'Hub Rule Target' = "Service Plan target of " & FORMAT ( [Inspections Service Plan Target], "#,0" ) & " inspections per fiscal year, drawn as a reference line rather than a data series so it never enters a count."
+		displayFolder: Hub
+		lineageTag: a3d49061-64d9-4754-9da8-a93253b1966f
+
+	/// Access state - the line under the request-access buttons.
+	measure 'Hub Access Note' = "Access is granted by audience, not by report. Rajneesh Gulati or Nhung Nguyen can add you to the right one."
+		displayFolder: Hub
+		lineageTag: 39366f03-b735-454e-a847-675a1674c874
+
+	/// Stale-refresh state - the warning banner. Dates come from the data.
+	measure 'Hub Stale Warning' = "The " & FORMAT ( EOMONTH ( TODAY (), 0 ) + 1, "d MMMM" ) & " refresh has not completed. Figures below are still as at " & FORMAT ( MAX ( fact_inspection[inspection_date] ), "d MMMM yyyy" ) & " and should not be quoted as current. MDS is notified automatically."
+		displayFolder: Hub
+		lineageTag: c13ea8f3-7406-423c-8b8c-b64d4ab6ccb4
+
+	/// Object page - DEFINITION line for Inspections Total.
+	measure 'Obj Def Total' = "Every inspection ever recorded. Distinct count of inspection_id, all types, no date filter."
+		displayFolder: Object
+		lineageTag: 0b1e0000-0000-4000-8000-000000000000
+
+	/// Object page - DEFINITION line for Inspections FYTD.
+	measure 'Obj Def FYTD' = "Inspections whose inspection_date falls in the current BC fiscal year, up to and including today. Distinct inspection_id, all types."
+		displayFolder: Object
+		lineageTag: 0b1e0001-0000-4000-8000-000000000001
+
+	/// Object page - DEFINITION line for Inspections Same Time Last FY.
+	measure 'Obj Def Same Last FY' = "The same window one year earlier, so the comparison is like-for-like: 1 April of last fiscal year to this date last year."
+		displayFolder: Object
+		lineageTag: 0b1e0002-0000-4000-8000-000000000002
+
+	/// Object page - DEFINITION line for Inspections Last Month.
+	measure 'Obj Def Last Month' = "Inspections in the rolling previous 30 days. Matches the Metabase ""Inspection Date Previous 30 Days"" filter - it is NOT last calendar month."
+		displayFolder: Object
+		lineageTag: 0b1e0003-0000-4000-8000-000000000003
+
+	/// Object page - DEFINITION line for Inspections Prev FY Total.
+	measure 'Obj Def Prev FY' = "Every inspection in the last completed fiscal year, 1 April to 31 March."
+		displayFolder: Object
+		lineageTag: 0b1e0004-0000-4000-8000-000000000004
+
+	/// Object page - the actual date window behind Inspections Total.
+	measure 'Obj Win Total' = VAR a = MIN ( fact_inspection[inspection_date] ) VAR b = MAX ( fact_inspection[inspection_date] ) RETURN IF ( ISBLANK ( a ), "No inspection dates present", FORMAT ( a, "d MMMM yyyy" ) & " to " & FORMAT ( b, "d MMMM yyyy" ) & "  (all data)" )
+		displayFolder: Object
+		lineageTag: 0b1e0005-0000-4000-8000-000000000005
+
+	/// Object page - the exact date window behind Inspections FYTD. Recalculates daily.
+	measure 'Obj Win FYTD' = VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN FORMAT ( DATE ( fy, 4, 1 ), "d MMMM yyyy" ) & " to " & FORMAT ( d, "d MMMM yyyy" ) & "  (inclusive)"
+		displayFolder: Object
+		lineageTag: 0b1e0006-0000-4000-8000-000000000006
+
+	/// Object page - the exact date window behind Inspections Same Time Last FY.
+	measure 'Obj Win Same Last FY' = VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN FORMAT ( DATE ( fy - 1, 4, 1 ), "d MMMM yyyy" ) & " to " & FORMAT ( EDATE ( d, -12 ), "d MMMM yyyy" ) & "  (inclusive)"
+		displayFolder: Object
+		lineageTag: 0b1e0007-0000-4000-8000-000000000007
+
+	/// Object page - the exact date window behind Inspections Last Month.
+	measure 'Obj Win Last Month' = VAR d = TODAY () RETURN FORMAT ( d - 30, "d MMMM yyyy" ) & " to " & FORMAT ( d - 1, "d MMMM yyyy" ) & "  (rolling 30 days)"
+		displayFolder: Object
+		lineageTag: 0b1e0008-0000-4000-8000-000000000008
+
+	/// Object page - the exact date window behind Inspections Prev FY Total.
+	measure 'Obj Win Prev FY' = VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN FORMAT ( DATE ( fy - 1, 4, 1 ), "d MMMM yyyy" ) & " to " & FORMAT ( DATE ( fy, 3, 31 ), "d MMMM yyyy" )
+		displayFolder: Object
+		lineageTag: 0b1e0009-0000-4000-8000-000000000009
+
+	/// Object page - trust tag for Inspections Total. All-time count needs no window coverage.
+	measure 'Obj Trust Total' = "Certified"
+		displayFolder: Object
+		lineageTag: 0b1e0010-0000-4000-8000-000000000010
+
+	/// Object page - trust tag for Inspections FYTD. Drops to Provisional when gold does not cover the whole window - the automated check the 21 Jul 'blue tick' discussion asked for, in its simplest form.
+	measure 'Obj Trust FYTD' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR needed = d RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0011-0000-4000-8000-000000000011
+
+	/// Object page - trust tag for Inspections Same Time Last FY.
+	measure 'Obj Trust Same Last FY' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR needed = EDATE ( TODAY (), -12 ) RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0012-0000-4000-8000-000000000012
+
+	/// Object page - trust tag for Inspections Last Month. Reads Provisional today because gold ends 7 July.
+	measure 'Obj Trust Last Month' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR needed = TODAY () - 1 RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0013-0000-4000-8000-000000000013
+
+	/// Object page - trust tag for Inspections Prev FY Total.
+	measure 'Obj Trust Prev FY' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR needed = DATE ( fy, 3, 31 ) RETURN IF ( ISBLANK ( mx ), "Not validated", IF ( mx >= needed, "Certified", "Provisional" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0014-0000-4000-8000-000000000014
+
+	/// Object page - plain-language statement of what the data does and does not cover.
+	measure 'Obj Coverage Note' = VAR mx = CALCULATE ( MAX ( fact_inspection[inspection_date] ), ALL ( fact_inspection ) ) VAR d = TODAY () VAR fy = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN IF ( ISBLANK ( mx ), "No inspection data is present in gold.", IF ( mx >= d, "Gold covers the full fiscal year to date - every window on this page is complete.", "Gold ends " & FORMAT ( mx, "d MMMM yyyy" ) & ", so windows running past that date are incomplete. Figures are shown and labelled rather than hidden." ) )
+		displayFolder: Object
+		lineageTag: 0b1e0015-0000-4000-8000-000000000015
+
+	/// Object page - where this object sits in the bronze / silver / gold medallion, per the 5 Aug ask.
+	measure 'Obj Layer' = "Gold  ·  lh_gold.fact_inspection"
+		displayFolder: Object
+		lineageTag: 0b1e0016-0000-4000-8000-000000000016
+
+	/// Object page - the object's shape in one line, straight from the data.
+	measure 'Obj Record Count' = VAR n = DISTINCTCOUNT ( fact_inspection[inspection_id] ) VAR m = DISTINCTCOUNT ( fact_inspection[mine_guid] ) VAR t = DISTINCTCOUNT ( fact_inspection[inspection_type_id] ) RETURN FORMAT ( n, "#,0" ) & " inspections  ·  " & FORMAT ( m, "#,0" ) & " mines  ·  " & FORMAT ( t, "#,0" ) & " inspection types"
+		displayFolder: Object
+		lineageTag: 0b1e0017-0000-4000-8000-000000000017
+
+	/// Object page - RELATIONSHIP line, Inspection to Mine.
+	measure 'Obj Rel Mine' = VAR m = DISTINCTCOUNT ( fact_inspection[mine_guid] ) RETURN "Mine  —  " & FORMAT ( m, "#,0" ) & " related mines  ·  via mine_guid"
+		displayFolder: Object
+		lineageTag: 0b1e0018-0000-4000-8000-000000000018
+
+	/// Object page - RELATIONSHIP line, Inspection to Inspection Type.
+	measure 'Obj Rel Type' = VAR t = DISTINCTCOUNT ( fact_inspection[inspection_type_id] ) RETURN "Inspection Type  —  " & FORMAT ( t, "#,0" ) & " types  ·  via inspection_type_id"
+		displayFolder: Object
+		lineageTag: 0b1e0019-0000-4000-8000-000000000019
+
+	/// Object page - RELATIONSHIP line, Inspection to Date.
+	measure 'Obj Rel Date' = VAR a = MIN ( fact_inspection[inspection_date] ) VAR b = MAX ( fact_inspection[inspection_date] ) RETURN IF ( ISBLANK ( a ), "Date  —  no dates present", "Date  —  " & FORMAT ( a, "MMM yyyy" ) & " to " & FORMAT ( b, "MMM yyyy" ) & "  ·  via inspection_date_key" )
+		displayFolder: Object
+		lineageTag: 0b1e0020-0000-4000-8000-000000000020
+
+	/// Object page - IDENTITY line. inspector_idir is the field Inspection carries that Notice of Work does not.
+	measure 'Obj Identity Note' = VAR ins = DISTINCTCOUNT ( fact_inspection[inspector_idir] ) RETURN "Keyed on inspection_id  ·  " & FORMAT ( ins, "#,0" ) & " distinct inspectors recorded in inspector_idir"
+		displayFolder: Object
+		lineageTag: 0b1e0021-0000-4000-8000-000000000021
+
+	/// Object page - display value for Inspections Total. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Total' = VAR v = [Inspections Total] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0022-0000-4000-8000-000000000022
+
+	/// Object page - display value for Inspections FYTD. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val FYTD' = VAR v = [Inspections FYTD] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0023-0000-4000-8000-000000000023
+
+	/// Object page - display value for Inspections Same Time Last FY. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Same Last FY' = VAR v = [Inspections Same Time Last FY] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0024-0000-4000-8000-000000000024
+
+	/// Object page - display value for Inspections Last Month. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Last Month' = VAR v = [Inspections Last Month] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0025-0000-4000-8000-000000000025
+
+	/// Object page - display value for Inspections Prev FY Total. Falls back to an em dash rather than rendering (blank), per the 5 Aug 'never show an empty card' rule.
+	measure 'Obj Val Prev FY' = VAR v = [Inspections Prev FY Total] RETURN IF ( ISBLANK ( v ), "—", FORMAT ( v, "#,0" ) )
+		displayFolder: Object
+		lineageTag: 0b1e0026-0000-4000-8000-000000000026
+
+	column inspection_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: deaf85ed-4c06-4b0e-9596-2db5d870d6da
+		sourceLineageTag: inspection_id
+		summarizeBy: sum
+		sourceColumn: inspection_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column external_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 7fca2147-e5a0-4447-b800-3880b5eba1dc
+		sourceLineageTag: external_id
+		summarizeBy: sum
+		sourceColumn: external_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 29cc5e8e-c738-4ece-be96-a6eab0401b2f
+		sourceLineageTag: inspection_date
+		summarizeBy: none
+		sourceColumn: inspection_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column completed_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 97085077-0e6f-44df-a493-9d81c6ab3e41
+		sourceLineageTag: completed_date
+		summarizeBy: none
+		sourceColumn: completed_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_from_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: acd3aa1d-a40e-4282-92e3-3ca658d2505b
+		sourceLineageTag: inspection_from_date
+		summarizeBy: none
+		sourceColumn: inspection_from_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_to_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 5d6c8949-d838-41d3-b0b0-405c3898f803
+		sourceLineageTag: inspection_to_date
+		summarizeBy: none
+		sourceColumn: inspection_to_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_report_sent_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 7db7f908-7590-4e5c-9578-1902462f8e65
+		sourceLineageTag: inspection_report_sent_date
+		summarizeBy: none
+		sourceColumn: inspection_report_sent_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_status_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: b1b24df9-da08-424d-bbb4-76a136a3883c
+		sourceLineageTag: inspection_status_id
+		summarizeBy: sum
+		sourceColumn: inspection_status_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_substatus_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 5aece41e-1990-4869-9928-ba17e3e9d308
+		sourceLineageTag: inspection_substatus_id
+		summarizeBy: sum
+		sourceColumn: inspection_substatus_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_type_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: ec06d627-afee-45bb-ac56-5dc87cc57105
+		sourceLineageTag: inspection_type_id
+		summarizeBy: sum
+		sourceColumn: inspection_type_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_reason_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 16b0f7f0-d243-4260-a71f-2ed99234e99f
+		sourceLineageTag: inspection_reason_id
+		summarizeBy: sum
+		sourceColumn: inspection_reason_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_type
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: c3c00762-580e-4bfb-ac4a-3a3481e7dd91
+		sourceLineageTag: inspection_auth_type
+		summarizeBy: none
+		sourceColumn: inspection_auth_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_status
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 6cbd245b-e5c4-4a70-93eb-3ec22bd76aa0
+		sourceLineageTag: inspection_auth_status
+		summarizeBy: none
+		sourceColumn: inspection_auth_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_source_application
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 0dd7e3f2-5b44-44d8-8f73-e4b76499155a
+		sourceLineageTag: inspection_auth_source_application
+		summarizeBy: none
+		sourceColumn: inspection_auth_source_application
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_auth_source_id
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 735bc0ad-592f-46ba-a5b3-b845405da997
+		sourceLineageTag: inspection_auth_source_id
+		summarizeBy: none
+		sourceColumn: inspection_auth_source_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column assessment_sub_type
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 6826ea29-d091-402a-9307-3a148372eb45
+		sourceLineageTag: assessment_sub_type
+		summarizeBy: none
+		sourceColumn: assessment_sub_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column business_area
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: bd39f743-491e-4112-9902-00febed2ab64
+		sourceLineageTag: business_area
+		summarizeBy: none
+		sourceColumn: business_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspector_idir
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 435b5cef-3b55-4e9d-bd3b-5591af04334d
+		sourceLineageTag: inspector_idir
+		summarizeBy: none
+		sourceColumn: inspector_idir
+
+		annotation SummarizationSetBy = Automatic
+
+	column mine_no
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 7c4496b4-6d3b-4bb5-910e-c4ab71d0833b
+		sourceLineageTag: mine_no
+		summarizeBy: none
+		sourceColumn: mine_no
+
+		annotation SummarizationSetBy = Automatic
+
+	column mine_guid
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: cd0b13db-0e2a-40f3-bb25-ce3c9d4a8279
+		sourceLineageTag: mine_guid
+		summarizeBy: none
+		sourceColumn: mine_guid
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mine_SK
+		dataType: int64
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: 989a2ba4-b23a-4063-813a-d6323070037b
+		sourceLineageTag: Mine_SK
+		summarizeBy: none
+		sourceColumn: Mine_SK
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_date_key
+		dataType: dateTime
+		isHidden
+		formatString: Short Date
+		displayFolder: Keys
+		lineageTag: bbf6e573-2bad-4e4c-9846-0aa3b5aa4bde
+		summarizeBy: none
+		sourceColumn: inspection_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_inspection = entity
+		mode: directLake
+		source
+			entityName: fact_inspection
+			schemaName: gold
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

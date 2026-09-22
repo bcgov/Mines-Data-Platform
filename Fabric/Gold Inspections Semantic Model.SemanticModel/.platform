@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Gold Inspections Semantic Model"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "e2b8b4a5-6cb2-be57-4d14-fa3938e1ea0b"
+  }
+}

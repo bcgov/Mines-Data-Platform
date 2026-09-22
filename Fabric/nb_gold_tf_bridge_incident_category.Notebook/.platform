@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "nb_gold_tf_bridge_incident_category",
+    "description": "Gold transform - incident categories (added 2026-09-03)"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f0da43b1-a254-464a-be31-819e17b3ea08"
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "name": "a100000000000000001b",
+  "position": {
+    "x": 24,
+    "y": 740,
+    "z": 27,
+    "width": 1232,
+    "height": 42,
+    "tabOrder": 27
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Definitions   ",
+                    "textStyle": {
+                      "fontSize": "10px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "Incident ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "any event reported to the OCI under the Mines Act at a permitted site.    ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#605E5C"
+                    }
+                  },
+                  {
+                    "value": "Dangerous Occurrence (DO) ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "a high-potential event listed in the Code, whether or not anyone was hurt.    ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#605E5C"
+                    }
+                  },
+                  {
+                    "value": "Injury ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "lost time or medical aid beyond first aid.    ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#605E5C"
+                    }
+                  },
+                  {
+                    "value": "Fatality ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "a work-related death at a permitted mine site.    ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#605E5C"
+                    }
+                  },
+                  {
+                    "value": "Effective date ",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#013366",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": "incident time when reported more than 24 hours after the event, else reported time.",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#605E5C"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#F7F9FB'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -159,6 +159,230 @@ table fact_mine_incident
 		isHidden
 		lineageTag: 35fe75f7-7354-4650-88cb-63529f8ec926
 
+	/// Sub-line under KPI card 1. Direction, % change and last FY's count for the same window.
+	measure 'Incidents FYTD Delta Label' = VAR c = [Incidents FYTD] VAR p = [Incidents Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR fyS = IF ( MONTH ( TODAY() ) >= 4, YEAR ( TODAY() ), YEAR ( TODAY() ) - 1 ) VAR lastFY = RIGHT ( fyS - 1, 2 ) & "/" & RIGHT ( fyS, 2 ) RETURN IF ( ISBLANK ( p ) || p = 0, "No comparison for the same period last FY", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & " incidents same period FY" & lastFY )
+		displayFolder: Enhanced
+		lineageTag: 5993746f-3e0b-49d0-aef2-f9096d0c337d
+
+	/// Card 1 title.
+	measure 'Incidents FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "INCIDENTS — FYTD " & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 )
+		displayFolder: Enhanced
+		lineageTag: bf3739b9-4e6c-4a79-9651-e36ddbe994d8
+
+	/// KPI card 2. Last 30 days including today, effective date.
+	measure 'Incidents Rolling 30 Days' = VAR d = TODAY() RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[effective_date] > d - 30, fact_mine_incident[effective_date] < d + 1 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 75e00077-3f1c-497b-9251-3c328fe331f1
+
+	/// The 30 days before the rolling window, for the comparison line.
+	measure 'Incidents Prior 30 Days' = VAR d = TODAY() RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[effective_date] > d - 60, fact_mine_incident[effective_date] <= d - 30 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 5160acd0-05a1-4528-b0c0-ba09144f84c4
+
+	/// Sub-line under KPI card 2.
+	measure 'Incidents Rolling 30 Delta Label' = VAR c = [Incidents Rolling 30 Days] VAR p = [Incidents Prior 30 Days] VAR pct = DIVIDE ( c - p, p ) RETURN IF ( ISBLANK ( p ) || p = 0, "No incidents in the prior 30 days", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & " in the prior 30 days" )
+		displayFolder: Enhanced
+		lineageTag: 9b28351e-5e21-4c6f-bfef-960bac14623d
+
+	/// Card 2 title with the actual window.
+	measure 'Incidents Rolling 30 Title' = VAR d = TODAY() RETURN "ROLLING 30 DAYS  ·  " & FORMAT ( d - 29, "d MMM" ) & " – " & FORMAT ( d, "d MMM yyyy" )
+		displayFolder: Enhanced
+		lineageTag: f41743af-b429-4106-b41b-e455d6e05c31
+
+	/// KPI card 3. Dangerous Occurrences in the current FY to date, effective date.
+	measure 'DOs FYTD' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[effective_date] >= DATE ( fyStart, 4, 1 ), fact_mine_incident[effective_date] < d + 1 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: ab4711e4-ad9a-4123-b67d-c12e8252733b
+
+	/// Comparison window for card 3.
+	measure 'DOs Same Time Last FY' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR lastStart = DATE ( fyStart - 1, 4, 1 ) VAR lastSame = DATE ( YEAR ( d ) - 1, MONTH ( d ), DAY ( d ) ) RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[effective_date] >= lastStart, fact_mine_incident[effective_date] < lastSame + 1 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 799e7103-e5b3-4169-aea2-d79361d250fd
+
+	/// Sub-line under card 3: change vs last FY plus DO share of all incidents.
+	measure 'DOs FYTD Delta Label' = VAR c = [DOs FYTD] VAR p = [DOs Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR share = DIVIDE ( [DOs FYTD], [Incidents FYTD] ) RETURN IF ( ISBLANK ( p ) || p = 0, "", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & "  ·  " ) & FORMAT ( share, "0%" ) & " of all incidents"
+		displayFolder: Enhanced
+		lineageTag: 36ed6ce4-28b8-4024-afd9-fc9c85061f20
+
+	/// Card 3 title.
+	measure 'DOs FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "DANGEROUS OCCURRENCES — FYTD " & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 )
+		displayFolder: Enhanced
+		lineageTag: 934d91fb-c31d-4550-b181-38bebf6ebc84
+
+	/// KPI card 4. Sum of number_of_injuries, current FY to date.
+	measure 'Injuries FYTD' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_injuries] ), fact_mine_incident[effective_date] >= DATE ( fyStart, 4, 1 ), fact_mine_incident[effective_date] < d + 1 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: cb825a7f-811b-408b-86ab-2b1c2db8ef97
+
+	/// Comparison window for card 4.
+	measure 'Injuries Same Time Last FY' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR lastStart = DATE ( fyStart - 1, 4, 1 ) VAR lastSame = DATE ( YEAR ( d ) - 1, MONTH ( d ), DAY ( d ) ) RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_injuries] ), fact_mine_incident[effective_date] >= lastStart, fact_mine_incident[effective_date] < lastSame + 1 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 878e8f2f-ce36-4dbe-8359-002d63b8fa73
+
+	/// Sub-line under card 4.
+	measure 'Injuries FYTD Delta Label' = VAR c = [Injuries FYTD] VAR p = [Injuries Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR fyS = IF ( MONTH ( TODAY() ) >= 4, YEAR ( TODAY() ), YEAR ( TODAY() ) - 1 ) VAR lastFY = RIGHT ( fyS - 1, 2 ) & "/" & RIGHT ( fyS, 2 ) RETURN IF ( ISBLANK ( p ) || p = 0, "No comparison for the same period last FY", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & " injuries same period FY" & lastFY )
+		displayFolder: Enhanced
+		lineageTag: 38fc11af-4de9-4bfb-91da-c19597a14b9f
+
+	/// Card 4 title.
+	measure 'Injuries FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "INJURIES — FYTD " & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 )
+		displayFolder: Enhanced
+		lineageTag: b25302e9-2b89-4f36-964f-de99e5a984bb
+
+	/// KPI card 5. Sum of number_of_fatalities, current FY to date.
+	measure 'Fatalities FYTD' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_fatalities] ), fact_mine_incident[effective_date] >= DATE ( fyStart, 4, 1 ), fact_mine_incident[effective_date] < d + 1 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 7a9a3175-5a0d-46db-b57f-230fbfa8c485
+
+	/// Comparison window for card 5.
+	measure 'Fatalities Same Time Last FY' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) VAR lastStart = DATE ( fyStart - 1, 4, 1 ) VAR lastSame = DATE ( YEAR ( d ) - 1, MONTH ( d ), DAY ( d ) ) RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_fatalities] ), fact_mine_incident[effective_date] >= lastStart, fact_mine_incident[effective_date] < lastSame + 1 )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: d0323442-6305-4758-ae1f-b2fd0e59abc2
+
+	/// Effective date of the latest incident with a fatality. Future-dated records ignored.
+	measure 'Most Recent Fatality Date' = CALCULATE ( MAX ( fact_mine_incident[effective_date] ), fact_mine_incident[number_of_fatalities] > 0, fact_mine_incident[effective_date] <= TODAY() )
+		formatString: d MMM yyyy
+		displayFolder: Enhanced
+		lineageTag: 7ef456f6-652d-43a0-9e36-eafe2d05929b
+
+	/// Sub-line under card 5: absolute change (not %, counts are tiny) and the most recent fatality.
+	measure 'Fatalities FYTD Delta Label' = VAR c = [Fatalities FYTD] VAR p = [Fatalities Same Time Last FY] VAR last = [Most Recent Fatality Date] RETURN IF ( c > p, "▲ +" & FORMAT ( c - p, "0" ), IF ( c < p, "▼ " & FORMAT ( c - p, "0" ), "— unchanged" ) ) & "  vs " & FORMAT ( p, "0" ) & " same period last FY" & IF ( ISBLANK ( last ), "", "  ·  Most recent: " & FORMAT ( last, "d MMM yyyy" ) )
+		displayFolder: Enhanced
+		lineageTag: c60669f7-aa4b-4d40-b38a-3f52cbd207d8
+
+	/// Card 5 title.
+	measure 'Fatalities FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "FATALITIES — FYTD " & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 )
+		displayFolder: Enhanced
+		lineageTag: b3e29aa7-396d-4827-b88d-9635997b4f62
+
+	/// Trend chart columns. Monthly incidents, trailing 24 months including the current partial month. Axis: dim_date[fiscal_month_label].
+	measure 'Incidents Last 24 Months' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 2, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 46647343-07ec-45f4-8a45-2f4e8bcc3a02
+
+	/// Trend chart line. Dangerous Occurrences per month, same window.
+	measure 'DOs Last 24 Months' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 2, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[is_dangerous_occurrence] = 1, fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 3ac183b0-4cfd-4362-ba65-550c3cfbdc88
+
+	/// Flat reference line: 24-month average incidents per month. Blank outside the window so the line stops with the columns.
+	measure 'Incidents 24 Month Average' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 2, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 VAR tot = CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), ALL ( dim_date ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd ) VAR months = 24 RETURN IF ( ISBLANK ( [Incidents Last 24 Months] ), BLANK (), DIVIDE ( tot, months ) )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 3945ba86-0be9-4de9-9223-934fa7ac0571
+
+	/// Hidden axis-trim flag for the 24-month chart.
+	measure 'Is Last 24 Months Month' = VAR d = TODAY() VAR firstDay = MIN ( dim_date[full_date] ) RETURN IF ( NOT ISBLANK ( firstDay ) && firstDay >= DATE ( YEAR ( d ) - 2, MONTH ( d ), 1 ) && firstDay <= d, 1, 0 )
+		formatString: 0
+		isHidden
+		lineageTag: d942c7ba-6851-49be-914f-86f55e779ac5
+
+	/// Trend chart title.
+	measure 'Trend 24 Month Title' = VAR d = TODAY() RETURN "Incidents and Dangerous Occurrences  ·  monthly, " & FORMAT ( DATE ( YEAR ( d ) - 2, MONTH ( d ), 1 ), "MMM yyyy" ) & " – " & FORMAT ( d, "MMM yyyy" )
+		displayFolder: Enhanced
+		lineageTag: 6ca4d427-5f7a-4611-82b3-3e121a1b4c13
+
+	/// Injuries per month, trailing 12 months. Axis: dim_date[fiscal_month_label].
+	measure 'Injuries Last 12 Months' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 1, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_injuries] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: a9fcbf66-016d-4887-b3a1-e824861f4f25
+
+	/// Fatalities per month, trailing 12 months.
+	measure 'Fatalities Last 12 Months' = VAR d = TODAY() VAR wStart = DATE ( YEAR ( d ) - 1, MONTH ( d ), 1 ) VAR wEnd = EOMONTH ( d, 0 ) + 1 RETURN CALCULATE ( SUM ( fact_mine_incident[number_of_fatalities] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= wStart, fact_mine_incident[effective_date] < wEnd )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: af987281-b988-4322-87e5-4629f00d1b31
+
+	/// Chart title.
+	measure 'Injuries 12 Month Title' = "Injuries and fatalities  ·  last 12 months"
+		displayFolder: Enhanced
+		lineageTag: 584ad355-0939-47c9-8275-d5e39b5e1619
+
+	/// Top-5 panel. Incidents in the last 28 days per parent category group; self-trimming to the top 5 so the visual needs no filter. Categories exist from 21 May 2018 only.
+	measure 'Incidents Last 4 Weeks by Type' = VAR Base = CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( 2018, 5, 21 ), bridge_incident_category[is_uncategorised] = 0, fact_mine_incident[effective_date] > TODAY() - 28, fact_mine_incident[effective_date] < TODAY() + 1 ) VAR Ranked = RANKX ( ALLSELECTED ( dim_incident_category[category_group] ), CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( 2018, 5, 21 ), bridge_incident_category[is_uncategorised] = 0, fact_mine_incident[effective_date] > TODAY() - 28, fact_mine_incident[effective_date] < TODAY() + 1 ), , DESC, DENSE ) RETURN IF ( ISBLANK ( Ranked ) || Ranked <= 5, Base )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 4b0fd24f-e604-45fe-8a5a-02122e34e89e
+
+	/// The 28 days before that, for the same top-5 groups.
+	measure 'Incidents Previous 4 Weeks by Type' = IF ( ISBLANK ( [Incidents Last 4 Weeks by Type] ), BLANK (), CALCULATE ( DISTINCTCOUNT ( fact_mine_incident[mine_incident_id] ), USERELATIONSHIP ( fact_mine_incident[Effective_Date_SK], dim_date[Date_SK] ), fact_mine_incident[effective_date] >= DATE ( 2018, 5, 21 ), bridge_incident_category[is_uncategorised] = 0, fact_mine_incident[effective_date] > TODAY() - 56, fact_mine_incident[effective_date] <= TODAY() - 28 ) )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: cda39cb1-bf5e-44ab-b7dc-ef9874010285
+
+	/// Arrow + absolute change for the top-5 table.
+	measure '4 Week Change by Type' = VAR c = [Incidents Last 4 Weeks by Type] VAR p = [Incidents Previous 4 Weeks by Type] RETURN IF ( ISBLANK ( c ), BLANK (), IF ( c > p, "▲ " & ( c - p ), IF ( c < p, "▼ " & ( p - c ), "—" ) ) )
+		displayFolder: Enhanced
+		lineageTag: a2a7892f-8eee-4b3b-a918-e7f404c75f0e
+
+	/// Panel title.
+	measure 'Top 5 Types Title' = "Top 5 incident types  ·  last 4 weeks against the previous 4"
+		displayFolder: Enhanced
+		lineageTag: 8fc12f2a-663a-4885-bf87-b03200841ca8
+
+	/// Distinct mines whose operation status reads as operating (status text contains 'operat' and not 'Not'). Source: CORE mine register via dim_mine. Review the status codes with Raj before quoting.
+	measure 'Active Mines Operating' = CALCULATE ( DISTINCTCOUNT ( dim_mine[mine_guid] ), SEARCH ( "operat", dim_mine[mine_operation_status_desc], 1, 0 ) > 0, NOT CONTAINSSTRING ( dim_mine[mine_operation_status_desc], "Not" ), dim_mine[deleted_ind] = FALSE () )
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: 24e87822-4438-47ea-a63c-6e2639a38dd4
+
+	/// Incidents FYTD divided by active mines, times 100.
+	measure 'Incidents per 100 Active Mines' = DIVIDE ( [Incidents FYTD], [Active Mines Operating] ) * 100
+		formatString: #,##0
+		displayFolder: Enhanced
+		lineageTag: d01a5d70-9a9a-459e-a605-c0b9b755b7fd
+
+	/// Panel title.
+	measure 'Why Moved Title' = "Why the numbers moved  ·  context for the same period"
+		displayFolder: Enhanced
+		lineageTag: 6e2f364f-8a7a-449c-81a3-c707bfca302a
+
+	/// Card title.
+	measure 'Active Mines Label' = "ACTIVE MINES OPERATING  ·  CORE mine register"
+		displayFolder: Enhanced
+		lineageTag: e9f2b481-4950-46a9-b487-d40a7e73f871
+
+	/// Card title.
+	measure 'Rate Label' = "INCIDENTS PER 100 ACTIVE MINES  ·  FYTD"
+		displayFolder: Enhanced
+		lineageTag: d7b2debe-df30-4ef6-af1f-f2930076a82b
+
+	/// Region chart title.
+	measure 'Region Chart Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "Incidents and DOs by region  ·  FY" & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 ) & " to date"
+		displayFolder: Enhanced
+		lineageTag: 78db7282-6932-4b21-9128-cc2513011ce8
+
+	/// Header coverage text, e.g. 'FY2017/18 → FY2026/27 YTD', from the data itself.
+	measure 'Coverage Label' = VAR first = CALCULATE ( MIN ( fact_mine_incident[effective_date] ), fact_mine_incident[effective_date] > DATE ( 2000, 1, 1 ) ) VAR fyF = IF ( MONTH ( first ) >= 4, YEAR ( first ), YEAR ( first ) - 1 ) VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "FY" & fyF & "/" & RIGHT ( fyF + 1, 2 ) & "  →  FY" & fyStart & "/" & RIGHT ( fyStart + 1, 2 ) & " YTD"
+		displayFolder: Enhanced
+		lineageTag: 8cc188d2-5fa2-4214-9034-3b6280f20b12
+
+	/// Title for the original report's FY chart. Referenced by Incidents Report (Gold) but missing from the TMDL until now.
+	measure 'FY Chart Title' = "Incidents and Dangerous Occurrences by fiscal year  ·  last 5 completed years"
+		displayFolder: Card Labels
+		lineageTag: 0a070526-47da-457d-bcdb-6b4c369ed3ff
+
+	/// Title for the original report's monthly chart.
+	measure 'Monthly Chart Title' = "Incidents, DOs, injuries and fatalities by month  ·  last 4 years"
+		displayFolder: Card Labels
+		lineageTag: ba70d053-4f50-4dec-918d-90d9905dcf0e
+
+	/// Title for the original report's category chart.
+	measure 'Category Chart Title' = "Top 5 incident categories  ·  May 2018 onward"
+		displayFolder: Card Labels
+		lineageTag: ea16d356-213d-4fbc-8f0c-356acad736eb
+
 	column mine_incident_id
 		dataType: int64
 		formatString: 0

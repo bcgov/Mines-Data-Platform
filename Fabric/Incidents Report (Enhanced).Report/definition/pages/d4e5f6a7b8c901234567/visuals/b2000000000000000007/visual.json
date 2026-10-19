@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b2000000000000000007",
   "position": {
-    "x": 364,
-    "y": 24,
+    "x": 666,
+    "y": 30,
     "z": 7,
-    "width": 290,
-    "height": 72,
+    "width": 1,
+    "height": 66,
     "tabOrder": 7
   },
   "visual": {
@@ -19,38 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "SOURCE SYSTEMS",
-                    "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#605E5C",
-                      "fontFamily": "Segoe UI",
-                      "fontWeight": "bold"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "NRIS   \u00b7   CORE   \u00b7   MCM Database",
-                    "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#013366",
-                      "fontFamily": "Segoe UI",
-                      "fontWeight": "bold"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Incident records, permits and site master",
-                    "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C",
-                      "fontFamily": "Segoe UI"
-                    }
+                    "value": " "
                   }
                 ]
               }
@@ -67,7 +36,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#D8DDE3'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
                 }
               }
             }

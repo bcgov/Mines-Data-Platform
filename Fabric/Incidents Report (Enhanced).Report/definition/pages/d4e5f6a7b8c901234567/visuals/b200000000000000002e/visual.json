@@ -2,18 +2,18 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b200000000000000002e",
   "position": {
-    "x": 1028,
-    "y": 172,
+    "x": 1032,
+    "y": 234,
     "z": 46,
-    "width": 220,
-    "height": 52,
+    "width": 100,
+    "height": 20,
     "tabOrder": 46
   },
   "visual": {
-    "visualType": "cardVisual",
+    "visualType": "card",
     "query": {
       "queryState": {
-        "Data": {
+        "Values": {
           "projections": [
             {
               "field": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Fatalities FYTD"
+                  "Property": "Fatalities Pill"
                 }
               },
-              "queryRef": "fact_mine_incident.Fatalities FYTD",
-              "nativeQueryRef": "Fatalities FYTD"
+              "queryRef": "fact_mine_incident.Fatalities Pill",
+              "nativeQueryRef": "Fatalities Pill"
             }
           ]
         }
@@ -35,27 +35,29 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "value": [
+      "labels": [
         {
           "properties": {
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "30D"
+                  "Value": "8D"
                 }
               }
             },
-            "fontColor": {
-              "expr": {
-                "Literal": {
-                  "Value": "'#CE3E39'"
-                }
-              }
-            },
-            "horizontalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'left'"
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "fact_mine_incident"
+                        }
+                      },
+                      "Property": "Fatalities Pill Color"
+                    }
+                  }
                 }
               }
             },
@@ -69,7 +71,7 @@
           }
         }
       ],
-      "label": [
+      "categoryLabels": [
         {
           "properties": {
             "show": {
@@ -82,37 +84,13 @@
           }
         }
       ],
-      "cards": [
+      "wordWrap": [
         {
           "properties": {
-            "backgroundColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#FFFFFF'"
-                    }
-                  }
-                }
-              }
-            },
-            "padding": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "layout": [
-        {
-          "properties": {
-            "verticalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'top'"
+                  "Value": "false"
                 }
               }
             }
@@ -127,7 +105,23 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "fact_mine_incident"
+                        }
+                      },
+                      "Property": "Fatalities Pill Tint"
+                    }
+                  }
                 }
               }
             }

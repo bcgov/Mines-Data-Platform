@@ -3,10 +3,10 @@
   "name": "b200000000000000003e",
   "position": {
     "x": 504,
-    "y": 654,
+    "y": 678,
     "z": 62,
-    "width": 360,
-    "height": 1,
+    "width": 220,
+    "height": 44,
     "tabOrder": 62
   },
   "visual": {
@@ -19,7 +19,25 @@
               {
                 "textRuns": [
                   {
-                    "value": " "
+                    "value": "Incidents per 100 active mines",
+                    "textStyle": {
+                      "fontSize": "10px",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Incidents FYTD \u00f7 active mines \u00d7 100",
+                    "textStyle": {
+                      "fontSize": "8px",
+                      "color": "#605E5C",
+                      "fontFamily": "Segoe UI"
+                    }
                   }
                 ]
               }
@@ -36,25 +54,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#EEF1F4'"
-                    }
-                  }
-                }
-              }
-            },
-            "transparency": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
+                  "Value": "false"
                 }
               }
             }

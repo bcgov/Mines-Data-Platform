@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b200000000000000004a",
   "position": {
-    "x": 656,
-    "y": 792,
+    "x": 914,
+    "y": 800,
     "z": 74,
     "width": 250,
-    "height": 40,
+    "height": 54,
     "tabOrder": 74
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Injury",
+                    "value": "Fatality",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#013366",
@@ -32,7 +32,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "An incident resulting in lost time or medical aid beyond first aid.",
+                    "value": "A work-related death at a permitted mine site.",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#605E5C",

@@ -3,10 +3,10 @@
   "name": "b2000000000000000041",
   "position": {
     "x": 504,
-    "y": 702,
+    "y": 728,
     "z": 65,
     "width": 360,
-    "height": 1,
+    "height": 52,
     "tabOrder": 65
   },
   "visual": {
@@ -19,7 +19,24 @@
               {
                 "textRuns": [
                   {
-                    "value": " "
+                    "value": "Commodity price context (BC Stats) is not in the platform yet.",
+                    "textStyle": {
+                      "fontSize": "8px",
+                      "color": "#605E5C",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Active-mine definition and the South East DO coding are under review with the OCI.",
+                    "textStyle": {
+                      "fontSize": "8px",
+                      "color": "#605E5C",
+                      "fontFamily": "Segoe UI"
+                    }
                   }
                 ]
               }
@@ -36,25 +53,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#EEF1F4'"
-                    }
-                  }
-                }
-              }
-            },
-            "transparency": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
+                  "Value": "false"
                 }
               }
             }

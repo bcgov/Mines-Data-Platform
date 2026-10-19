@@ -2,28 +2,46 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b200000000000000004f",
   "position": {
-    "x": 40,
-    "y": 22,
+    "x": 176,
+    "y": 20,
     "z": 79,
-    "width": 120,
-    "height": 40,
+    "width": 800,
+    "height": 58,
     "tabOrder": 79
   },
   "visual": {
-    "visualType": "image",
+    "visualType": "textbox",
     "objects": {
       "general": [
         {
           "properties": {
-            "imageUrl": {
-              "expr": {
-                "ResourcePackageItem": {
-                  "PackageName": "RegisteredResources",
-                  "PackageType": 1,
-                  "ItemName": "Logo.png"
-                }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Incidents Report \u2014 Definitions",
+                    "textStyle": {
+                      "fontSize": "15px",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "What each number on the report means, where it comes from, and what to check before quoting it.",
+                    "textStyle": {
+                      "fontSize": "9px",
+                      "color": "#605E5C",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
               }
-            }
+            ]
           }
         }
       ]

@@ -3,10 +3,10 @@
   "name": "b200000000000000003b",
   "position": {
     "x": 504,
-    "y": 572,
+    "y": 628,
     "z": 59,
-    "width": 360,
-    "height": 34,
+    "width": 220,
+    "height": 44,
     "tabOrder": 59
   },
   "visual": {
@@ -19,9 +19,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Why the numbers moved",
+                    "value": "Active mines operating",
                     "textStyle": {
-                      "fontSize": "13px",
+                      "fontSize": "10px",
                       "color": "#1F2933",
                       "fontFamily": "Segoe UI",
                       "fontWeight": "bold"
@@ -32,9 +32,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "Context for the same period",
+                    "value": "Source: CORE mine register (status = operating)",
                     "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "8px",
                       "color": "#605E5C",
                       "fontFamily": "Segoe UI"
                     }

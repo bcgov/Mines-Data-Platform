@@ -3,89 +3,32 @@
   "name": "b2000000000000000011",
   "position": {
     "x": 24,
-    "y": 110,
+    "y": 158,
     "z": 17,
-    "width": 1232,
-    "height": 26,
+    "width": 236,
+    "height": 128,
     "tabOrder": 17
   },
   "visual": {
-    "visualType": "card",
-    "query": {
-      "queryState": {
-        "Values": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_mine_incident"
-                    }
-                  },
-                  "Property": "Alert Label"
-                }
-              },
-              "queryRef": "fact_mine_incident.Alert Label",
-              "nativeQueryRef": "Alert Label"
-            }
-          ]
-        }
-      }
-    },
-    "drillFilterOtherVisuals": true,
+    "visualType": "textbox",
     "objects": {
-      "labels": [
+      "general": [
         {
           "properties": {
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "9D"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#6B4E00'"
-                    }
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": " "
                   }
-                }
+                ]
               }
-            }
-          }
-        }
-      ],
-      "categoryLabels": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "wordWrap": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
+            ]
           }
         }
       ]
     },
+    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "background": [
         {
@@ -102,9 +45,16 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFF4D6'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
                 }
               }
             }
@@ -126,7 +76,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#F2D58A'"
+                      "Value": "'#D8DDE3'"
                     }
                   }
                 }
@@ -135,7 +85,7 @@
             "radius": {
               "expr": {
                 "Literal": {
-                  "Value": "4D"
+                  "Value": "6D"
                 }
               }
             }

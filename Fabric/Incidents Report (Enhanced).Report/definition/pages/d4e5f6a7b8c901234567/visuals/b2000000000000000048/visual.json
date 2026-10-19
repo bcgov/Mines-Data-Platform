@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b2000000000000000048",
   "position": {
-    "x": 140,
-    "y": 792,
+    "x": 398,
+    "y": 800,
     "z": 72,
     "width": 250,
-    "height": 40,
+    "height": 54,
     "tabOrder": 72
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Incident",
+                    "value": "Dangerous Occurrence (DO)",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#013366",
@@ -32,7 +32,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Any event reported to the OCI under the Mines Act at a permitted site.",
+                    "value": "A high-potential event listed in the Code \u2014 whether or not anyone was hurt.",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#605E5C",

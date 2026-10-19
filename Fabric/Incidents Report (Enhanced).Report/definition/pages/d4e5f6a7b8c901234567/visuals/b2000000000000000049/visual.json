@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b2000000000000000049",
   "position": {
-    "x": 398,
-    "y": 792,
+    "x": 656,
+    "y": 800,
     "z": 73,
     "width": 250,
-    "height": 40,
+    "height": 54,
     "tabOrder": 73
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Dangerous Occurrence (DO)",
+                    "value": "Injury",
                     "textStyle": {
                       "fontSize": "9px",
                       "color": "#013366",
@@ -32,7 +32,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "A high-potential event listed in the Code \u2014 whether or not anyone was hurt.",
+                    "value": "An incident resulting in lost time or medical aid beyond first aid.",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#605E5C",

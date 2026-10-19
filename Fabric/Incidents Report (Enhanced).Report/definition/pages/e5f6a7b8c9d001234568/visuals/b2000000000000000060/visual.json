@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b2000000000000000060",
   "position": {
-    "x": 452,
-    "y": 228,
+    "x": 852,
+    "y": 226,
     "z": 96,
-    "width": 376,
-    "height": 102,
+    "width": 404,
+    "height": 120,
     "tabOrder": 96
   },
   "visual": {
@@ -19,25 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Effective date (24-hour rule)",
-                    "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#013366",
-                      "fontFamily": "Segoe UI",
-                      "fontWeight": "bold"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "If an incident was reported more than 24 hours after it happened, the incident time is used; otherwise the reported time is used. Every card and chart on this page uses the effective date.",
-                    "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#1F2933",
-                      "fontFamily": "Segoe UI"
-                    }
+                    "value": " "
                   }
                 ]
               }
@@ -54,7 +36,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
                 }
               }
             }
@@ -67,7 +67,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#D8DDE3'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "6D"
                 }
               }
             }

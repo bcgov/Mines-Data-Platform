@@ -2,10 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b2000000000000000028",
   "position": {
-    "x": 783,
-    "y": 228,
+    "x": 887,
+    "y": 234,
     "z": 40,
-    "width": 100,
+    "width": 108,
     "height": 20,
     "tabOrder": 40
   },
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Injuries Pill"
+                  "Property": "Injuries Period"
                 }
               },
-              "queryRef": "fact_mine_incident.Injuries Pill",
-              "nativeQueryRef": "Injuries Pill"
+              "queryRef": "fact_mine_incident.Injuries Period",
+              "nativeQueryRef": "Injuries Period"
             }
           ]
         }
@@ -49,13 +49,8 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Measure": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "fact_mine_incident"
-                        }
-                      },
-                      "Property": "Injuries Pill Color"
+                    "Literal": {
+                      "Value": "'#605E5C'"
                     }
                   }
                 }
@@ -64,7 +59,7 @@
             "bold": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             }
@@ -105,23 +100,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Measure": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "fact_mine_incident"
-                        }
-                      },
-                      "Property": "Injuries Pill Tint"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }

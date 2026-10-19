@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b200000000000000006c",
   "position": {
-    "x": 866,
-    "y": 356,
+    "x": 24,
+    "y": 486,
     "z": 108,
-    "width": 376,
-    "height": 102,
+    "width": 404,
+    "height": 120,
     "tabOrder": 108
   },
   "visual": {
@@ -19,25 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Top 5 incident types",
-                    "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#013366",
-                      "fontFamily": "Segoe UI",
-                      "fontWeight": "bold"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Parent category groups ranked by incidents in the last 4 weeks (28 days), against the 28 days before. Categories only exist in CORE from 21 May 2018, so older incidents never appear here.",
-                    "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#1F2933",
-                      "fontFamily": "Segoe UI"
-                    }
+                    "value": " "
                   }
                 ]
               }
@@ -54,7 +36,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
                 }
               }
             }
@@ -67,7 +67,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#D8DDE3'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "6D"
                 }
               }
             }

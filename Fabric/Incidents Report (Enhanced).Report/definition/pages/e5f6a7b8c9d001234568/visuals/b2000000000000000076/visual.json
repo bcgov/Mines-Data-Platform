@@ -3,10 +3,10 @@
   "name": "b2000000000000000076",
   "position": {
     "x": 24,
-    "y": 612,
+    "y": 620,
     "z": 118,
-    "width": 1232,
-    "height": 60,
+    "width": 4,
+    "height": 62,
     "tabOrder": 118
   },
   "visual": {
@@ -45,7 +45,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#FCBA19'"
                     }
                   }
                 }
@@ -67,25 +67,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#D8DDE3'"
-                    }
-                  }
-                }
-              }
-            },
-            "radius": {
-              "expr": {
-                "Literal": {
-                  "Value": "6D"
+                  "Value": "false"
                 }
               }
             }

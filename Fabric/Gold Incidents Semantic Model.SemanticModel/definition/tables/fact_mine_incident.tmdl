@@ -332,7 +332,7 @@ table fact_mine_incident
 		lineageTag: 8fc12f2a-663a-4885-bf87-b03200841ca8
 
 	/// Distinct mines whose operation status reads as operating (status text contains 'operat' and not 'Not'). Source: CORE mine register via dim_mine. Review the status codes with Raj before quoting.
-	measure 'Active Mines Operating' = CALCULATE ( DISTINCTCOUNT ( dim_mine[mine_guid] ), SEARCH ( "operat", dim_mine[mine_operation_status_desc], 1, 0 ) > 0, NOT CONTAINSSTRING ( dim_mine[mine_operation_status_desc], "Not" ), dim_mine[deleted_ind] = FALSE () )
+	measure 'Active Mines Operating' = CALCULATE ( DISTINCTCOUNT ( dim_mine[mine_guid] ), SEARCH ( "operat", dim_mine[mine_operation_status_desc], 1, 0 ) > 0, NOT CONTAINSSTRING ( dim_mine[mine_operation_status_desc], "Not" ), dim_mine[deleted_ind] = FALSE (), dim_mine[dl_iscurrent] = TRUE () )
 		formatString: #,##0
 		displayFolder: Enhanced
 		lineageTag: 24e87822-4438-47ea-a63c-6e2639a38dd4

@@ -354,7 +354,7 @@ table fact_mine_incident
 		lineageTag: e9f2b481-4950-46a9-b487-d40a7e73f871
 
 	/// Card title.
-	measure 'Rate Label' = "INCIDENTS PER 100 MINES · FYTD"
+	measure 'Rate Label' = "INCIDENTS PER 100 MINES"
 		displayFolder: Enhanced
 		lineageTag: d7b2debe-df30-4ef6-af1f-f2930076a82b
 

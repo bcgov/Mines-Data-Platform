@@ -10,10 +10,10 @@
     "tabOrder": 5
   },
   "visual": {
-    "visualType": "cardVisual",
+    "visualType": "card",
     "query": {
       "queryState": {
-        "Data": {
+        "Values": {
           "projections": [
             {
               "field": {
@@ -35,7 +35,7 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "value": [
+      "labels": [
         {
           "properties": {
             "fontSize": {
@@ -45,24 +45,30 @@
                 }
               }
             },
-            "fontColor": {
+            "color": {
               "expr": {
                 "Literal": {
                   "Value": "'#013366'"
-                }
-              }
-            },
-            "horizontalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'left'"
                 }
               }
             }
           }
         }
       ],
-      "label": [
+      "categoryLabels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "wordWrap": [
         {
           "properties": {
             "show": {

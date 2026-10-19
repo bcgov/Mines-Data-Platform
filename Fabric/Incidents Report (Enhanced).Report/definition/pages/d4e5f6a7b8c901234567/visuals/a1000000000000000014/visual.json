@@ -2,50 +2,33 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "a1000000000000000014",
   "position": {
-    "x": 856,
-    "y": 290,
+    "x": 24,
+    "y": 542,
     "z": 20,
-    "width": 400,
-    "height": 240,
+    "width": 440,
+    "height": 186,
     "tabOrder": 20
   },
   "visual": {
-    "visualType": "lineChart",
+    "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Category": {
+        "Values": {
           "projections": [
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "dim_date"
+                      "Entity": "dim_incident_category"
                     }
                   },
-                  "Property": "fiscal_month_label"
+                  "Property": "category_group"
                 }
               },
-              "queryRef": "dim_date.fiscal_month_label",
-              "nativeQueryRef": "fiscal_month_label"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_mine_incident"
-                    }
-                  },
-                  "Property": "Injuries Last 12 Months"
-                }
-              },
-              "queryRef": "fact_mine_incident.Injuries Last 12 Months",
-              "nativeQueryRef": "Injuries Last 12 Months"
+              "queryRef": "dim_incident_category.category_group",
+              "nativeQueryRef": "category_group",
+              "displayName": "Type"
             },
             {
               "field": {
@@ -55,82 +38,92 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Fatalities Last 12 Months"
+                  "Property": "Incidents Last 4 Weeks by Type"
                 }
               },
-              "queryRef": "fact_mine_incident.Fatalities Last 12 Months",
-              "nativeQueryRef": "Fatalities Last 12 Months"
+              "queryRef": "fact_mine_incident.Incidents Last 4 Weeks by Type",
+              "nativeQueryRef": "Incidents Last 4 Weeks by Type",
+              "displayName": "Last 4 wks"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_mine_incident"
+                    }
+                  },
+                  "Property": "Incidents Previous 4 Weeks by Type"
+                }
+              },
+              "queryRef": "fact_mine_incident.Incidents Previous 4 Weeks by Type",
+              "nativeQueryRef": "Incidents Previous 4 Weeks by Type",
+              "displayName": "Prev 4 wks"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_mine_incident"
+                    }
+                  },
+                  "Property": "4 Week Change by Type"
+                }
+              },
+              "queryRef": "fact_mine_incident.4 Week Change by Type",
+              "nativeQueryRef": "4 Week Change by Type",
+              "displayName": "Change"
             }
           ]
         }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_mine_incident"
+                  }
+                },
+                "Property": "Incidents Last 4 Weeks by Type"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
       }
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "legend": [
+      "columnHeaders": [
         {
           "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "position": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Top'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "labels": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "categoryAxis": [
-        {
-          "properties": {
-            "showAxisTitle": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
+                  "Value": "9D"
                 }
               }
             },
-            "fontSize": {
+            "fontColor": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "'#605E5C'"
                 }
               }
-            }
-          }
-        }
-      ],
-      "valueAxis": [
-        {
-          "properties": {
-            "showAxisTitle": {
+            },
+            "backColor": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#FFFFFF'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
                   "Value": "false"
@@ -140,41 +133,121 @@
           }
         }
       ],
-      "dataPoint": [
+      "values": [
         {
           "properties": {
-            "fill": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#FCBA19'"
-                    }
-                  }
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "fontColor": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#000000'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "gridVertical": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "gridHorizontal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "200D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "fact_mine_incident.Injuries Last 12 Months"
+            "metadata": "dim_incident_category.category_group"
           }
         },
         {
           "properties": {
-            "fill": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#CE3E39'"
-                    }
-                  }
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "68D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "fact_mine_incident.Fatalities Last 12 Months"
+            "metadata": "fact_mine_incident.Incidents Last 4 Weeks by Type"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "68D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "fact_mine_incident.Incidents Previous 4 Weeks by Type"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "68D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "fact_mine_incident.4 Week Change by Type"
           }
         }
       ]
@@ -219,7 +292,7 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Injuries 12 Month Title"
+                  "Property": "Top 5 Types Title"
                 }
               }
             }

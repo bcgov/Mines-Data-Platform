@@ -2,18 +2,18 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "a100000000000000000a",
   "position": {
-    "x": 30,
-    "y": 238,
+    "x": 273,
+    "y": 164,
     "z": 10,
-    "width": 224,
-    "height": 32,
+    "width": 236,
+    "height": 112,
     "tabOrder": 10
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "cardVisual",
     "query": {
       "queryState": {
-        "Values": {
+        "Data": {
           "projections": [
             {
               "field": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Incidents FYTD Delta Label"
+                  "Property": "Incidents Rolling 30 Days"
                 }
               },
-              "queryRef": "fact_mine_incident.Incidents FYTD Delta Label",
-              "nativeQueryRef": "Incidents FYTD Delta Label"
+              "queryRef": "fact_mine_incident.Incidents Rolling 30 Days",
+              "nativeQueryRef": "Incidents Rolling 30 Days"
             }
           ]
         }
@@ -35,27 +35,34 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "labels": [
+      "value": [
         {
           "properties": {
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "30D"
                 }
               }
             },
-            "color": {
+            "fontColor": {
               "expr": {
                 "Literal": {
-                  "Value": "'#605E5C'"
+                  "Value": "'#013366'"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
                 }
               }
             }
           }
         }
       ],
-      "categoryLabels": [
+      "label": [
         {
           "properties": {
             "show": {
@@ -67,14 +74,96 @@
             }
           }
         }
-      ],
-      "wordWrap": [
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
                   "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            },
+            "fontColor": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#013366'"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_mine_incident"
+                    }
+                  },
+                  "Property": "Incidents Rolling 30 Title"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#D8DDE3'"
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#FFFFFF'"
                 }
               }
             }

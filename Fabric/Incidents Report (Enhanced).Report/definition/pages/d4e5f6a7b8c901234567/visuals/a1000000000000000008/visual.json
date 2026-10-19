@@ -3,17 +3,17 @@
   "name": "a1000000000000000008",
   "position": {
     "x": 24,
-    "y": 132,
+    "y": 164,
     "z": 8,
-    "width": 1232,
-    "height": 26,
+    "width": 236,
+    "height": 112,
     "tabOrder": 8
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "cardVisual",
     "query": {
       "queryState": {
-        "Values": {
+        "Data": {
           "projections": [
             {
               "field": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Data As Of Label"
+                  "Property": "Incidents FYTD"
                 }
               },
-              "queryRef": "fact_mine_incident.Data As Of Label",
-              "nativeQueryRef": "Data As Of Label"
+              "queryRef": "fact_mine_incident.Incidents FYTD",
+              "nativeQueryRef": "Incidents FYTD"
             }
           ]
         }
@@ -35,27 +35,34 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "labels": [
+      "value": [
         {
           "properties": {
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "30D"
                 }
               }
             },
-            "color": {
+            "fontColor": {
               "expr": {
                 "Literal": {
-                  "Value": "'#6B4E00'"
+                  "Value": "'#013366'"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
                 }
               }
             }
           }
         }
       ],
-      "categoryLabels": [
+      "label": [
         {
           "properties": {
             "show": {
@@ -67,8 +74,10 @@
             }
           }
         }
-      ],
-      "wordWrap": [
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
         {
           "properties": {
             "show": {
@@ -77,12 +86,70 @@
                   "Value": "true"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            },
+            "fontColor": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#013366'"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_mine_incident"
+                    }
+                  },
+                  "Property": "Incidents FYTD Title"
+                }
+              }
             }
           }
         }
-      ]
-    },
-    "visualContainerObjects": {
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#D8DDE3'"
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ],
       "background": [
         {
           "properties": {
@@ -96,7 +163,7 @@
             "color": {
               "expr": {
                 "Literal": {
-                  "Value": "'#FFF4D6'"
+                  "Value": "'#FFFFFF'"
                 }
               }
             }

@@ -2,18 +2,18 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "a100000000000000000e",
   "position": {
-    "x": 528,
-    "y": 238,
+    "x": 771,
+    "y": 164,
     "z": 14,
-    "width": 224,
-    "height": 32,
+    "width": 236,
+    "height": 112,
     "tabOrder": 14
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "cardVisual",
     "query": {
       "queryState": {
-        "Values": {
+        "Data": {
           "projections": [
             {
               "field": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "DOs FYTD Delta Label"
+                  "Property": "Injuries FYTD"
                 }
               },
-              "queryRef": "fact_mine_incident.DOs FYTD Delta Label",
-              "nativeQueryRef": "DOs FYTD Delta Label"
+              "queryRef": "fact_mine_incident.Injuries FYTD",
+              "nativeQueryRef": "Injuries FYTD"
             }
           ]
         }
@@ -35,27 +35,34 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "labels": [
+      "value": [
         {
           "properties": {
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "30D"
                 }
               }
             },
-            "color": {
+            "fontColor": {
               "expr": {
                 "Literal": {
-                  "Value": "'#605E5C'"
+                  "Value": "'#013366'"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
                 }
               }
             }
           }
         }
       ],
-      "categoryLabels": [
+      "label": [
         {
           "properties": {
             "show": {
@@ -67,14 +74,96 @@
             }
           }
         }
-      ],
-      "wordWrap": [
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
                   "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            },
+            "fontColor": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#013366'"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_mine_incident"
+                    }
+                  },
+                  "Property": "Injuries FYTD Title"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#D8DDE3'"
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "expr": {
+                "Literal": {
+                  "Value": "'#FFFFFF'"
                 }
               }
             }

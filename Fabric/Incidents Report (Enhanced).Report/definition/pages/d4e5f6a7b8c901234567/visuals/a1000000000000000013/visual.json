@@ -2,15 +2,15 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "a1000000000000000013",
   "position": {
-    "x": 24,
+    "x": 856,
     "y": 290,
     "z": 19,
-    "width": 820,
+    "width": 400,
     "height": 240,
     "tabOrder": 19
   },
   "visual": {
-    "visualType": "lineClusteredColumnComboChart",
+    "visualType": "lineChart",
     "query": {
       "queryState": {
         "Category": {
@@ -41,29 +41,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Incidents Last 24 Months"
+                  "Property": "Injuries Last 12 Months"
                 }
               },
-              "queryRef": "fact_mine_incident.Incidents Last 24 Months",
-              "nativeQueryRef": "Incidents Last 24 Months"
-            }
-          ]
-        },
-        "Y2": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_mine_incident"
-                    }
-                  },
-                  "Property": "DOs Last 24 Months"
-                }
-              },
-              "queryRef": "fact_mine_incident.DOs Last 24 Months",
-              "nativeQueryRef": "DOs Last 24 Months"
+              "queryRef": "fact_mine_incident.Injuries Last 12 Months",
+              "nativeQueryRef": "Injuries Last 12 Months"
             },
             {
               "field": {
@@ -73,11 +55,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Incidents 24 Month Average"
+                  "Property": "Fatalities Last 12 Months"
                 }
               },
-              "queryRef": "fact_mine_incident.Incidents 24 Month Average",
-              "nativeQueryRef": "Incidents 24 Month Average"
+              "queryRef": "fact_mine_incident.Fatalities Last 12 Months",
+              "nativeQueryRef": "Fatalities Last 12 Months"
             }
           ]
         }
@@ -111,7 +93,14 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
                 }
               }
             }
@@ -147,61 +136,11 @@
                   "Value": "false"
                 }
               }
-            },
-            "secShow": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            },
-            "alignZeros": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
             }
           }
         }
       ],
       "dataPoint": [
-        {
-          "properties": {
-            "fill": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#9BC2E6'"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "fact_mine_incident.Incidents Last 24 Months"
-          }
-        },
-        {
-          "properties": {
-            "fill": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#013366'"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "fact_mine_incident.DOs Last 24 Months"
-          }
-        },
         {
           "properties": {
             "fill": {
@@ -217,7 +156,25 @@
             }
           },
           "selector": {
-            "metadata": "fact_mine_incident.Incidents 24 Month Average"
+            "metadata": "fact_mine_incident.Injuries Last 12 Months"
+          }
+        },
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#CE3E39'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "fact_mine_incident.Fatalities Last 12 Months"
           }
         }
       ]
@@ -262,7 +219,7 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Trend 24 Month Title"
+                  "Property": "Injuries 12 Month Title"
                 }
               }
             }

@@ -209,7 +209,7 @@ table fact_mine_incident
 		lineageTag: 36ed6ce4-28b8-4024-afd9-fc9c85061f20
 
 	/// Card 3 title.
-	measure 'DOs FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "DANGEROUS OCCURRENCES FYTD " & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 )
+	measure 'DOs FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "DANGEROUS OCCURRENCES · FYTD"
 		displayFolder: Enhanced
 		lineageTag: 934d91fb-c31d-4550-b181-38bebf6ebc84
 
@@ -349,12 +349,12 @@ table fact_mine_incident
 		lineageTag: 6e2f364f-8a7a-449c-81a3-c707bfca302a
 
 	/// Card title.
-	measure 'Active Mines Label' = "ACTIVE MINES OPERATING  ·  CORE mine register"
+	measure 'Active Mines Label' = "ACTIVE MINES OPERATING"
 		displayFolder: Enhanced
 		lineageTag: e9f2b481-4950-46a9-b487-d40a7e73f871
 
 	/// Card title.
-	measure 'Rate Label' = "INCIDENTS PER 100 ACTIVE MINES  ·  FYTD"
+	measure 'Rate Label' = "INCIDENTS PER 100 MINES · FYTD"
 		displayFolder: Enhanced
 		lineageTag: d7b2debe-df30-4ef6-af1f-f2930076a82b
 

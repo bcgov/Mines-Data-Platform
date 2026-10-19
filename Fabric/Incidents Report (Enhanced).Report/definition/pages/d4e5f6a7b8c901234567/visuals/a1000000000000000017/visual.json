@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "a1000000000000000017",
   "position": {
-    "x": 476,
-    "y": 572,
+    "x": 662,
+    "y": 576,
     "z": 23,
     "width": 174,
-    "height": 76,
+    "height": 72,
     "tabOrder": 23
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Active Mines Operating"
+                  "Property": "Incidents per 100 Active Mines"
                 }
               },
-              "queryRef": "fact_mine_incident.Active Mines Operating",
-              "nativeQueryRef": "Active Mines Operating"
+              "queryRef": "fact_mine_incident.Incidents per 100 Active Mines",
+              "nativeQueryRef": "Incidents per 100 Active Mines"
             }
           ]
         }
@@ -41,7 +41,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "28D"
+                  "Value": "30D"
                 }
               }
             },
@@ -116,7 +116,7 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Active Mines Label"
+                  "Property": "Rate Label"
                 }
               }
             }

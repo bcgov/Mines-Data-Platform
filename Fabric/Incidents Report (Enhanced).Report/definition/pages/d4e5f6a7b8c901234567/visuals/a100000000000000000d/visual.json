@@ -2,18 +2,18 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "a100000000000000000d",
   "position": {
-    "x": 522,
-    "y": 164,
+    "x": 528,
+    "y": 238,
     "z": 13,
-    "width": 236,
-    "height": 112,
+    "width": 224,
+    "height": 32,
     "tabOrder": 13
   },
   "visual": {
-    "visualType": "cardVisual",
+    "visualType": "card",
     "query": {
       "queryState": {
-        "Data": {
+        "Values": {
           "projections": [
             {
               "field": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "DOs FYTD"
+                  "Property": "DOs FYTD Delta Label"
                 }
               },
-              "queryRef": "fact_mine_incident.DOs FYTD",
-              "nativeQueryRef": "DOs FYTD"
+              "queryRef": "fact_mine_incident.DOs FYTD Delta Label",
+              "nativeQueryRef": "DOs FYTD Delta Label"
             }
           ]
         }
@@ -35,34 +35,27 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "value": [
+      "labels": [
         {
           "properties": {
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "28D"
+                  "Value": "8D"
                 }
               }
             },
-            "fontColor": {
+            "color": {
               "expr": {
                 "Literal": {
-                  "Value": "'#013366'"
-                }
-              }
-            },
-            "horizontalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'left'"
+                  "Value": "'#605E5C'"
                 }
               }
             }
           }
         }
       ],
-      "label": [
+      "categoryLabels": [
         {
           "properties": {
             "show": {
@@ -74,103 +67,27 @@
             }
           }
         }
-      ]
-    },
-    "visualContainerObjects": {
-      "title": [
+      ],
+      "wordWrap": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "9D"
-                }
-              }
-            },
-            "alignment": {
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "horizontalAlignment": {
               "expr": {
                 "Literal": {
                   "Value": "'left'"
-                }
-              }
-            },
-            "fontColor": {
-              "expr": {
-                "Literal": {
-                  "Value": "'#013366'"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_mine_incident"
-                    }
-                  },
-                  "Property": "DOs FYTD Title"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "border": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "expr": {
-                "Literal": {
-                  "Value": "'#013366'"
-                }
-              }
-            },
-            "radius": {
-              "expr": {
-                "Literal": {
-                  "Value": "4D"
-                }
-              }
-            },
-            "width": {
-              "expr": {
-                "Literal": {
-                  "Value": "2D"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "background": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "expr": {
-                "Literal": {
-                  "Value": "'#FFFFFF'"
                 }
               }
             }

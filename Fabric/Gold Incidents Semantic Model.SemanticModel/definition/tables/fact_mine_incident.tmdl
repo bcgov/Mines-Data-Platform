@@ -160,7 +160,7 @@ table fact_mine_incident
 		lineageTag: 35fe75f7-7354-4650-88cb-63529f8ec926
 
 	/// Sub-line under KPI card 1. Direction, % change and last FY's count for the same window.
-	measure 'Incidents FYTD Delta Label' = VAR c = [Incidents FYTD] VAR p = [Incidents Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR fyS = IF ( MONTH ( TODAY() ) >= 4, YEAR ( TODAY() ), YEAR ( TODAY() ) - 1 ) VAR lastFY = RIGHT ( fyS - 1, 2 ) & "/" & RIGHT ( fyS, 2 ) RETURN IF ( ISBLANK ( p ) || p = 0, "No comparison for the same period last FY", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & " incidents same period FY" & lastFY )
+	measure 'Incidents FYTD Delta Label' = VAR c = [Incidents FYTD] VAR p = [Incidents Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR fyS = IF ( MONTH ( TODAY() ) >= 4, YEAR ( TODAY() ), YEAR ( TODAY() ) - 1 ) VAR lastFY = RIGHT ( fyS - 1, 2 ) & "/" & RIGHT ( fyS, 2 ) RETURN IF ( ISBLANK ( p ) || p = 0, "No data for same period last FY", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ), IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ), "— same" ) ) & " vs " & FORMAT ( p, "#,##0" ) & " same period FY" & lastFY )
 		displayFolder: Enhanced
 		lineageTag: 5993746f-3e0b-49d0-aef2-f9096d0c337d
 
@@ -182,12 +182,12 @@ table fact_mine_incident
 		lineageTag: 5160acd0-05a1-4528-b0c0-ba09144f84c4
 
 	/// Sub-line under KPI card 2.
-	measure 'Incidents Rolling 30 Delta Label' = VAR c = [Incidents Rolling 30 Days] VAR p = [Incidents Prior 30 Days] VAR pct = DIVIDE ( c - p, p ) RETURN IF ( ISBLANK ( p ) || p = 0, "No incidents in the prior 30 days", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & " in the prior 30 days" )
+	measure 'Incidents Rolling 30 Delta Label' = VAR c = [Incidents Rolling 30 Days] VAR p = [Incidents Prior 30 Days] VAR pct = DIVIDE ( c - p, p ) RETURN IF ( ISBLANK ( p ) || p = 0, "No incidents in the prior 30 days", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ), IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ), "— same" ) ) & " vs " & FORMAT ( p, "#,##0" ) & " in prior 30 days" )
 		displayFolder: Enhanced
 		lineageTag: 9b28351e-5e21-4c6f-bfef-960bac14623d
 
 	/// Card 2 title with the actual window.
-	measure 'Incidents Rolling 30 Title' = VAR d = TODAY() RETURN "ROLLING 30 DAYS  ·  " & FORMAT ( d - 29, "d MMM" ) & " – " & FORMAT ( d, "d MMM yyyy" )
+	measure 'Incidents Rolling 30 Title' = VAR d = TODAY() RETURN "ROLLING 30 DAYS · " & FORMAT ( d - 29, "d MMM" ) & " – " & FORMAT ( d, "d MMM" )
 		displayFolder: Enhanced
 		lineageTag: f41743af-b429-4106-b41b-e455d6e05c31
 
@@ -204,12 +204,12 @@ table fact_mine_incident
 		lineageTag: 799e7103-e5b3-4169-aea2-d79361d250fd
 
 	/// Sub-line under card 3: change vs last FY plus DO share of all incidents.
-	measure 'DOs FYTD Delta Label' = VAR c = [DOs FYTD] VAR p = [DOs Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR share = DIVIDE ( [DOs FYTD], [Incidents FYTD] ) RETURN IF ( ISBLANK ( p ) || p = 0, "", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & "  ·  " ) & FORMAT ( share, "0%" ) & " of all incidents"
+	measure 'DOs FYTD Delta Label' = VAR c = [DOs FYTD] VAR p = [DOs Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR share = DIVIDE ( [DOs FYTD], [Incidents FYTD] ) RETURN IF ( ISBLANK ( p ) || p = 0, "", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ), IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ), "— same" ) ) & " vs " & FORMAT ( p, "#,##0" ) & " · " ) & FORMAT ( share, "0%" ) & " of incidents"
 		displayFolder: Enhanced
 		lineageTag: 36ed6ce4-28b8-4024-afd9-fc9c85061f20
 
 	/// Card 3 title.
-	measure 'DOs FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "DANGEROUS OCCURRENCES — FYTD " & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 )
+	measure 'DOs FYTD Title' = VAR d = TODAY() VAR fyStart = IF ( MONTH ( d ) >= 4, YEAR ( d ), YEAR ( d ) - 1 ) RETURN "DANGEROUS OCCURRENCES FYTD " & RIGHT ( fyStart, 2 ) & "/" & RIGHT ( fyStart + 1, 2 )
 		displayFolder: Enhanced
 		lineageTag: 934d91fb-c31d-4550-b181-38bebf6ebc84
 
@@ -226,7 +226,7 @@ table fact_mine_incident
 		lineageTag: 878e8f2f-ce36-4dbe-8359-002d63b8fa73
 
 	/// Sub-line under card 4.
-	measure 'Injuries FYTD Delta Label' = VAR c = [Injuries FYTD] VAR p = [Injuries Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR fyS = IF ( MONTH ( TODAY() ) >= 4, YEAR ( TODAY() ), YEAR ( TODAY() ) - 1 ) VAR lastFY = RIGHT ( fyS - 1, 2 ) & "/" & RIGHT ( fyS, 2 ) RETURN IF ( ISBLANK ( p ) || p = 0, "No comparison for the same period last FY", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ) & " higher", IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ) & " lower", "— unchanged" ) ) & "  vs " & FORMAT ( p, "#,##0" ) & " injuries same period FY" & lastFY )
+	measure 'Injuries FYTD Delta Label' = VAR c = [Injuries FYTD] VAR p = [Injuries Same Time Last FY] VAR pct = DIVIDE ( c - p, p ) VAR fyS = IF ( MONTH ( TODAY() ) >= 4, YEAR ( TODAY() ), YEAR ( TODAY() ) - 1 ) VAR lastFY = RIGHT ( fyS - 1, 2 ) & "/" & RIGHT ( fyS, 2 ) RETURN IF ( ISBLANK ( p ) || p = 0, "No data for same period last FY", IF ( c > p, "▲ " & FORMAT ( pct, "0%" ), IF ( c < p, "▼ " & FORMAT ( -pct, "0%" ), "— same" ) ) & " vs " & FORMAT ( p, "#,##0" ) & " same period FY" & lastFY )
 		displayFolder: Enhanced
 		lineageTag: 38fc11af-4de9-4bfb-91da-c19597a14b9f
 
@@ -254,7 +254,7 @@ table fact_mine_incident
 		lineageTag: 7ef456f6-652d-43a0-9e36-eafe2d05929b
 
 	/// Sub-line under card 5: absolute change (not %, counts are tiny) and the most recent fatality.
-	measure 'Fatalities FYTD Delta Label' = VAR c = [Fatalities FYTD] VAR p = [Fatalities Same Time Last FY] VAR last = [Most Recent Fatality Date] RETURN IF ( c > p, "▲ +" & FORMAT ( c - p, "0" ), IF ( c < p, "▼ " & FORMAT ( c - p, "0" ), "— unchanged" ) ) & "  vs " & FORMAT ( p, "0" ) & " same period last FY" & IF ( ISBLANK ( last ), "", "  ·  Most recent: " & FORMAT ( last, "d MMM yyyy" ) )
+	measure 'Fatalities FYTD Delta Label' = VAR c = [Fatalities FYTD] VAR p = [Fatalities Same Time Last FY] VAR last = [Most Recent Fatality Date] RETURN IF ( c > p, "▲ +" & FORMAT ( c - p, "0" ), IF ( c < p, "▼ " & FORMAT ( c - p, "0" ), "— same" ) ) & " vs " & FORMAT ( p, "0" ) & " last FY" & IF ( ISBLANK ( last ), "", " · last: " & FORMAT ( last, "d MMM yyyy" ) )
 		displayFolder: Enhanced
 		lineageTag: c60669f7-aa4b-4d40-b38a-3f52cbd207d8
 

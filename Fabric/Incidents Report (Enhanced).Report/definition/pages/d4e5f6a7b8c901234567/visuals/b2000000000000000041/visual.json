@@ -3,10 +3,10 @@
   "name": "b2000000000000000041",
   "position": {
     "x": 504,
-    "y": 728,
+    "y": 754,
     "z": 65,
     "width": 360,
-    "height": 52,
+    "height": 30,
     "tabOrder": 65
   },
   "visual": {
@@ -20,18 +20,6 @@
                 "textRuns": [
                   {
                     "value": "Commodity price context (BC Stats) is not in the platform yet.",
-                    "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#605E5C",
-                      "fontFamily": "Segoe UI"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Active-mine definition and the South East DO coding are under review with the OCI.",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#605E5C",

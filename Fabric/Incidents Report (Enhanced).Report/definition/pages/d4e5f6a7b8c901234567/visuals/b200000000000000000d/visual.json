@@ -2,10 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b200000000000000000d",
   "position": {
-    "x": 1128,
-    "y": 46,
+    "x": 1002,
+    "y": 76,
     "z": 13,
-    "width": 118,
+    "width": 76,
     "height": 22,
     "tabOrder": 13
   },
@@ -25,14 +25,14 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Report a data issue'"
+                  "Value": "'Data issue'"
                 }
               }
             },
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "8D"
                 }
               }
             },
@@ -78,7 +78,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Report a data issue'"
+                  "Value": "'Data issue'"
                 }
               }
             }

@@ -6,7 +6,7 @@
     "y": 22,
     "z": 8,
     "width": 300,
-    "height": 84,
+    "height": 86,
     "tabOrder": 8
   },
   "visual": {
@@ -44,21 +44,9 @@
               {
                 "textRuns": [
                   {
-                    "value": "All reportable incidents at permitted mine sites",
+                    "value": "Permitted mine sites \u00b7 effective date (24-hour rule)",
                     "textStyle": {
-                      "fontSize": "9px",
-                      "color": "#605E5C",
-                      "fontFamily": "Segoe UI"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Date basis: effective date (24-hour rule)",
-                    "textStyle": {
-                      "fontSize": "9px",
+                      "fontSize": "8px",
                       "color": "#605E5C",
                       "fontFamily": "Segoe UI"
                     }

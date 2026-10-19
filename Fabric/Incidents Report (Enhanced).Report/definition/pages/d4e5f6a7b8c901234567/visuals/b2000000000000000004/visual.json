@@ -6,7 +6,7 @@
     "y": 22,
     "z": 4,
     "width": 206,
-    "height": 84,
+    "height": 86,
     "tabOrder": 4
   },
   "visual": {
@@ -45,19 +45,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Office of the Chief Inspector (OCI)",
-                    "textStyle": {
-                      "fontSize": "8px",
-                      "color": "#605E5C",
-                      "fontFamily": "Segoe UI"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Raj Gulati \u00b7 Nhung Nguyen",
+                    "value": "OCI \u00b7 Raj Gulati, Nhung Nguyen",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#605E5C",

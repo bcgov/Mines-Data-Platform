@@ -3,10 +3,10 @@
   "name": "b2000000000000000019",
   "position": {
     "x": 283,
-    "y": 184,
+    "y": 192,
     "z": 25,
     "width": 216,
-    "height": 50,
+    "height": 52,
     "tabOrder": 25
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Incidents Rolling 30 Days"
+                  "Property": "Rolling 30 Value"
                 }
               },
-              "queryRef": "fact_mine_incident.Incidents Rolling 30 Days",
-              "nativeQueryRef": "Incidents Rolling 30 Days"
+              "queryRef": "fact_mine_incident.Rolling 30 Value",
+              "nativeQueryRef": "Rolling 30 Value"
             }
           ]
         }
@@ -41,7 +41,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "28D"
+                  "Value": "24D"
                 }
               }
             },

@@ -3,10 +3,10 @@
   "name": "b2000000000000000020",
   "position": {
     "x": 532,
-    "y": 184,
+    "y": 192,
     "z": 32,
     "width": 216,
-    "height": 50,
+    "height": 52,
     "tabOrder": 32
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "DOs FYTD"
+                  "Property": "DOs Value"
                 }
               },
-              "queryRef": "fact_mine_incident.DOs FYTD",
-              "nativeQueryRef": "DOs FYTD"
+              "queryRef": "fact_mine_incident.DOs Value",
+              "nativeQueryRef": "DOs Value"
             }
           ]
         }
@@ -41,7 +41,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "28D"
+                  "Value": "24D"
                 }
               }
             },

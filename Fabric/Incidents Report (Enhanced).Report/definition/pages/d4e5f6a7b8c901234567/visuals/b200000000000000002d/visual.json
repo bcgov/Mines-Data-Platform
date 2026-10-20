@@ -3,10 +3,10 @@
   "name": "b200000000000000002d",
   "position": {
     "x": 1030,
-    "y": 184,
+    "y": 192,
     "z": 45,
     "width": 216,
-    "height": 50,
+    "height": 52,
     "tabOrder": 45
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "fact_mine_incident"
                     }
                   },
-                  "Property": "Fatalities FYTD"
+                  "Property": "Fatalities Value"
                 }
               },
-              "queryRef": "fact_mine_incident.Fatalities FYTD",
-              "nativeQueryRef": "Fatalities FYTD"
+              "queryRef": "fact_mine_incident.Fatalities Value",
+              "nativeQueryRef": "Fatalities Value"
             }
           ]
         }
@@ -41,7 +41,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "28D"
+                  "Value": "24D"
                 }
               }
             },

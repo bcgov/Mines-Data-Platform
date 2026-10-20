@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b2000000000000000049",
   "position": {
-    "x": 644,
-    "y": 802,
+    "x": 564,
+    "y": 812,
     "z": 73,
-    "width": 244,
-    "height": 62,
+    "width": 206,
+    "height": 78,
     "tabOrder": 73
   },
   "visual": {
@@ -32,7 +32,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "An incident resulting in lost time or medical aid beyond first aid.",
+                    "value": "Lost time or medical aid beyond first aid.",
                     "textStyle": {
                       "fontSize": "8px",
                       "color": "#605E5C",

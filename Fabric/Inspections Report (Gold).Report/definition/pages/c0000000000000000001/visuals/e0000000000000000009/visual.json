@@ -3,7 +3,7 @@
   "name": "e0000000000000000009",
   "position": {
     "x": 649.5167286245354,
-    "y": 441.3382899628253,
+    "y": 249,
     "z": 8000,
     "height": 107.06319702602231,
     "width": 606.6914498141264,
@@ -53,7 +53,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Monthly stacked bar: Apr 2022-Jun 2026, series = 12 inspection types",
+                    "value": "Monthly stacked bar: trailing 4 years, series = 12 inspection types",
                     "textStyle": {
                       "fontSize": "11px",
                       "color": "#252423"

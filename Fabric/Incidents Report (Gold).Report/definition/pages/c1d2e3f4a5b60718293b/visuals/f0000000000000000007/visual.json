@@ -31,26 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "1.  Incident data stops January 2022.",
-                    "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#013366",
-                      "fontWeight": "bold"
-                    }
-                  },
-                  {
-                    "value": "   ~2,700 incidents never reached Silver; the watermark is stuck (with Sebastian). Every window is anchored to the latest well-populated month.",
-                    "textStyle": {
-                      "fontSize": "11px",
-                      "color": "#252423"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "2.  Categories only exist from 21 May 2018.",
+                    "value": "1.  Categories only exist from 21 May 2018.",
                     "textStyle": {
                       "fontSize": "11px",
                       "color": "#013366",
@@ -69,7 +50,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "3.  Three bad source rows.",
+                    "value": "2.  Three bad source rows.",
                     "textStyle": {
                       "fontSize": "11px",
                       "color": "#013366",
